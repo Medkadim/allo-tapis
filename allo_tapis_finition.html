@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Allo Tapis — Finition</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+.phone{width:390px;height:844px;background:#0E1212;border-radius:44px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 1px rgba(255,255,255,0.07),0 40px 80px rgba(0,0,0,0.7);position:relative;}
+
+/* STATUS BAR */
+.status-bar{height:44px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#0E1212;}
+.status-time{font-family:'JetBrains Mono';font-size:15px;font-weight:600;color:#fff;}
+.status-icons{display:flex;align-items:center;gap:6px;}
+
+/* ─── LOGIN ─── */
+.login-screen{position:absolute;inset:0;background:#0E1212;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;z-index:100;}
+.login-logo{font-size:52px;margin-bottom:8px;}
+.login-brand{font-size:24px;font-weight:800;color:#fff;margin-bottom:2px;}
+.login-sub{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:40px;}
+.login-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;align-self:flex-start;}
+.login-select{width:100%;padding:14px 16px;background:#161C1C;border:1px solid rgba(255,255,255,.1);border-radius:14px;font-family:'Syne';font-size:14px;font-weight:600;color:#fff;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='rgba(255,255,255,0.3)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;margin-bottom:24px;cursor:pointer;}
+.login-select:focus{outline:none;border-color:#2ECC9B;}
+.login-select option{background:#161C1C;}
+.btn-login{width:100%;padding:16px;background:#2ECC9B;border:none;border-radius:14px;font-family:'Syne';font-size:16px;font-weight:800;color:#0E1212;cursor:pointer;letter-spacing:.04em;}
+.btn-login:active{transform:scale(.97);}
+
+/* ─── NAV TABS ─── */
+.nav-tabs{display:flex;background:#161C1C;border-bottom:1px solid rgba(255,255,255,.06);flex-shrink:0;}
+.nav-tab{flex:1;padding:12px 4px 10px;text-align:center;cursor:pointer;font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:rgba(255,255,255,.3);border-bottom:2px solid transparent;transition:all .2s;}
+.nav-tab.active{color:#2ECC9B;border-bottom-color:#2ECC9B;}
+.nav-tab svg{display:block;margin:0 auto 3px;width:18px;height:18px;}
+
+/* ─── SCREENS ─── */
+.screen{flex:1;overflow:hidden;display:none;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ─── SCREEN RECHERCHE ─── */
+.search-header{padding:18px 20px 10px;flex-shrink:0;}
+.screen-title{font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.screen-sub{font-size:11px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono';margin-top:2px;}
+
+.search-box-wrap{padding:0 20px 12px;flex-shrink:0;}
+.search-box{width:100%;display:flex;align-items:center;background:#161C1C;border:1.5px solid rgba(255,255,255,.1);border-radius:14px;overflow:hidden;transition:border-color .2s;}
+.search-box.focused{border-color:#2ECC9B;}
+.search-icon{padding:0 12px;font-size:18px;color:rgba(255,255,255,.3);}
+.search-input{flex:1;background:none;border:none;outline:none;font-family:'JetBrains Mono';font-size:16px;font-weight:500;color:#fff;padding:14px 0;letter-spacing:.05em;}
+.search-input::placeholder{color:rgba(255,255,255,.2);font-size:14px;}
+.btn-search-clear{padding:0 14px;font-size:18px;color:rgba(255,255,255,.3);background:none;border:none;cursor:pointer;}
+
+/* Quick filters */
+.quick-filters{display:flex;gap:6px;padding:0 20px 12px;flex-shrink:0;overflow-x:auto;}
+.quick-filters::-webkit-scrollbar{display:none;}
+.qf{padding:6px 14px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);background:rgba(255,255,255,.04);white-space:nowrap;transition:all .15s;}
+.qf.active{background:#2ECC9B;color:#0E1212;border-color:#2ECC9B;}
+
+/* Résultats */
+.results-list{flex:1;overflow-y:auto;padding:0 20px 20px;}
+.results-list::-webkit-scrollbar{display:none;}
+
+/* CMD GROUP CARD */
+.cmd-group{background:#161C1C;border:1px solid rgba(255,255,255,.07);border-radius:18px;margin-bottom:12px;overflow:hidden;}
+.cmd-group-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;border-bottom:1px solid rgba(255,255,255,.06);}
+.cmd-num{font-family:'JetBrains Mono';font-size:14px;font-weight:600;color:#2ECC9B;}
+.cmd-client{font-size:13px;font-weight:700;color:#fff;margin-top:2px;}
+.cmd-meta{font-size:10px;color:rgba(255,255,255,.3);margin-top:2px;}
+.cmd-badge-wrap{display:flex;flex-direction:column;align-items:flex-end;gap:4px;}
+.cmd-nblignes{font-family:'JetBrains Mono';font-size:11px;color:rgba(255,255,255,.3);}
+.etat-dot{width:8px;height:8px;border-radius:50%;}
+.ed-brouillon{background:#64748B;}.ed-traitement{background:#3B9EE8;}.ed-pret{background:#2ECC9B;}
+
+/* ARTICLE ROWS */
+.art-rows{padding:8px 0;}
+.art-row{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.04);}
+.art-row:last-child{border-bottom:none;}
+.art-row-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;}
+.art-num{font-family:'JetBrains Mono';font-size:10px;color:rgba(255,255,255,.25);flex-shrink:0;width:22px;}
+.art-name{font-size:13px;font-weight:700;color:#fff;flex:1;}
+.art-dims{font-family:'JetBrains Mono';font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;}
+.art-etat-chip{font-size:9px;font-weight:700;padding:3px 8px;border-radius:6px;text-transform:uppercase;letter-spacing:.06em;flex-shrink:0;}
+.aec-brouillon{background:rgba(100,116,139,.15);color:#94A3B8;border:1px solid rgba(100,116,139,.2);}
+.aec-traitement{background:rgba(59,158,232,.12);color:#3B9EE8;border:1px solid rgba(59,158,232,.2);}
+.aec-pret{background:rgba(46,204,155,.12);color:#2ECC9B;border:1px solid rgba(46,204,155,.2);}
+
+/* EMPLACEMENT ROW */
+.empl-row{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.empl-label{font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;width:60px;flex-shrink:0;}
+.empl-val{font-family:'JetBrains Mono';font-size:13px;font-weight:600;color:#E8A838;flex:1;}
+.empl-val.empty{color:rgba(255,255,255,.2);font-style:italic;font-size:11px;font-family:'Syne';}
+.empl-input-wrap{flex:1;display:flex;align-items:center;gap:6px;}
+.empl-input{flex:1;background:#0E1212;border:1.5px solid rgba(46,204,155,.4);border-radius:8px;padding:7px 10px;font-family:'JetBrains Mono';font-size:13px;font-weight:600;color:#fff;outline:none;letter-spacing:.08em;}
+.empl-input:focus{border-color:#2ECC9B;background:#111A18;}
+.empl-input::placeholder{color:rgba(255,255,255,.2);font-size:11px;font-family:'Syne';letter-spacing:0;}
+.btn-save-empl{padding:7px 12px;background:#2ECC9B;border:none;border-radius:8px;font-family:'Syne';font-size:11px;font-weight:700;color:#0E1212;cursor:pointer;white-space:nowrap;}
+.btn-save-empl:active{transform:scale(.95);}
+.btn-edit-empl{padding:6px 10px;background:rgba(232,168,56,.1);border:1px solid rgba(232,168,56,.2);border-radius:8px;font-size:10px;font-weight:700;color:#E8A838;cursor:pointer;font-family:'Syne';}
+.btn-edit-empl:active{transform:scale(.95);}
+
+/* OBS TAG */
+.obs-tag{display:inline-block;padding:2px 8px;background:rgba(255,255,255,.06);border-radius:5px;font-size:10px;color:rgba(255,255,255,.4);margin-top:4px;}
+
+/* ─── SCREEN HISTORIQUE ─── */
+.histo-list{flex:1;overflow-y:auto;padding:0 20px 20px;}
+.histo-item{background:#161C1C;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;}
+.histo-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;background:#2ECC9B;}
+.histo-dot.mod{background:#E8A838;}
+.histo-cmd{font-family:'JetBrains Mono';font-size:11px;color:#2ECC9B;}
+.histo-art{font-size:12px;font-weight:600;color:#fff;margin-top:2px;}
+.histo-empl{font-family:'JetBrains Mono';font-size:12px;color:#E8A838;}
+.histo-time{font-size:10px;color:rgba(255,255,255,.25);margin-top:2px;}
+
+/* ─── SCREEN STATS ─── */
+.stats-content{flex:1;overflow-y:auto;padding:20px;}
+.stat-box-fin{background:#161C1C;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;}
+.stat-box-icon{font-size:28px;flex-shrink:0;}
+.stat-box-val{font-family:'JetBrains Mono';font-size:26px;font-weight:600;}
+.stat-box-lbl{font-size:11px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.07em;margin-top:3px;}
+.progress-section{background:#161C1C;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:16px;margin-bottom:12px;}
+.progress-title{font-size:11px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:14px;}
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
+.progress-label{font-size:11px;color:rgba(255,255,255,.5);width:90px;flex-shrink:0;}
+.progress-bar-wrap{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden;}
+.progress-bar-fill{height:100%;border-radius:4px;transition:width .5s ease;}
+.progress-val{font-family:'JetBrains Mono';font-size:11px;font-weight:600;width:30px;text-align:right;}
+
+/* TOAST */
+.toast-fin{position:absolute;bottom:90px;left:50%;transform:translateX(-50%) translateY(10px);padding:11px 22px;border-radius:30px;font-size:12px;font-weight:700;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:300;}
+.toast-fin.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-fin.green{background:#2ECC9B;color:#0E1212;}
+.toast-fin.amber{background:#E8A838;color:#0E1212;}
+
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 24px;gap:12px;}
+.empty-icon{font-size:42px;}
+.empty-text{font-size:13px;color:rgba(255,255,255,.3);text-align:center;line-height:1.6;}
+.empty-hint{font-size:11px;color:rgba(255,255,255,.15);font-family:'JetBrains Mono';}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+@keyframes flashGreen{0%,100%{background:#161C1C;}50%{background:rgba(46,204,155,.15);}}
+.flash{animation:flashGreen .5s ease;}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="status-bar">
+    <div class="status-time" id="app-time">09:41</div>
+    <div class="status-icons">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4" y="2" width="3" height="10" rx="1"/><rect x="8" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="white"><rect x="0" y="1" width="22" height="10" rx="2" stroke="white" stroke-width="1.5" fill="none"/><rect x="2" y="3" width="16" height="6" rx="1" fill="white"/></svg>
+    </div>
+  </div>
+
+  <!-- ═══ LOGIN ═══ -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-logo">✂️</div>
+    <div class="login-brand">Allo Tapis</div>
+    <div class="login-sub">Atelier Finition</div>
+    <div class="login-label" style="margin-top:8px;">Votre nom</div>
+    <select class="login-select" id="login-user">
+      <option value="">— Sélectionner —</option>
+      <option value="Naqi Redouane">Naqi Redouane</option>
+      <option value="Koukouss Hafid">Koukouss Hafid</option>
+      <option value="Ourouch Houssam">Ourouch Houssam</option>
+      <option value="Radi Abdellah">Radi Abdellah</option>
+      <option value="Abdessamad Aboulfath">Abdessamad Aboulfath</option>
+      <option value="Messaoud Ameziane">Messaoud Ameziane</option>
+      <option value="Taakouft Soufiane">Taakouft Soufiane</option>
+    </select>
+    <button class="btn-login" onclick="doLogin()">Accéder à l'atelier →</button>
+  </div>
+
+  <!-- ═══ NAV ═══ -->
+  <div class="nav-tabs" id="nav-tabs" style="display:none;">
+    <div class="nav-tab active" id="ntab-search" onclick="switchScreen('search')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      Chercher
+    </div>
+    <div class="nav-tab" id="ntab-histo" onclick="switchScreen('histo')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      Activité
+    </div>
+    <div class="nav-tab" id="ntab-stats" onclick="switchScreen('stats')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+      Stats
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN CHERCHER ═══ -->
+  <div class="screen" id="screen-search">
+    <div class="search-header">
+      <div class="screen-title">Lignes de commande</div>
+      <div class="screen-sub" id="search-user-label">—</div>
+    </div>
+    <div class="search-box-wrap">
+      <div class="search-box" id="search-box-el">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="search-input" placeholder="N° commande, article..."
+          oninput="onSearch(this.value)"
+          onfocus="document.getElementById('search-box-el').classList.add('focused')"
+          onblur="document.getElementById('search-box-el').classList.remove('focused')"/>
+        <button class="btn-search-clear" onclick="clearSearch()" id="btn-clear" style="display:none;">✕</button>
+      </div>
+    </div>
+    <div class="quick-filters">
+      <div class="qf active" id="qf-all" onclick="setQFilter('all')">Tout</div>
+      <div class="qf" id="qf-sans" onclick="setQFilter('sans')">⚠️ Sans emplacement</div>
+      <div class="qf" id="qf-traitement" onclick="setQFilter('traitement')">🔵 En traitement</div>
+      <div class="qf" id="qf-pret" onclick="setQFilter('pret')">🟢 Prêt à livrer</div>
+    </div>
+    <div class="results-list" id="results-list">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+  <!-- ═══ SCREEN ACTIVITÉ ═══ -->
+  <div class="screen" id="screen-histo">
+    <div class="search-header">
+      <div class="screen-title">Mon activité</div>
+      <div class="screen-sub" id="histo-user-label">Aujourd'hui</div>
+    </div>
+    <div class="histo-list" id="histo-list"></div>
+  </div>
+
+  <!-- ═══ SCREEN STATS ═══ -->
+  <div class="screen" id="screen-stats">
+    <div class="search-header">
+      <div class="screen-title">Statistiques</div>
+      <div class="screen-sub">Atelier — Avril 2026</div>
+    </div>
+    <div class="stats-content" id="stats-content"></div>
+  </div>
+
+  <div class="toast-fin" id="toast"></div>
+</div>
+
+<script>
+// ══ DONNÉES (miroir des lignesData + commandes de l'ERP) ══
+const ERP_COMMANDES = {
+  '264504':{client:'Ahmed bou9tib',   date:'15/04/2026',statut:'Brouillon'},
+  '264503':{client:'Laundry Service', date:'15/04/2026',statut:'Brouillon'},
+  '264495':{client:'Pressing Roudaina',date:'14/04/2026',statut:'En traitement'},
+  '264491':{client:'Rachida',          date:'13/04/2026',statut:'En traitement'},
+  '264488':{client:'Abdeljalil Salma', date:'15/04/2026',statut:'En traitement'},
+  '264487':{client:'Hanane',           date:'15/04/2026',statut:'Brouillon'},
+  '264486':{client:'Ibrahim elkhalil', date:'15/04/2026',statut:'Brouillon'},
+  '264485':{client:'Laundry Service Irfane',date:'15/04/2026',statut:'Brouillon'},
+  '264484':{client:'Homat el warda',   date:'13/04/2026',statut:'En traitement'},
+  '264483':{client:'Touria',           date:'13/04/2026',statut:'En traitement'},
+  '264482':{client:'Rachida Bennani',  date:'13/04/2026',statut:'Brouillon'},
+};
+
+// Lignes de commande — miroir lignesData ERP
+let LIGNES = [
+  {id:0, cmdNum:'264504',numArt:1,article:'Tapis synthétique',larg:3.48,long:3.48,surface:12.11,qte:1,qteTraitee:0,uom:'m²',obs:'rouge beige',empl:'',etat:'Brouillon'},
+  {id:1, cmdNum:'264503',numArt:1,article:'Divers',           larg:0,   long:0,   surface:0,    qte:1,qteTraitee:0,uom:'Pièce',obs:'',        empl:'',etat:'Brouillon'},
+  {id:2, cmdNum:'264495',numArt:1,article:'Tapis synthétique',larg:2.95,long:3.50,surface:10.32,qte:1,qteTraitee:1,uom:'m²',obs:'beige marron',empl:'A-05',etat:'En traitement'},
+  {id:3, cmdNum:'264491',numArt:1,article:'Tapis synthétique',larg:3.60,long:4.00,surface:14.40,qte:1,qteTraitee:1,uom:'m²',obs:'beige',      empl:'A-02',etat:'En traitement'},
+  {id:4, cmdNum:'264491',numArt:2,article:'Rideau',           larg:0,   long:0,   surface:0,    qte:2,qteTraitee:0,uom:'Forfait',obs:'',      empl:'',etat:'Brouillon'},
+  {id:5, cmdNum:'264488',numArt:1,article:'Tapis synthétique',larg:1.40,long:2.00,surface:2.80, qte:1,qteTraitee:1,uom:'m²',obs:'bleu',      empl:'A-04',etat:'Prêt à livrer'},
+  {id:6, cmdNum:'264488',numArt:2,article:'Couverture',       larg:0,   long:0,   surface:0,    qte:5,qteTraitee:3,uom:'Pièce',obs:'',       empl:'B-01',etat:'En traitement'},
+  {id:7, cmdNum:'264488',numArt:3,article:'Couette',          larg:0,   long:0,   surface:0,    qte:1,qteTraitee:1,uom:'Pièce',obs:'',       empl:'B-02',etat:'En traitement'},
+  {id:8, cmdNum:'264487',numArt:1,article:'Tapis shaggy',     larg:1.65,long:2.30,surface:3.79, qte:1,qteTraitee:0,uom:'m²',obs:'beige',     empl:'',etat:'Brouillon'},
+  {id:9, cmdNum:'264487',numArt:2,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68, qte:1,qteTraitee:0,uom:'m²',obs:'gris',      empl:'',etat:'Brouillon'},
+  {id:10,cmdNum:'264486',numArt:1,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68, qte:1,qteTraitee:0,uom:'m²',obs:'blanc',     empl:'',etat:'Brouillon'},
+  {id:11,cmdNum:'264485',numArt:1,article:'Tapis synthétique',larg:1.70,long:2.30,surface:3.91, qte:1,qteTraitee:0,uom:'m²',obs:'rouge beige',empl:'',etat:'Brouillon'},
+  {id:12,cmdNum:'264484',numArt:1,article:'Tapis synthétique',larg:2.50,long:4.55,surface:11.38,qte:1,qteTraitee:0,uom:'m²',obs:'doré',      empl:'',etat:'En traitement'},
+  {id:13,cmdNum:'264484',numArt:2,article:'Tapis shaggy',     larg:1.65,long:3.15,surface:5.20, qte:1,qteTraitee:0,uom:'m²',obs:'marron',    empl:'',etat:'En traitement'},
+  {id:14,cmdNum:'264484',numArt:3,article:'Tapis synthétique',larg:1.20,long:2.30,surface:2.76, qte:3,qteTraitee:1,uom:'m²',obs:'multi-coleur',empl:'A-08',etat:'En traitement'},
+  {id:15,cmdNum:'264484',numArt:4,article:'Tapis synthétique',larg:0.96,long:2.90,surface:2.78, qte:1,qteTraitee:0,uom:'m²',obs:'beige',     empl:'',etat:'En traitement'},
+  {id:16,cmdNum:'264484',numArt:5,article:'Lhouf',            larg:0,   long:0,   surface:0,    qte:6,qteTraitee:0,uom:'Pièce',obs:'',       empl:'',etat:'Brouillon'},
+  {id:17,cmdNum:'264484',numArt:6,article:'Tapis synthétique',larg:2.96,long:3.50,surface:10.36,qte:1,qteTraitee:0,uom:'m²',obs:'jaune',     empl:'',etat:'Brouillon'},
+  {id:18,cmdNum:'264483',numArt:1,article:'Tapis synthétique',larg:2.05,long:3.00,surface:6.15, qte:1,qteTraitee:0,uom:'m²',obs:'rouge',     empl:'',etat:'En traitement'},
+  {id:19,cmdNum:'264482',numArt:1,article:'Tapis synthétique',larg:2.00,long:3.10,surface:6.20, qte:2,qteTraitee:0,uom:'m²',obs:'blanc',     empl:'',etat:'Brouillon'},
+];
+
+// ══ STATE ══
+let currentUser = '';
+let currentSearch = '';
+let currentQFilter = 'all';
+let editingIds = new Set(); // IDs des lignes en mode édition
+let histoLog = []; // Log des actions
+
+// ══ UTILS ══
+function updateTime(){
+  const now = new Date();
+  document.getElementById('app-time').textContent =
+    now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+function fmt2(n){return n>0?n.toFixed(2):'—';}
+function nowStr(){
+  return new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+
+// ══ LOGIN ══
+window.onload = () => {
+  updateTime();
+  setInterval(updateTime,30000);
+};
+
+function doLogin(){
+  const u = document.getElementById('login-user').value;
+  if(!u){showToast('⚠️ Choisissez votre nom','amber');return;}
+  currentUser = u;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('nav-tabs').style.display = 'flex';
+  document.getElementById('search-user-label').textContent = u + ' · Atelier';
+  document.getElementById('histo-user-label').textContent = u + ' · Aujourd\'hui';
+  switchScreen('search');
+  renderResults();
+  showToast('Bienvenue ' + u.split(' ')[0] + ' 👋','green');
+}
+
+// ══ SCREENS ══
+function switchScreen(s){
+  document.querySelectorAll('.screen').forEach(sc => sc.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('screen-'+s).classList.add('active');
+  document.getElementById('ntab-'+s).classList.add('active');
+  if(s==='histo') renderHisto();
+  if(s==='stats') renderStats();
+}
+
+// ══ FILTRAGE ══
+function onSearch(q){
+  currentSearch = q.trim();
+  document.getElementById('btn-clear').style.display = q ? 'block' : 'none';
+  renderResults();
+}
+
+function clearSearch(){
+  document.getElementById('search-input').value = '';
+  document.getElementById('btn-clear').style.display = 'none';
+  currentSearch = '';
+  renderResults();
+}
+
+function setQFilter(f){
+  currentQFilter = f;
+  ['all','sans','traitement','pret'].forEach(id => {
+    document.getElementById('qf-'+id).classList.toggle('active', id===f);
+  });
+  renderResults();
+}
+
+function getFilteredLignes(){
+  let data = [...LIGNES];
+  // Filtre texte
+  if(currentSearch){
+    const q = currentSearch.toLowerCase();
+    data = data.filter(l =>
+      l.cmdNum.includes(q) ||
+      l.article.toLowerCase().includes(q) ||
+      (l.obs||'').toLowerCase().includes(q) ||
+      (l.empl||'').toLowerCase().includes(q)
+    );
+  }
+  // Filtre rapide
+  if(currentQFilter==='sans')     data = data.filter(l => !l.empl);
+  if(currentQFilter==='traitement') data = data.filter(l => l.etat==='En traitement');
+  if(currentQFilter==='pret')     data = data.filter(l => l.etat==='Prêt à livrer');
+  return data;
+}
+
+// ══ RENDER RÉSULTATS ══
+function renderResults(){
+  const data = getFilteredLignes();
+  const list = document.getElementById('results-list');
+
+  if(data.length === 0){
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">${currentSearch ? '🔍' : '📋'}</div>
+        <div class="empty-text">${currentSearch ? 'Aucun résultat pour "'+currentSearch+'"' : 'Aucune ligne pour ce filtre'}</div>
+        <div class="empty-hint">${currentSearch ? 'Essayez un autre N° ou article' : ''}</div>
+      </div>`;
+    return;
+  }
+
+  // Grouper par commande
+  const byCmd = {};
+  data.forEach(l => {
+    if(!byCmd[l.cmdNum]) byCmd[l.cmdNum] = [];
+    byCmd[l.cmdNum].push(l);
+  });
+
+  list.innerHTML = Object.entries(byCmd).map(([cmdNum, lignes], gi) => {
+    const cmd = ERP_COMMANDES[cmdNum] || {client:'—', date:'—', statut:'Brouillon'};
+    const nbPret = lignes.filter(l=>l.etat==='Prêt à livrer').length;
+    const nbSans = lignes.filter(l=>!l.empl).length;
+    const dotClass = cmd.statut==='Prêt à livrer'?'ed-pret':cmd.statut==='En traitement'?'ed-traitement':'ed-brouillon';
+
+    return `
+    <div class="cmd-group" style="animation:fadeUp .25s ${gi*.05}s both">
+      <div class="cmd-group-header" onclick="toggleGroup('${cmdNum}')">
+        <div>
+          <div class="cmd-num">${cmdNum}</div>
+          <div class="cmd-client">${cmd.client}</div>
+          <div class="cmd-meta">${cmd.date} · ${lignes.length} article${lignes.length>1?'s':''} ${nbSans>0?'· <span style="color:#E8A838">⚠️ '+nbSans+' sans empl.</span>':''}</div>
+        </div>
+        <div class="cmd-badge-wrap">
+          <div class="etat-dot ${dotClass}"></div>
+          <div class="cmd-nblignes">${nbPret}/${lignes.length} ✓</div>
+          <div style="font-size:14px;color:rgba(255,255,255,.3)" id="grp-arrow-${cmdNum}">▾</div>
+        </div>
+      </div>
+      <div class="art-rows" id="grp-rows-${cmdNum}">
+        ${lignes.map(l => renderArtRow(l)).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleGroup(cmdNum){
+  const rows = document.getElementById('grp-rows-'+cmdNum);
+  const arrow = document.getElementById('grp-arrow-'+cmdNum);
+  const hidden = rows.style.display === 'none';
+  rows.style.display = hidden ? 'block' : 'none';
+  if(arrow) arrow.textContent = hidden ? '▾' : '▸';
+}
+
+function renderArtRow(l){
+  const etatClass = l.etat==='Prêt à livrer'?'aec-pret':l.etat==='En traitement'?'aec-traitement':'aec-brouillon';
+  const inEdit = editingIds.has(l.id);
+  const dimsStr = l.larg>0 ? `${l.larg.toFixed(2)} × ${l.long.toFixed(2)} m — ${l.surface.toFixed(2)} m²` : `${l.uom}`;
+  const qte = l.qte || 1;
+  const qteT = l.qteTraitee || 0;
+
+  // Bloc emplacement
+  const emplBlock = inEdit
+    ? `<div class="empl-row">
+        <span class="empl-label">Empl.</span>
+        <div class="empl-input-wrap">
+          <input class="empl-input" id="empl-input-${l.id}"
+            value="${l.empl||''}" placeholder="Ex: A-12, 13/14..."
+            onkeydown="if(event.key==='Enter')saveEmpl(${l.id})"/>
+          <button class="btn-save-empl" onclick="saveEmpl(${l.id})">✓ Sauver</button>
+        </div>
+       </div>`
+    : `<div class="empl-row">
+        <span class="empl-label">Empl.</span>
+        ${l.empl
+          ? `<span class="empl-val">${l.empl}</span>
+             <button class="btn-edit-empl" onclick="startEdit(${l.id})">✏️</button>`
+          : `<span class="empl-val empty">Non saisi</span>
+             <button class="btn-save-empl" onclick="startEdit(${l.id})">+ Saisir</button>`
+        }
+       </div>`;
+
+  // ── REMARQUE 2 : bloc quantité — visible seulement si qte > 1 ──
+  const qteBlock = qte > 1 ? `
+    <div style="display:flex;align-items:center;gap:6px;margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.05);">
+      <span style="font-size:10px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;width:60px;">Traité</span>
+      <!-- compteur -->
+      <div style="display:flex;align-items:center;gap:6px;flex:1;">
+        <button onclick="changeQte(${l.id},-1)" style="width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:${qteT<=0?'rgba(255,255,255,.15)':'#fff'};font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;${qteT<=0?'pointer-events:none':''}">−</button>
+        <div style="text-align:center;min-width:44px;">
+          <div style="font-family:'JetBrains Mono';font-size:16px;font-weight:700;color:${qteT>=qte?'#2ECC9B':'#E8A838'};">${qteT}</div>
+          <div style="font-size:9px;color:rgba(255,255,255,.25);">/ ${qte}</div>
+        </div>
+        <button onclick="changeQte(${l.id},+1)" style="width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);color:${qteT>=qte?'rgba(255,255,255,.15)':'#fff'};font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;${qteT>=qte?'pointer-events:none':''}">+</button>
+        <button onclick="setQteAll(${l.id})" style="padding:6px 12px;border-radius:8px;border:1px solid rgba(46,204,155,.2);background:rgba(46,204,155,.08);color:${qteT>=qte?'rgba(46,204,155,.4)':'#2ECC9B'};font-size:11px;font-weight:700;cursor:pointer;font-family:'Syne';${qteT>=qte?'pointer-events:none':''}">Tous</button>
+      </div>
+      ${qteT>=qte ? '<span style="font-size:11px;color:#2ECC9B;font-weight:700;">✓ Complet</span>' : ''}
+    </div>` : '';
+
+  return `
+    <div class="art-row" id="art-row-${l.id}">
+      <div class="art-row-top">
+        <span class="art-num">${l.numArt}</span>
+        <div style="flex:1;margin-left:4px;">
+          <div class="art-name">${l.article}</div>
+          <div class="art-dims">${dimsStr}</div>
+          ${l.obs ? `<span class="obs-tag">${l.obs}</span>` : ''}
+        </div>
+        <span class="art-etat-chip ${etatClass}">${l.etat}</span>
+      </div>
+      ${emplBlock}
+      ${qteBlock}
+    </div>`;
+}
+
+function refreshArtRow(id){
+  const l = LIGNES.find(x=>x.id===id);
+  const row = document.getElementById('art-row-'+id);
+  if(!row||!l) return;
+  const tmp = document.createElement('div');
+  tmp.innerHTML = renderArtRow(l);
+  const inner = tmp.querySelector('.art-row');
+  if(inner) row.innerHTML = inner.innerHTML;
+  // Focus auto si en édition
+  if(editingIds.has(id)){
+    setTimeout(()=>{
+      const inp = document.getElementById('empl-input-'+id);
+      if(inp){inp.focus();inp.select();}
+    },60);
+  }
+}
+
+// ══ ACTIONS EMPLACEMENT ══
+function startEdit(id){
+  editingIds.add(id);
+  refreshArtRow(id);
+  setTimeout(()=>{
+    const inp = document.getElementById('empl-input-'+id);
+    if(inp){inp.focus();inp.select();}
+  },80);
+}
+
+function saveEmpl(id){
+  const inp = document.getElementById('empl-input-'+id);
+  if(!inp) return;
+  const val = inp.value.trim().toUpperCase();
+  if(!val){showToast('⚠️ Saisissez un emplacement','amber');inp.focus();return;}
+
+  const l = LIGNES.find(x=>x.id===id);
+  const oldEmpl = l.empl;
+  l.empl = val;
+
+  // ── REMARQUE 1 ──
+  // Dès qu'un emplacement est saisi ET que qteTraitee = qte → article passe "Prêt à livrer"
+  // (si qte > 1, le passage se fait via les boutons +/-/Tous, pas ici)
+  if(l.qte === 1){
+    l.qteTraitee = 1;
+    l.etat = 'Prêt à livrer';
+  } else {
+    // Pour qte > 1 : emplacement saisi mais on attend que qteTraitee = qte
+    if(l.qteTraitee >= l.qte) l.etat = 'Prêt à livrer';
+    else l.etat = 'En traitement';
+  }
+
+  // Vérifier si TOUS les articles de la commande sont "Prêt à livrer"
+  // → si oui, passer la commande entière à "Prêt à livrer" dans l'ERP
+  checkCmdAllPret(l.cmdNum);
+
+  editingIds.delete(id);
+
+  // Log activité
+  histoLog.unshift({
+    type: oldEmpl ? 'mod' : 'new',
+    cmdNum: l.cmdNum,
+    article: l.article,
+    oldEmpl,
+    newEmpl: val,
+    user: currentUser,
+    time: nowStr(),
+    date: new Date().toLocaleDateString('fr-FR')
+  });
+
+  // ── REMARQUE 3 : sync ERP ──
+  syncToERP(l.cmdNum, id, val, l.etat);
+
+  const row = document.getElementById('art-row-'+id);
+  if(row) row.classList.add('flash');
+  setTimeout(()=>{
+    renderResults();
+    showToast('✅ Emplacement '+(oldEmpl?'modifié':'saisi')+' : '+val,'green');
+  },300);
+}
+
+function checkCmdAllPret(cmdNum){
+  const cmdLignes = LIGNES.filter(x=>x.cmdNum===cmdNum);
+  const allPret = cmdLignes.every(x=>x.etat==='Prêt à livrer');
+  if(allPret && ERP_COMMANDES[cmdNum]){
+    const wasAlready = ERP_COMMANDES[cmdNum].statut === 'Prêt à livrer';
+    ERP_COMMANDES[cmdNum].statut = 'Prêt à livrer';
+    if(!wasAlready){
+      // Log commande complète
+      histoLog.unshift({
+        type:'cmd',
+        cmdNum,
+        article:'Commande complète',
+        oldEmpl:'',
+        newEmpl:'',
+        user: currentUser,
+        time: nowStr(),
+        date: new Date().toLocaleDateString('fr-FR')
+      });
+      showToast('🎉 Commande '+cmdNum+' → Prêt à livrer !','green');
+    }
+  }
+}
+
+// ── REMARQUE 2 : contrôle quantité (+1 / -1 / Tous) ──
+function changeQte(id, delta){
+  const l = LIGNES.find(x=>x.id===id);
+  if(!l) return;
+  if(!l.empl){showToast('⚠️ Saisissez d\'abord l\'emplacement','amber');return;}
+  const newVal = Math.max(0, Math.min(l.qte, (l.qteTraitee||0) + delta));
+  l.qteTraitee = newVal;
+  updateEtatFromQte(l);
+  checkCmdAllPret(l.cmdNum);
+  syncToERP(l.cmdNum, id, l.empl, l.etat);
+  refreshArtRow(id);
+  showToast(newVal >= l.qte ? '✅ Tout traité' : `${newVal}/${l.qte} traité(s)`,'green');
+}
+
+function setQteAll(id){
+  const l = LIGNES.find(x=>x.id===id);
+  if(!l) return;
+  if(!l.empl){showToast('⚠️ Saisissez d\'abord l\'emplacement','amber');return;}
+  l.qteTraitee = l.qte;
+  updateEtatFromQte(l);
+  checkCmdAllPret(l.cmdNum);
+  syncToERP(l.cmdNum, id, l.empl, l.etat);
+  refreshArtRow(id);
+  showToast('✅ Tous les '+l.qte+' traités','green');
+}
+
+function updateEtatFromQte(l){
+  if(!l.empl) return; // pas d'emplacement = pas de changement d'état
+  if(l.qteTraitee >= l.qte) l.etat = 'Prêt à livrer';
+  else if(l.qteTraitee > 0) l.etat = 'En traitement';
+  // Brouillon reste Brouillon si qteTraitee = 0 et pas d'empl
+}
+
+// ── REMARQUE 3 : pont de synchronisation avec l'ERP ──
+// Dans la version Firebase ces 2 fonctions feront un updateDoc() sur Firestore
+// Pour l'instant elles écrivent dans un objet global ERPSync que l'ERP peut lire
+const ERPSync = { updates: [], lastSync: null };
+
+function syncToERP(cmdNum, ligneId, empl, etat){
+  const l = LIGNES.find(x=>x.id===ligneId);
+  if(!l) return;
+  const update = {
+    cmdNum,
+    ligneId,
+    numArt: l.numArt,
+    article: l.article,
+    empl,
+    etat,
+    qteTraitee: l.qteTraitee,
+    syncedAt: new Date().toISOString(),
+    syncedBy: currentUser
+  };
+  const idx = ERPSync.updates.findIndex(u=>u.cmdNum===cmdNum && u.ligneId===ligneId);
+  if(idx>=0) ERPSync.updates[idx] = update;
+  else ERPSync.updates.push(update);
+  ERPSync.lastSync = new Date().toISOString();
+
+  // Envoyer au fenêtre ERP si ouverte dans un autre onglet
+  try {
+    window.opener?.postMessage({type:'FINITION_SYNC', updates:[update]}, '*');
+    window.parent?.postMessage({type:'FINITION_SYNC', updates:[update]}, '*');
+  } catch(e){}
+
+  updateSyncBadge();
+}
+
+function updateSyncBadge(){
+  const badge = document.getElementById('sync-badge');
+  if(badge){
+    badge.textContent = ERPSync.updates.length + ' en attente de sync';
+    badge.style.display = 'block';
+  }
+}
+
+// ══ RENDER HISTORIQUE ══
+function renderHisto(){
+  const el = document.getElementById('histo-list');
+  if(histoLog.length===0){
+    el.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">📝</div>
+        <div class="empty-text">Aucune activité pour l'instant</div>
+        <div class="empty-hint">Les emplacements saisis apparaissent ici</div>
+      </div>`;
+    return;
+  }
+  el.innerHTML = histoLog.map((h,i) => {
+    if(h.type==='cmd') return `
+      <div class="histo-item" style="animation:fadeUp .2s ${i*.04}s both;border-color:rgba(46,204,155,.2);background:rgba(46,204,155,.05);">
+        <div class="histo-dot" style="background:#2ECC9B;width:10px;height:10px;"></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span class="histo-cmd">${h.cmdNum}</span>
+            <span style="font-size:10px;font-weight:700;color:#2ECC9B;background:rgba(46,204,155,.1);padding:2px 8px;border-radius:6px;">✅ PRÊT À LIVRER</span>
+          </div>
+          <div class="histo-art" style="color:#2ECC9B;">🎉 Commande complète</div>
+          <div class="histo-time">${h.time} · ${h.user.split(' ')[0]}</div>
+        </div>
+      </div>`;
+    return `
+      <div class="histo-item" style="animation:fadeUp .2s ${i*.04}s both">
+        <div class="histo-dot ${h.type==='mod'?'mod':''}"></div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span class="histo-cmd">${h.cmdNum}</span>
+            <span class="histo-empl">${h.newEmpl}</span>
+          </div>
+          <div class="histo-art">${h.article}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;">
+            <div class="histo-time">${h.type==='mod'?'✏️ Modifié':'✅ Saisi'} · ${h.time}</div>
+            ${h.oldEmpl?`<span style="font-size:10px;color:rgba(255,255,255,.2);">était: ${h.oldEmpl}</span>`:''}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ══ RENDER STATS ══
+function renderStats(){
+  const total = LIGNES.length;
+  const avecEmpl = LIGNES.filter(l=>l.empl).length;
+  const sansEmpl = total - avecEmpl;
+  const pret = LIGNES.filter(l=>l.etat==='Prêt à livrer').length;
+  const traitement = LIGNES.filter(l=>l.etat==='En traitement').length;
+  const brouillon = LIGNES.filter(l=>l.etat==='Brouillon').length;
+  const pct = n => Math.round(n/total*100);
+
+  const statsEl = document.getElementById('stats-content');
+  statsEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;">
+      <div class="stat-box-fin">
+        <div class="stat-box-icon">📦</div>
+        <div>
+          <div class="stat-box-val" style="color:#2ECC9B">${avecEmpl}</div>
+          <div class="stat-box-lbl">Avec emplacement</div>
+        </div>
+      </div>
+      <div class="stat-box-fin">
+        <div class="stat-box-icon">⚠️</div>
+        <div>
+          <div class="stat-box-val" style="color:#E8A838">${sansEmpl}</div>
+          <div class="stat-box-lbl">Sans emplacement</div>
+        </div>
+      </div>
+      <div class="stat-box-fin">
+        <div class="stat-box-icon">✅</div>
+        <div>
+          <div class="stat-box-val" style="color:#2ECC9B">${pret}</div>
+          <div class="stat-box-lbl">Prêt à livrer</div>
+        </div>
+      </div>
+      <div class="stat-box-fin">
+        <div class="stat-box-icon">🔧</div>
+        <div>
+          <div class="stat-box-val" style="color:#3B9EE8">${histoLog.length}</div>
+          <div class="stat-box-lbl">Saisis aujourd'hui</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-title">Progression globale</div>
+      <div class="progress-row">
+        <span class="progress-label">Prêt à livrer</span>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct(pret)}%;background:#2ECC9B"></div></div>
+        <span class="progress-val" style="color:#2ECC9B">${pct(pret)}%</span>
+      </div>
+      <div class="progress-row">
+        <span class="progress-label">En traitement</span>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct(traitement)}%;background:#3B9EE8"></div></div>
+        <span class="progress-val" style="color:#3B9EE8">${pct(traitement)}%</span>
+      </div>
+      <div class="progress-row">
+        <span class="progress-label">Brouillon</span>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct(brouillon)}%;background:#64748B"></div></div>
+        <span class="progress-val" style="color:#64748B">${pct(brouillon)}%</span>
+      </div>
+      <div class="progress-row">
+        <span class="progress-label">Emplacements</span>
+        <div class="progress-bar-wrap"><div class="progress-bar-fill" style="width:${pct(avecEmpl)}%;background:#E8A838"></div></div>
+        <span class="progress-val" style="color:#E8A838">${pct(avecEmpl)}%</span>
+      </div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-title">🔗 Synchronisation ERP</div>
+      <div id="sync-badge" style="display:none;background:rgba(232,168,56,.1);border:1px solid rgba(232,168,56,.2);border-radius:10px;padding:10px 14px;font-size:12px;color:#E8A838;font-weight:600;margin-bottom:10px;text-align:center;"></div>
+      <div style="font-size:11px;color:rgba(255,255,255,.3);line-height:1.7;">
+        <div>📤 <strong style="color:rgba(255,255,255,.5)">${ERPSync.updates.length}</strong> mise(s) à jour en attente</div>
+        <div>🕐 Dernière sync : <strong style="color:rgba(255,255,255,.5)">${ERPSync.lastSync ? new Date(ERPSync.lastSync).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}) : '—'}</strong></div>
+        <div style="margin-top:8px;font-size:10px;color:rgba(255,255,255,.15);">Firebase requis pour sync temps réel</div>
+      </div>
+    </div>`;
+}
+
+// ══ TOAST ══
+function showToast(msg, type='green'){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `toast-fin ${type} show`;
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>

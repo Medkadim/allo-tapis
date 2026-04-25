@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Allo Tapis — Lavage</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;}
+
+.phone{width:390px;height:844px;background:#0A0F14;border-radius:44px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 0 0 1px rgba(255,255,255,.07),0 40px 80px rgba(0,0,0,.8);position:relative;}
+
+/* STATUS BAR */
+.status-bar{height:44px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#0A0F14;}
+.status-time{font-family:'JetBrains Mono';font-size:15px;font-weight:600;color:#fff;}
+
+/* LOGIN */
+.login-screen{position:absolute;inset:0;background:#0A0F14;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 24px;z-index:100;}
+.login-logo{font-size:52px;margin-bottom:8px;}
+.login-brand{font-size:24px;font-weight:800;color:#fff;margin-bottom:2px;}
+.login-sub{font-size:11px;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:40px;}
+.login-label{font-size:11px;font-weight:700;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;align-self:flex-start;}
+.login-select{width:100%;padding:14px 16px;background:#131B22;border:1px solid rgba(255,255,255,.1);border-radius:14px;font-family:'Syne';font-size:14px;font-weight:600;color:#fff;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M0 0l6 8 6-8z' fill='rgba(255,255,255,0.3)'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 14px center;margin-bottom:24px;cursor:pointer;}
+.login-select:focus{outline:none;border-color:#3B9EE8;}
+.btn-login{width:100%;padding:16px;background:#3B9EE8;border:none;border-radius:14px;font-family:'Syne';font-size:16px;font-weight:800;color:#fff;cursor:pointer;}
+.btn-login:active{transform:scale(.97);}
+
+/* HEADER */
+.app-header{padding:16px 20px 10px;flex-shrink:0;background:#0A0F14;}
+.app-title{font-size:20px;font-weight:800;color:#fff;letter-spacing:-.3px;}
+.app-sub{font-size:11px;color:rgba(255,255,255,.3);font-family:'JetBrains Mono';margin-top:2px;}
+
+/* KPI BAND */
+.kpi-band{display:flex;gap:8px;padding:0 20px 12px;flex-shrink:0;overflow-x:auto;}
+.kpi-band::-webkit-scrollbar{display:none;}
+.kpi-pill{background:#131B22;border:1px solid rgba(255,255,255,.07);border-radius:12px;padding:10px 14px;flex-shrink:0;text-align:center;min-width:80px;}
+.kpi-pill-val{font-family:'JetBrains Mono';font-size:18px;font-weight:700;line-height:1;}
+.kpi-pill-lbl{font-size:9px;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.07em;margin-top:3px;}
+
+/* FILTERS */
+.filter-row{display:flex;gap:6px;padding:0 20px 10px;flex-shrink:0;overflow-x:auto;}
+.filter-row::-webkit-scrollbar{display:none;}
+.filter-pill{padding:6px 13px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid rgba(255,255,255,.1);color:rgba(255,255,255,.4);background:rgba(255,255,255,.04);white-space:nowrap;transition:all .15s;}
+.filter-pill.active{background:#3B9EE8;color:#fff;border-color:#3B9EE8;}
+
+/* ARTICLE LIST */
+.art-list{flex:1;overflow-y:auto;padding:0 20px 24px;}
+.art-list::-webkit-scrollbar{display:none;}
+
+/* PRIORITY SECTION LABEL */
+.section-sep{display:flex;align-items:center;gap:10px;margin:14px 0 8px;}
+.section-sep-line{flex:1;height:1px;background:rgba(255,255,255,.06);}
+.section-sep-lbl{font-size:9px;font-weight:700;color:rgba(255,255,255,.2);text-transform:uppercase;letter-spacing:.12em;white-space:nowrap;}
+
+/* ARTICLE CARD */
+.art-card{background:#131B22;border-radius:16px;margin-bottom:8px;overflow:hidden;border:1px solid rgba(255,255,255,.06);transition:border-color .2s;}
+.art-card.urgent{border-color:rgba(239,68,68,.3);background:#160E0E;}
+.art-card.pro{border-color:rgba(168,85,247,.2);background:#10101A;}
+.art-card.pressing{border-color:rgba(59,158,232,.2);background:#0D1520;}
+
+/* PRIORITY STRIPE */
+.priority-stripe{height:3px;border-radius:2px 2px 0 0;}
+.stripe-urgent{background:linear-gradient(90deg,#EF4444,#F97316);}
+.stripe-pro{background:linear-gradient(90deg,#A855F7,#6366F1);}
+.stripe-pressing{background:linear-gradient(90deg,#3B9EE8,#06B6D4);}
+.stripe-normal{background:rgba(255,255,255,.05);}
+
+.art-card-body{padding:12px 14px;}
+
+/* TOP ROW */
+.art-top{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:8px;}
+.art-left{flex:1;}
+.art-cmd{font-family:'JetBrains Mono';font-size:11px;color:#3B9EE8;margin-bottom:2px;}
+.art-client{font-size:13px;font-weight:700;color:#fff;}
+.art-type-badge{font-size:9px;font-weight:700;padding:2px 7px;border-radius:5px;margin-left:6px;vertical-align:middle;}
+.atb-urgent{background:rgba(239,68,68,.15);color:#EF4444;border:1px solid rgba(239,68,68,.2);}
+.atb-pro{background:rgba(168,85,247,.12);color:#A855F7;border:1px solid rgba(168,85,247,.2);}
+.atb-pressing{background:rgba(59,158,232,.12);color:#3B9EE8;border:1px solid rgba(59,158,232,.2);}
+
+/* WAIT KPI */
+.wait-kpi{text-align:right;flex-shrink:0;margin-left:10px;}
+.wait-val{font-family:'JetBrains Mono';font-size:20px;font-weight:700;line-height:1;}
+.wait-unit{font-size:9px;text-transform:uppercase;letter-spacing:.07em;margin-top:1px;}
+.wait-ok{color:#2ECC9B;} /* < 2j */
+.wait-warn{color:#E8A838;} /* 2-4j */
+.wait-danger{color:#EF4444;} /* > 4j */
+
+/* ARTICLE NAME ROW */
+.art-name-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.art-name{font-size:14px;font-weight:700;color:#fff;}
+.art-num-badge{font-family:'JetBrains Mono';font-size:10px;color:rgba(255,255,255,.25);background:rgba(255,255,255,.05);padding:2px 6px;border-radius:5px;}
+
+/* DIMS & COLOR */
+.art-details{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.art-dim{font-family:'JetBrains Mono';font-size:11px;color:rgba(255,255,255,.45);background:rgba(255,255,255,.05);padding:3px 8px;border-radius:7px;}
+.art-surface{font-family:'JetBrains Mono';font-size:11px;color:#3B9EE8;font-weight:600;background:rgba(59,158,232,.08);padding:3px 8px;border-radius:7px;border:1px solid rgba(59,158,232,.15);}
+.art-color{font-size:11px;font-weight:600;padding:3px 9px;border-radius:7px;}
+
+/* Color chips */
+.color-beige{background:rgba(210,180,140,.15);color:#D2B48C;border:1px solid rgba(210,180,140,.2);}
+.color-rouge{background:rgba(220,38,38,.12);color:#F87171;border:1px solid rgba(220,38,38,.2);}
+.color-gris{background:rgba(156,163,175,.12);color:#9CA3AF;border:1px solid rgba(156,163,175,.2);}
+.color-blanc{background:rgba(255,255,255,.08);color:rgba(255,255,255,.7);border:1px solid rgba(255,255,255,.15);}
+.color-noir{background:rgba(0,0,0,.4);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);}
+.color-bleu{background:rgba(59,130,246,.12);color:#60A5FA;border:1px solid rgba(59,130,246,.2);}
+.color-marron{background:rgba(120,80,40,.2);color:#CD853F;border:1px solid rgba(120,80,40,.3);}
+.color-vert{background:rgba(34,197,94,.1);color:#4ADE80;border:1px solid rgba(34,197,94,.2);}
+.color-other{background:rgba(255,255,255,.06);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.1);}
+
+/* FOOTER */
+.art-footer{display:flex;align-items:center;justify-content:space-between;padding-top:8px;border-top:1px solid rgba(255,255,255,.05);}
+.art-date{font-size:10px;color:rgba(255,255,255,.25);font-family:'JetBrains Mono';}
+.art-statut{font-size:10px;font-weight:700;padding:3px 9px;border-radius:6px;text-transform:uppercase;letter-spacing:.05em;}
+.as-brouillon{background:rgba(100,116,139,.12);color:#64748B;border:1px solid rgba(100,116,139,.15);}
+.as-traitement{background:rgba(59,158,232,.1);color:#3B9EE8;border:1px solid rgba(59,158,232,.15);}
+.as-pret{background:rgba(46,204,155,.1);color:#2ECC9B;border:1px solid rgba(46,204,155,.15);}
+
+/* QTE badge */
+.art-qte{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:#E8A838;background:rgba(232,168,56,.1);border:1px solid rgba(232,168,56,.2);padding:2px 8px;border-radius:6px;}
+
+/* EMPTY */
+.empty-state{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:48px 20px;gap:10px;}
+.empty-icon{font-size:40px;}
+.empty-text{font-size:13px;color:rgba(255,255,255,.25);text-align:center;}
+
+/* TOAST */
+.toast-lav{position:absolute;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);padding:11px 22px;border-radius:30px;font-size:12px;font-weight:700;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;z-index:300;}
+.toast-lav.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast-lav.blue{background:#3B9EE8;color:#fff;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+</style>
+</head>
+<body>
+<div class="phone">
+  <div class="status-bar">
+    <div class="status-time" id="app-time">09:41</div>
+    <div style="display:flex;align-items:center;gap:6px;">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="white"><rect x="0" y="4" width="3" height="8" rx="1"/><rect x="4" y="2" width="3" height="10" rx="1"/><rect x="8" y="0" width="3" height="12" rx="1"/></svg>
+      <svg width="25" height="12" viewBox="0 0 25 12" fill="white"><rect x="0" y="1" width="22" height="10" rx="2" stroke="white" stroke-width="1.5" fill="none"/><rect x="2" y="3" width="16" height="6" rx="1" fill="white"/></svg>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-logo">🫧</div>
+    <div class="login-brand">Allo Tapis</div>
+    <div class="login-sub">Atelier Lavage</div>
+    <div class="login-label" style="margin-top:8px;">Votre nom</div>
+    <select class="login-select" id="login-user">
+      <option value="">— Sélectionner —</option>
+      <option>Naqi Redouane</option>
+      <option>Messaoud Ameziane</option>
+      <option>Abdessamad Aboulfath</option>
+      <option>Taakouft Soufiane</option>
+      <option>Anass Mounaouar</option>
+      <option>Labiad Yassine</option>
+    </select>
+    <button class="btn-login" onclick="doLogin()">Accéder à l'atelier →</button>
+  </div>
+
+  <!-- HEADER -->
+  <div class="app-header" id="app-header" style="display:none">
+    <div class="app-title">Atelier Lavage</div>
+    <div class="app-sub" id="app-sub-label">—</div>
+  </div>
+
+  <!-- KPI BAND -->
+  <div class="kpi-band" id="kpi-band" style="display:none"></div>
+
+  <!-- FILTRES -->
+  <div class="filter-row" id="filter-row" style="display:none">
+    <div class="filter-pill active" id="fp-all"      onclick="setFilter('all')">Tout</div>
+    <div class="filter-pill" id="fp-tapis-syn"       onclick="setFilter('tapis-syn')">Tapis synthétique</div>
+    <div class="filter-pill" id="fp-tapis-shag"      onclick="setFilter('tapis-shag')">Tapis shaggy</div>
+    <div class="filter-pill" id="fp-tapis-laine"     onclick="setFilter('tapis-laine')">Tapis laine</div>
+    <div class="filter-pill" id="fp-couette"         onclick="setFilter('couette')">Couette / Couverture</div>
+    <div class="filter-pill" id="fp-divers"          onclick="setFilter('divers')">Divers</div>
+  </div>
+
+  <!-- LISTE ARTICLES -->
+  <div class="art-list" id="art-list" style="display:none"></div>
+
+  <div class="toast-lav" id="toast"></div>
+</div>
+
+<script>
+// ══ DONNÉES (miroir ERP) ══
+// Commandes avec type client (Particulier / Pressing / Professionnel)
+// urgent = commandes flaggées urgentes dans l'ERP
+const COMMANDES = {
+  '264504':{client:'Ahmed bou9tib',      typeClient:'Particulier', dateCollecte:'2026-04-15', urgent:false},
+  '264503':{client:'Laundry Service',    typeClient:'Pressing',    dateCollecte:'2026-04-15', urgent:false},
+  '264495':{client:'Pressing Roudaina', typeClient:'Pressing',    dateCollecte:'2026-04-14', urgent:true},
+  '264491':{client:'Rachida',            typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
+  '264488':{client:'Abdeljalil Salma',   typeClient:'Particulier', dateCollecte:'2026-04-15', urgent:false},
+  '264487':{client:'Hanane',             typeClient:'Particulier', dateCollecte:'2026-04-15', urgent:false},
+  '264486':{client:'Ibrahim elkhalil',   typeClient:'Professionnel',dateCollecte:'2026-04-15', urgent:false},
+  '264485':{client:'Laundry Irfane',     typeClient:'Pressing',    dateCollecte:'2026-04-15', urgent:false},
+  '264484':{client:'Homat el warda',     typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:true},
+  '264483':{client:'Touria',             typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
+  '264482':{client:'Rachida Bennani',    typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
+  '264475':{client:'Greenzer',           typeClient:'Professionnel',dateCollecte:'2026-04-14', urgent:false},
+  '264474':{client:'Laundry Mesnana',    typeClient:'Pressing',    dateCollecte:'2026-04-13', urgent:false},
+  '264472':{client:'Thibeau Isabelle',   typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
+  '264469':{client:'Homat el warda',     typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
+  '264099':{client:'Amrani Mustapha',    typeClient:'Particulier', dateCollecte:'2026-02-23', urgent:false},
+  '264298':{client:'Zeyneb',             typeClient:'Particulier', dateCollecte:'2026-03-30', urgent:false},
+  '264423':{client:'Mohamed Yahya',      typeClient:'Particulier', dateCollecte:'2026-04-08', urgent:false},
+};
+
+// Articles en attente de lavage (lignesData ERP — statut Brouillon ou En traitement)
+const ARTICLES = [
+  // 264495 URGENT Pressing
+  {id:0,  cmdNum:'264495',numArt:1,article:'Tapis synthétique',larg:2.95,long:3.50,surface:10.33,qte:1,obs:'beige marron',etat:'En traitement'},
+  // 264484 URGENT Particulier
+  {id:1,  cmdNum:'264484',numArt:1,article:'Tapis synthétique',larg:2.50,long:4.55,surface:11.38,qte:1,obs:'doré',       etat:'En traitement'},
+  {id:2,  cmdNum:'264484',numArt:2,article:'Tapis shaggy',     larg:1.65,long:3.15,surface:5.20, qte:1,obs:'marron',     etat:'En traitement'},
+  {id:3,  cmdNum:'264484',numArt:3,article:'Tapis synthétique',larg:1.20,long:2.30,surface:2.76, qte:3,obs:'multi-coleur',etat:'En traitement'},
+  {id:4,  cmdNum:'264484',numArt:4,article:'Tapis synthétique',larg:0.96,long:2.90,surface:2.78, qte:1,obs:'beige',      etat:'En traitement'},
+  {id:5,  cmdNum:'264484',numArt:5,article:'Lhouf',            larg:0,   long:0,   surface:0,    qte:6,obs:'',           etat:'Brouillon'},
+  {id:6,  cmdNum:'264484',numArt:6,article:'Tapis synthétique',larg:2.96,long:3.50,surface:10.36,qte:1,obs:'jaune',      etat:'Brouillon'},
+  // 264486 Pro
+  {id:7,  cmdNum:'264486',numArt:1,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68, qte:1,obs:'blanc',      etat:'Brouillon'},
+  // 264485 Pressing
+  {id:8,  cmdNum:'264485',numArt:1,article:'Tapis synthétique',larg:1.70,long:2.30,surface:3.91, qte:1,obs:'rouge beige',etat:'Brouillon'},
+  // 264503 Pressing
+  {id:9,  cmdNum:'264503',numArt:1,article:'Divers',           larg:0,   long:0,   surface:0,    qte:1,obs:'',           etat:'Brouillon'},
+  // 264488 Particulier
+  {id:10, cmdNum:'264488',numArt:2,article:'Couverture',       larg:0,   long:0,   surface:0,    qte:5,obs:'',           etat:'En traitement'},
+  {id:11, cmdNum:'264488',numArt:3,article:'Couette',          larg:0,   long:0,   surface:0,    qte:1,obs:'',           etat:'En traitement'},
+  // 264491 Particulier
+  {id:12, cmdNum:'264491',numArt:2,article:'Rideau',           larg:0,   long:0,   surface:0,    qte:2,obs:'',           etat:'Brouillon'},
+  {id:13, cmdNum:'264491',numArt:1,article:'Tapis synthétique',larg:3.60,long:4.00,surface:14.40,qte:1,obs:'beige',      etat:'En traitement'},
+  // 264487 Particulier
+  {id:14, cmdNum:'264487',numArt:1,article:'Tapis shaggy',     larg:1.65,long:2.30,surface:3.79, qte:1,obs:'beige',      etat:'Brouillon'},
+  {id:15, cmdNum:'264487',numArt:2,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68, qte:1,obs:'gris',       etat:'Brouillon'},
+  // 264504 Particulier
+  {id:16, cmdNum:'264504',numArt:1,article:'Tapis synthétique',larg:3.48,long:3.48,surface:12.11,qte:1,obs:'rouge beige',etat:'Brouillon'},
+  // 264483 Particulier
+  {id:17, cmdNum:'264483',numArt:1,article:'Tapis synthétique',larg:2.05,long:3.00,surface:6.15, qte:1,obs:'rouge',      etat:'En traitement'},
+  // 264482 Particulier
+  {id:18, cmdNum:'264482',numArt:1,article:'Tapis synthétique',larg:2.00,long:3.10,surface:6.20, qte:2,obs:'blanc',      etat:'Brouillon'},
+  // 264475 Pro
+  {id:19, cmdNum:'264475',numArt:1,article:'Tapis synthétique',larg:2.50,long:3.80,surface:9.50, qte:1,obs:'gris noir',  etat:'En traitement'},
+  {id:20, cmdNum:'264475',numArt:2,article:'Tapis synthétique',larg:2.98,long:2.50,surface:7.45, qte:1,obs:'rouge',      etat:'En traitement'},
+  // Anciens
+  {id:21, cmdNum:'264099',numArt:1,article:'Tapis synthétique',larg:2.80,long:3.80,surface:10.64,qte:1,obs:'beige',      etat:'En traitement'},
+  {id:22, cmdNum:'264099',numArt:2,article:'Tapis shaggy',     larg:1.60,long:2.30,surface:3.68, qte:1,obs:'gris',       etat:'En traitement'},
+  {id:23, cmdNum:'264298',numArt:1,article:'Tapis synthétique',larg:3.00,long:4.00,surface:12.00,qte:1,obs:'rouge',      etat:'En traitement'},
+  {id:24, cmdNum:'264423',numArt:1,article:'Tapis synthétique',larg:2.95,long:3.50,surface:10.33,qte:1,obs:'blanc',      etat:'En traitement'},
+];
+
+// ══ STATE ══
+let currentUser = '';
+let currentFilter = 'all';
+const TODAY = new Date('2026-04-25');
+
+// ══ UTILS ══
+function updateTime(){
+  const now = new Date();
+  document.getElementById('app-time').textContent =
+    now.toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+}
+
+function joursAttente(dateStr){
+  // dateStr format: 'YYYY-MM-DD'
+  const d = new Date(dateStr + 'T12:00:00');
+  const diff = Math.floor((TODAY - d) / (1000*60*60*24));
+  return Math.max(0, diff);
+}
+
+function waitClass(jours){
+  if(jours <= 2) return 'wait-ok';
+  if(jours <= 4) return 'wait-warn';
+  return 'wait-danger';
+}
+
+function colorClass(obs){
+  if(!obs) return '';
+  const o = obs.toLowerCase();
+  if(o.includes('beige')||o.includes('doré')||o.includes('jaune')) return 'color-beige';
+  if(o.includes('rouge')) return 'color-rouge';
+  if(o.includes('gris')) return 'color-gris';
+  if(o.includes('blanc')) return 'color-blanc';
+  if(o.includes('noir')) return 'color-noir';
+  if(o.includes('bleu')) return 'color-bleu';
+  if(o.includes('marron')||o.includes('brun')) return 'color-marron';
+  if(o.includes('vert')) return 'color-vert';
+  return 'color-other';
+}
+
+function getPriority(cmdNum){
+  const cmd = COMMANDES[cmdNum];
+  if(!cmd) return 3;
+  if(cmd.urgent) return 0;
+  if(cmd.typeClient === 'Professionnel') return 1;
+  if(cmd.typeClient === 'Pressing') return 1;
+  return 2;
+}
+
+function articleTypeKey(article){
+  const a = article.toLowerCase();
+  if(a.includes('synthétique')) return 'tapis-syn';
+  if(a.includes('shaggy'))      return 'tapis-shag';
+  if(a.includes('laine'))       return 'tapis-laine';
+  if(a.includes('couette')||a.includes('couverture')||a.includes('lhouf')) return 'couette';
+  return 'divers';
+}
+
+// ══ LOGIN ══
+window.onload = () => {
+  updateTime();
+  setInterval(updateTime, 30000);
+};
+
+function doLogin(){
+  const u = document.getElementById('login-user').value;
+  if(!u){ showToast('⚠️ Choisissez votre nom'); return; }
+  currentUser = u;
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-header').style.display = 'block';
+  document.getElementById('kpi-band').style.display = 'flex';
+  document.getElementById('filter-row').style.display = 'flex';
+  document.getElementById('art-list').style.display = 'block';
+  document.getElementById('app-sub-label').textContent =
+    u + ' · ' + TODAY.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'long'});
+  renderKPIs();
+  renderList();
+}
+
+// ══ KPIs ══
+function renderKPIs(){
+  const total = ARTICLES.length;
+  const urgent = ARTICLES.filter(a=>COMMANDES[a.cmdNum]?.urgent).length;
+  const enTraitement = ARTICLES.filter(a=>a.etat==='En traitement').length;
+
+  // Temps d'attente moyen
+  const attentes = ARTICLES.map(a=>{
+    const cmd = COMMANDES[a.cmdNum];
+    return cmd ? joursAttente(cmd.dateCollecte) : 0;
+  });
+  const maxAttente = Math.max(...attentes);
+  const avgAttente = Math.round(attentes.reduce((s,v)=>s+v,0)/attentes.length);
+
+  // Compter par type client
+  const proPressing = [...new Set(ARTICLES
+    .filter(a=>['Professionnel','Pressing'].includes(COMMANDES[a.cmdNum]?.typeClient))
+    .map(a=>a.cmdNum))].length;
+
+  const band = document.getElementById('kpi-band');
+  band.innerHTML = [
+    {val:total,       lbl:'Articles',   color:'#3B9EE8'},
+    {val:urgent,      lbl:'Urgents 🔴',  color:'#EF4444'},
+    {val:proPressing, lbl:'Pro/Press',   color:'#A855F7'},
+    {val:enTraitement,lbl:'En cours',   color:'#E8A838'},
+    {val:maxAttente+'j',lbl:'Max attente',color:maxAttente>4?'#EF4444':maxAttente>2?'#E8A838':'#2ECC9B'},
+    {val:avgAttente+'j',lbl:'Moy. attente',color:'rgba(255,255,255,.6)'},
+  ].map(k=>`
+    <div class="kpi-pill">
+      <div class="kpi-pill-val" style="color:${k.color}">${k.val}</div>
+      <div class="kpi-pill-lbl">${k.lbl}</div>
+    </div>`).join('');
+}
+
+// ══ FILTRES ══
+function setFilter(f){
+  currentFilter = f;
+  document.querySelectorAll('.filter-pill').forEach(p=>p.classList.remove('active'));
+  document.getElementById('fp-'+f)?.classList.add('active');
+  renderList();
+}
+
+// ══ RENDER LISTE ══
+function renderList(){
+  // 1. Filtrer par type article
+  let data = [...ARTICLES];
+  if(currentFilter !== 'all'){
+    data = data.filter(a => articleTypeKey(a.article) === currentFilter);
+  }
+
+  // 2. Trier par priorité :
+  //    0 = urgent  1 = Pro/Pressing  2 = Particulier
+  //    Au sein de chaque groupe : par ancienneté (plus vieux = plus haut)
+  data.sort((a,b)=>{
+    const pa = getPriority(a.cmdNum);
+    const pb = getPriority(b.cmdNum);
+    if(pa !== pb) return pa - pb;
+    // Même priorité → par date collecte (plus ancien d'abord)
+    const da = COMMANDES[a.cmdNum]?.dateCollecte || '9999';
+    const db = COMMANDES[b.cmdNum]?.dateCollecte || '9999';
+    return da.localeCompare(db);
+  });
+
+  if(data.length === 0){
+    document.getElementById('art-list').innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <div class="empty-text">Aucun article pour ce filtre</div>
+      </div>`;
+    return;
+  }
+
+  // 3. Grouper par section de priorité
+  let html = '';
+  let lastPriority = -1;
+  const sectionLabels = [
+    {icon:'🔴', label:'URGENT — À traiter immédiatement'},
+    {icon:'🟣', label:'PROFESSIONNEL & PRESSING'},
+    {icon:'⚪', label:'PARTICULIERS'},
+  ];
+
+  data.forEach((a, idx) => {
+    const prio = getPriority(a.cmdNum);
+    const cmd = COMMANDES[a.cmdNum] || {};
+    const jours = joursAttente(cmd.dateCollecte || '2026-04-25');
+    const wClass = waitClass(jours);
+
+    // Insérer séparateur de section
+    if(prio !== lastPriority){
+      lastPriority = prio;
+      const sec = sectionLabels[prio] || {icon:'⚪', label:'AUTRES'};
+      html += `
+        <div class="section-sep" style="animation:fadeUp .2s ${idx*.02}s both">
+          <div class="section-sep-line"></div>
+          <div class="section-sep-lbl">${sec.icon} ${sec.label}</div>
+          <div class="section-sep-line"></div>
+        </div>`;
+    }
+
+    // Type badge
+    let typeClass = '';
+    let typeBadge = '';
+    if(cmd.urgent){ typeClass='urgent'; typeBadge=`<span class="art-type-badge atb-urgent">URGENT</span>`; }
+    else if(cmd.typeClient==='Professionnel'){ typeClass='pro'; typeBadge=`<span class="art-type-badge atb-pro">PRO</span>`; }
+    else if(cmd.typeClient==='Pressing'){ typeClass='pressing'; typeBadge=`<span class="art-type-badge atb-pressing">PRESSING</span>`; }
+
+    // Stripe
+    const stripeClass = cmd.urgent?'stripe-urgent':cmd.typeClient==='Professionnel'?'stripe-pro':cmd.typeClient==='Pressing'?'stripe-pressing':'stripe-normal';
+
+    // Dims
+    const dims = a.larg > 0
+      ? `<span class="art-dim">${a.larg.toFixed(2)} × ${a.long.toFixed(2)} m</span>
+         <span class="art-surface">${a.surface.toFixed(2)} m²</span>`
+      : `<span class="art-dim">${a.qte > 1 ? a.qte + ' × ' : ''}${
+          a.article.toLowerCase().includes('couette') ? 'Couette' :
+          a.article.toLowerCase().includes('couverture') ? 'Couverture' :
+          a.article.toLowerCase().includes('lhouf') ? 'Lhouf' : 'Forfait'
+        }</span>`;
+
+    // Couleur obs
+    let colorBadge = '';
+    if(a.obs){
+      const cClass = colorClass(a.obs);
+      colorBadge = `<span class="art-color ${cClass}">${a.obs}</span>`;
+    }
+
+    // Qté > 1
+    const qteBadge = a.qte > 1 ? `<span class="art-qte">× ${a.qte}</span>` : '';
+
+    // Statut
+    const statutClass = a.etat==='Prêt à livrer'?'as-pret':a.etat==='En traitement'?'as-traitement':'as-brouillon';
+
+    // Attente display
+    const waitDisplay = jours === 0 ? `<span class="wait-val wait-ok">Auj.</span><div class="wait-unit" style="color:#2ECC9B">reçu</div>`
+      : `<span class="wait-val ${wClass}">${jours}</span><div class="wait-unit" style="color:${wClass==='wait-ok'?'#2ECC9B':wClass==='wait-warn'?'#E8A838':'#EF4444'}">jour${jours>1?'s':''}</div>`;
+
+    html += `
+      <div class="art-card ${typeClass}" style="animation:fadeUp .25s ${idx*.03}s both">
+        <div class="priority-stripe ${stripeClass}"></div>
+        <div class="art-card-body">
+          <div class="art-top">
+            <div class="art-left">
+              <div class="art-cmd">${a.cmdNum} ${typeBadge}</div>
+              <div class="art-client">${cmd.client || '—'}</div>
+            </div>
+            <div class="wait-kpi">
+              ${waitDisplay}
+            </div>
+          </div>
+          <div class="art-name-row">
+            <span class="art-num-badge">N°${a.numArt}</span>
+            <span class="art-name">${a.article}</span>
+            ${qteBadge}
+          </div>
+          <div class="art-details">
+            ${dims}
+            ${colorBadge}
+          </div>
+          <div class="art-footer">
+            <span class="art-date">Collecté le ${(cmd.dateCollecte||'').split('-').reverse().join('/')}</span>
+            <span class="art-statut ${statutClass}">${a.etat}</span>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('art-list').innerHTML = html;
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast-lav blue show';
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
