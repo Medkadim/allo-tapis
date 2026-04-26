@@ -329,6 +329,8 @@ function saveCmdForm(){
   hideCmdForm();
   renderCommandes(commandes);
   showToast(`✓ Commande ${obj.num} enregistrée`,'#1D9E75');
+  // Firebase
+  (async()=>{ const fid = await fbSave('commandes', obj, obj._id||null); if(fid&&!obj._id){obj._id=fid;} })();
 }
 
 // CLIENT AUTOCOMPLETE dans commande
@@ -1505,6 +1507,7 @@ function saveChargement(){
   chargEditMode=false;
   fillChargFiche(c);
   showToast('✓ Chargement enregistré','#1D9E75');
+  (async()=>{ const fid=await fbSave('chargements',c,c._id||null); if(fid&&!c._id)c._id=fid; })();
 }
 
 // MODAL AJOUTER BL
@@ -1778,10 +1781,12 @@ function saveNewCharge(){
   if(!date||!libelle||!montant){showToast('⚠️ Remplissez tous les champs obligatoires','#e53e3e');return;}
   const moisISO=parseInt(date.split('-')[1])-1;
   const id='C'+String(tresoMouvements.length+1).padStart(3,'0');
-  tresoMouvements.push({id,date,type:'charge',categorie:cat,libelle,ref,montant,saisi:'Administrator',mois:moisISO});
+  const newCharge={id,date,type:'charge',categorie:cat,libelle,ref,montant,saisi:'Administrator',mois:moisISO};
+  tresoMouvements.push(newCharge);
   document.getElementById('add-charge-modal').style.display='none';
   renderTresoSummary();renderTresoTable();
   showToast(`✓ Charge "${libelle}" — ${montant.toFixed(2)} MAD enregistrée`,'#1D9E75');
+  (async()=>{ const fid=await fbSave('tresorerie',newCharge,null); if(fid)newCharge._id=fid; })();
 }
 
 function deleteCharge(id){
@@ -1789,9 +1794,11 @@ function deleteCharge(id){
   if(idx>=0&&tresoMouvements[idx].type==='charge'){
     const mv=tresoMouvements[idx];
     if(confirm(`Supprimer "${mv.libelle}" (${mv.montant} MAD) ?`)){
+      const fid=mv._id;
       tresoMouvements.splice(idx,1);
       renderTresoSummary();renderTresoTable();
       showToast('✓ Charge supprimée','#1D9E75');
+      if(fid)(async()=>await fbDelete('tresorerie',fid))();
     }
   }
 }
@@ -2881,6 +2888,7 @@ function saveClient(){
   clReadOnly=true;
   fillClientForm(c);
   showToast(`✓ Client "${nom}" enregistré`,'#1D9E75');
+  (async()=>{ const fid=await fbSave('clients',c,c._id||null); if(fid&&!c._id)c._id=fid; })();
 }
 
 function openMaps(){
@@ -3550,6 +3558,24 @@ function submitRamassage(){
   closeRamModal();
   renderRamassage(ramassages);
 
+  // ── FIRESTORE : sauvegarder le ramassage ──
+  (async () => {
+    try {
+      const { initializeApp, getApps } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+      const { getFirestore, collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const db = getFirestore();
+      const docRef = await addDoc(collection(db, 'ramassages'), {
+        ...r,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      r._id = docRef.id; // garder l'ID Firestore
+      console.log('✅ Ramassage sauvegardé dans Firestore:', docRef.id);
+    } catch(e) {
+      console.warn('Firestore non disponible, sauvegarde locale seulement:', e.message);
+    }
+  })();
+
   // Flash confirmation
   const msg=document.createElement('div');
   msg.style.cssText='position:fixed;top:20px;right:20px;background:#1D9E75;color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.2);';
@@ -3567,6 +3593,54 @@ document.addEventListener('click',e=>{
 goPage('dashboard');
 
 
+
+
+
+// ══════════════════════════════════════════════════════════
+// FIREBASE HELPER — Source unique pour toutes les sauvegardes
+// ══════════════════════════════════════════════════════════
+let _fbDb = null;
+let _fbAddDoc = null;
+let _fbUpdateDoc = null;
+let _fbDeleteDoc = null;
+let _fbDoc = null;
+let _fbCollection = null;
+
+async function getDb() {
+  if (_fbDb) return _fbDb;
+  try {
+    const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const { addDoc, updateDoc, deleteDoc, doc, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    _fbDb = getFirestore();
+    _fbAddDoc = addDoc;
+    _fbUpdateDoc = updateDoc;
+    _fbDeleteDoc = deleteDoc;
+    _fbDoc = doc;
+    _fbCollection = collection;
+    return _fbDb;
+  } catch(e) { return null; }
+}
+
+async function fbSave(colName, data, id) {
+  const db = await getDb();
+  if (!db) return null;
+  try {
+    if (id) {
+      await _fbUpdateDoc(_fbDoc(db, colName, id), { ...data, updatedAt: new Date().toISOString() });
+      return id;
+    } else {
+      const ref = await _fbAddDoc(_fbCollection(db, colName), { ...data, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+      return ref.id;
+    }
+  } catch(e) { console.warn('fbSave error:', colName, e.message); return null; }
+}
+
+async function fbDelete(colName, id) {
+  const db = await getDb();
+  if (!db || !id) return;
+  try { await _fbDeleteDoc(_fbDoc(db, colName, id)); }
+  catch(e) { console.warn('fbDelete error:', colName, e.message); }
+}
 
 // ============================================================
 // FIREBASE — Connexion temps réel (s'ajoute aux données statiques)
