@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Allo Tapis — Import données Firebase</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:700px;margin:40px auto;padding:20px;background:#f5f6f8;}
+h1{color:#1a5fa8;margin-bottom:4px;}
+.sub{color:#8899aa;font-size:13px;margin-bottom:24px;}
+.card{background:white;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.08);}
+.card h2{font-size:14px;margin-bottom:12px;color:#1a2332;}
+.progress-row{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.progress-label{font-size:12px;width:160px;color:#5a6a7a;}
+.progress-bar{flex:1;height:8px;background:#f0f2f5;border-radius:4px;overflow:hidden;}
+.progress-fill{height:100%;background:#1a5fa8;border-radius:4px;transition:width .3s;width:0%;}
+.progress-count{font-size:11px;color:#8899aa;width:50px;text-align:right;}
+.btn{width:100%;padding:14px;background:#1D9E75;border:none;border-radius:10px;font-size:15px;font-weight:700;color:white;cursor:pointer;margin-top:8px;}
+.btn:disabled{background:#ccd3dc;cursor:not-allowed;}
+.btn.danger{background:#DC2626;}
+.log{background:#0f1923;border-radius:8px;padding:14px;font-family:monospace;font-size:11px;color:#2ECC9B;max-height:200px;overflow-y:auto;margin-top:12px;}
+.log .err{color:#EF4444;}
+.log .info{color:#3B9EE8;}
+.status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;}
+.sb-wait{background:#FEF3C7;color:#92400E;}
+.sb-ok{background:#D1FAE5;color:#065F46;}
+.sb-err{background:#FEE2E2;color:#991B1B;}
+</style>
+</head>
+<body>
+<h1>🔥 Allo Tapis — Import Firebase</h1>
+<p class="sub">Importe les données initiales dans Firestore. À exécuter une seule fois.</p>
+
+<div class="card">
+  <h2>📊 Collections à importer</h2>
+  <div id="progress-list"></div>
+</div>
+
+<div class="card">
+  <h2>🚀 Actions</h2>
+  <button class="btn" id="btn-import" onclick="startImport()">Importer toutes les données →</button>
+  <button class="btn danger" id="btn-reset" onclick="resetAll()" style="margin-top:8px;display:none;">⚠️ Réinitialiser (effacer tout)</button>
+  <div class="log" id="log">En attente...</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
+  authDomain: "allo-tapis.firebaseapp.com",
+  projectId: "allo-tapis",
+  storageBucket: "allo-tapis.firebasestorage.app",
+  messagingSenderId: "566002084826",
+  appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// ══ DONNÉES INITIALES ══
+const DATA = {
+  commandes: [
+    {num:'264504',client:'Ahmed bou9tib',livreur:'Ourouch Houssam',date:'15/04/2026',statut:'Brouillon',montant:0,remise:0,lignes:[]},
+    {num:'264503',client:'Laundry Service',livreur:'Koukouss Hafid',date:'15/04/2026',statut:'Brouillon',montant:0,remise:0,lignes:[]},
+    {num:'264495',client:'Pressing Roudaina',livreur:'Koukouss Hafid',date:'14/04/2026',statut:'En traitement',montant:227.60,remise:0,lignes:[]},
+    {num:'264491',client:'Rachida',livreur:'Ourouch Houssam',date:'13/04/2026',statut:'En traitement',montant:350.00,remise:0,lignes:[]},
+    {num:'264488',client:'Abdeljalil Salma',livreur:'Koukouss Hafid',date:'15/04/2026',statut:'En traitement',montant:294.00,remise:0,lignes:[]},
+    {num:'264487',client:'Hanane',livreur:'Radi Abdellah',date:'15/04/2026',statut:'Brouillon',montant:0,remise:0,lignes:[]},
+    {num:'264484',client:'Homat el warda',livreur:'Ourouch Houssam',date:'13/04/2026',statut:'En traitement',montant:680.00,remise:0,lignes:[]},
+    {num:'264483',client:'Touria',livreur:'Koukouss Hafid',date:'13/04/2026',statut:'En traitement',montant:220.00,remise:0,lignes:[]},
+    {num:'264475',client:'Greenzer',livreur:'Ourouch Houssam',date:'14/04/2026',statut:'Prêt à livrer',montant:481.80,remise:0,lignes:[]},
+    {num:'264474',client:'Laundry Service Mesnana',livreur:'Ourouch Houssam',date:'13/04/2026',statut:'Prêt à livrer',montant:91.20,remise:0,lignes:[]},
+    {num:'264466',client:'Rachida',livreur:'Koukouss Hafid',date:'13/04/2026',statut:'Prêt à livrer',montant:185.00,remise:0,lignes:[]},
+    {num:'264099',client:'Amrani Mustapha',livreur:'Ourouch Houssam',date:'23/02/2026',statut:'Prêt à livrer',montant:560.87,remise:0,lignes:[]},
+    {num:'264298',client:'zeyneb',livreur:'Ourouch Houssam',date:'30/03/2026',statut:'Prêt à livrer',montant:557.00,remise:0,lignes:[]},
+    {num:'264423',client:'Mohamed Yahya',livreur:'Ourouch Houssam',date:'08/04/2026',statut:'Prêt à livrer',montant:222.60,remise:0,lignes:[]},
+  ],
+  ramassages: [
+    {nom:'Khalidi Youssef',tel:'0661234567',adresse:'Boukhalef',creneau:'09:00',livreur:'Ourouch Houssam',statut:'En attente',urgent:false,date:'25/04/2026',maps:'',notes:''},
+    {nom:'Benali Fatima',tel:'0662345678',adresse:'Malabata',creneau:'10:30',livreur:'Ourouch Houssam',statut:'En attente',urgent:true,date:'25/04/2026',maps:'',notes:'Appeler avant'},
+    {nom:'Tazi Mohammed',tel:'0663456789',adresse:'Iberia',creneau:'11:00',livreur:'Radi Abdellah',statut:'En attente',urgent:false,date:'25/04/2026',maps:'',notes:''},
+    {nom:'Chaoui Khadija',tel:'0664567890',adresse:'Hay Hassani',creneau:'14:00',livreur:'Radi Abdellah',statut:'En attente',urgent:false,date:'25/04/2026',maps:'',notes:''},
+    {nom:'Alaoui Hassan',tel:'0665678901',adresse:'Branes',creneau:'15:30',livreur:'Koukouss Hafid',statut:'En attente',urgent:false,date:'25/04/2026',maps:'',notes:''},
+  ],
+  bons_livraison: [
+    {num:'264475',client:'Greenzer',livreur:'Ourouch Houssam',dateCollecte:'14/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,montant:481.80},
+    {num:'264474',client:'Laundry Service Mesnana',livreur:'Ourouch Houssam',dateCollecte:'13/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,montant:91.20},
+    {num:'264099',client:'Amrani Mustapha',livreur:'Ourouch Houssam',dateCollecte:'23/02/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,montant:560.87},
+    {num:'264298',client:'zeyneb',livreur:'Ourouch Houssam',dateCollecte:'30/03/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,montant:557.00},
+    {num:'264423',client:'Mohamed Yahya',livreur:'Ourouch Houssam',dateCollecte:'08/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,montant:222.60},
+    {num:'264466',client:'Rachida',livreur:'Koukouss Hafid',dateCollecte:'13/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,montant:185.00},
+  ],
+  lignes: [
+    {cmdNum:'264495',numArt:1,article:'Tapis synthétique',larg:2.95,long:3.50,surface:10.33,qte:1,qteTraitee:0,uom:'m²',obs:'beige marron',empl:'',etat:'En traitement',prixU:22,pu:0,totalHT:227.60},
+    {cmdNum:'264484',numArt:1,article:'Tapis synthétique',larg:2.50,long:4.55,surface:11.38,qte:1,qteTraitee:0,uom:'m²',obs:'doré',empl:'',etat:'En traitement',prixU:22,pu:0,totalHT:250.36},
+    {cmdNum:'264484',numArt:2,article:'Tapis shaggy',larg:1.65,long:3.15,surface:5.20,qte:1,qteTraitee:0,uom:'m²',obs:'marron',empl:'',etat:'En traitement',prixU:30,pu:0,totalHT:156.00},
+    {cmdNum:'264484',numArt:3,article:'Lhouf',larg:0,long:0,surface:0,qte:6,qteTraitee:0,uom:'Pièce',obs:'',empl:'',etat:'Brouillon',prixU:15,pu:0,totalHT:90.00},
+    {cmdNum:'264488',numArt:1,article:'Tapis synthétique',larg:1.40,long:2.00,surface:2.80,qte:1,qteTraitee:1,uom:'m²',obs:'bleu',empl:'A-04',etat:'Prêt à livrer',prixU:22,pu:0,totalHT:61.60},
+    {cmdNum:'264488',numArt:2,article:'Couverture',larg:0,long:0,surface:0,qte:5,qteTraitee:3,uom:'Pièce',obs:'',empl:'B-01',etat:'En traitement',prixU:20,pu:0,totalHT:100.00},
+    {cmdNum:'264488',numArt:3,article:'Couette',larg:0,long:0,surface:0,qte:1,qteTraitee:1,uom:'Pièce',obs:'',empl:'B-02',etat:'Prêt à livrer',prixU:35,pu:0,totalHT:35.00},
+  ],
+  clients: [
+    {nom:'Anassi Mohammed',tel:'0661234567',tel2:'',email:'',quartier:'Malabata',ville:'Tanger',type:'Particulier',maps:'',notes:''},
+    {nom:'Bennani Fatima',tel:'0662345678',tel2:'',email:'',quartier:'Marshan',ville:'Tanger',type:'Particulier',maps:'',notes:''},
+    {nom:'Chraibi Hassan',tel:'0663456789',tel2:'',email:'',quartier:'Centre-ville',ville:'Tanger',type:'Pressing',maps:'',notes:''},
+    {nom:'El Alami Youssef',tel:'0665678901',tel2:'',email:'elalami@pro.ma',quartier:'Val Fleuri',ville:'Tanger',type:'Professionnel',maps:'',notes:''},
+    {nom:'Greenzer',tel:'0667890123',tel2:'',email:'',quartier:'N/A',ville:'Tanger',type:'Professionnel',maps:'',notes:''},
+    {nom:'Pressing Roudaina',tel:'0664123456',tel2:'',email:'',quartier:'Dradeb',ville:'Tanger',type:'Pressing',maps:'',notes:''},
+    {nom:'Amrani Mustapha',tel:'0668901234',tel2:'',email:'',quartier:'Qasr Baladi',ville:'Tanger',type:'Particulier',maps:'',notes:''},
+    {nom:'Laundry Service Mesnana',tel:'0666789012',tel2:'',email:'',quartier:'Mesnana',ville:'Tanger',type:'Pressing',maps:'',notes:''},
+  ],
+  tresorerie: [
+    {date:'2026-04-14',type:'recette',categorie:'Commande payée',libelle:'Paiement commande Greenzer',ref:'264475',montant:481.80,saisi:'Système',mois:3},
+    {date:'2026-04-13',type:'recette',categorie:'Commande payée',libelle:'Paiement commande El Ahmar',ref:'264458',montant:257.60,saisi:'Système',mois:3},
+    {date:'2026-04-01',type:'charge',categorie:'Loyer',libelle:'Loyer atelier Avril 2026',ref:'Contrat bail',montant:3500.00,saisi:'Administrator',mois:3},
+    {date:'2026-04-05',type:'charge',categorie:'Salaires',libelle:'Salaires équipe Avril',ref:'Virement',montant:9000.00,saisi:'Administrator',mois:3},
+    {date:'2026-04-08',type:'charge',categorie:'Carburant',libelle:'Carburant Koukouss Hafid',ref:'Reçu #82',montant:480.00,saisi:'Administrator',mois:3},
+    {date:'2026-03-28',type:'recette',categorie:'Commande payée',libelle:'Paiement lot Mars S4',ref:'Multi',montant:8400.00,saisi:'Système',mois:2},
+    {date:'2026-03-01',type:'charge',categorie:'Loyer',libelle:'Loyer atelier Mars 2026',ref:'Contrat bail',montant:3500.00,saisi:'Administrator',mois:2},
+    {date:'2026-03-05',type:'charge',categorie:'Salaires',libelle:'Salaires équipe Mars',ref:'Virement',montant:18000.00,saisi:'Administrator',mois:2},
+  ],
+  fid_clients: [
+    {nom:'Idrissi Mohamed Amine',tel:'0661234567',pts:5820,ca:8420,cmds:24,depuis:'2020'},
+    {nom:'Mme Zerouali',tel:'0662345678',pts:5340,ca:6130,cmds:18,depuis:'2021'},
+    {nom:'Fellam Hassna',tel:'0663456789',pts:3680,ca:5480,cmds:15,depuis:'2020'},
+    {nom:'Iman Makroum',tel:'0664567890',pts:3120,ca:4210,cmds:12,depuis:'2021'},
+    {nom:'Jaafari Hanane',tel:'0665678901',pts:2840,ca:3890,cmds:11,depuis:'2022'},
+    {nom:'Bangoura Fatou',tel:'0666789012',pts:1480,ca:2940,cmds:9,depuis:'2022'},
+    {nom:'Greenzer',tel:'0667890123',pts:1320,ca:2640,cmds:8,depuis:'2023'},
+    {nom:'Amrani Mustapha',tel:'0668901234',pts:980,ca:1960,cmds:7,depuis:'2022'},
+  ],
+};
+
+const LABELS = {
+  commandes:'Commandes', ramassages:'Ramassages', bons_livraison:'Bons de livraison',
+  lignes:'Lignes de commande', clients:'Clients', tresorerie:'Trésorerie', fid_clients:'Fidélité'
+};
+
+// Render progress bars
+const pl = document.getElementById('progress-list');
+Object.keys(DATA).forEach(col => {
+  pl.innerHTML += `
+    <div class="progress-row">
+      <span class="progress-label">${LABELS[col]||col}</span>
+      <div class="progress-bar"><div class="progress-fill" id="pb-${col}"></div></div>
+      <span class="progress-count" id="pc-${col}">0/${DATA[col].length}</span>
+      <span class="status-badge sb-wait" id="ps-${col}">En attente</span>
+    </div>`;
+});
+
+function log(msg, type=''){
+  const el = document.getElementById('log');
+  const cls = type==='err'?'err':type==='info'?'info':'';
+  el.innerHTML += `<div class="${cls}">[${new Date().toLocaleTimeString()}] ${msg}</div>`;
+  el.scrollTop = el.scrollHeight;
+}
+
+window.startImport = async function(){
+  const btn = document.getElementById('btn-import');
+  btn.disabled = true;
+  btn.textContent = '⏳ Import en cours...';
+  log('Démarrage de l\'import...', 'info');
+
+  for(const [colName, docs] of Object.entries(DATA)){
+    const pbEl = document.getElementById('pb-'+colName);
+    const pcEl = document.getElementById('pc-'+colName);
+    const psEl = document.getElementById('ps-'+colName);
+    psEl.className = 'status-badge sb-wait';
+    psEl.textContent = 'Import...';
+    log(`📦 Import "${colName}" (${docs.length} documents)...`);
+
+    try {
+      let i = 0;
+      const batch = [];
+      for(const docData of docs){
+        batch.push(addDoc(collection(db, colName), {
+          ...docData,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }));
+        i++;
+        pbEl.style.width = Math.round(i/docs.length*100)+'%';
+        pcEl.textContent = `${i}/${docs.length}`;
+      }
+      await Promise.all(batch);
+      psEl.className = 'status-badge sb-ok';
+      psEl.textContent = '✓ OK';
+      log(`✅ "${colName}" importé (${docs.length} docs)`);
+    } catch(err){
+      psEl.className = 'status-badge sb-err';
+      psEl.textContent = '✗ Erreur';
+      log(`❌ Erreur "${colName}": ${err.message}`, 'err');
+    }
+  }
+
+  btn.textContent = '✅ Import terminé !';
+  btn.style.background = '#059669';
+  document.getElementById('btn-reset').style.display = 'block';
+  log('🎉 Import terminé ! Vous pouvez fermer cette page.', 'info');
+};
+
+window.resetAll = async function(){
+  if(!confirm('⚠️ Effacer TOUTES les données Firestore ? Cette action est irréversible.')) return;
+  log('🗑️ Suppression de toutes les données...', 'err');
+  for(const colName of Object.keys(DATA)){
+    const snap = await getDocs(collection(db, colName));
+    const batch = snap.docs.map(d => deleteDoc(doc(db, colName, d.id)));
+    await Promise.all(batch);
+    log(`🗑️ "${colName}" vidé (${snap.docs.length} docs supprimés)`);
+    document.getElementById('pb-'+colName).style.width = '0%';
+    document.getElementById('pc-'+colName).textContent = `0/${DATA[colName].length}`;
+    document.getElementById('ps-'+colName).className = 'status-badge sb-wait';
+    document.getElementById('ps-'+colName).textContent = 'Vide';
+  }
+  log('✅ Base de données réinitialisée', 'info');
+};
+
+log('Prêt à importer. Cliquez sur le bouton ci-dessus.', 'info');
+</script>
+</body>
+</html>

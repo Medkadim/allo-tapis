@@ -670,6 +670,10 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
       <div class="topnav-link">Configuration</div>
     </div>
     <div class="topnav-right">
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(255,255,255,.08);border-radius:20px;margin-right:8px;">
+        <div id="online-dot" style="width:7px;height:7px;border-radius:50%;background:#DC2626;transition:background .3s;"></div>
+        <span id="online-lbl" style="font-size:11px;color:rgba(255,255,255,.7);">Connexion...</span>
+      </div>
       <div class="topnav-user">
         <div class="user-avatar">A</div>
         Administrator ▾
@@ -2616,6 +2620,6 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
   </div>
 </div>
 
-<script src="allo_tapis_erp.js"></script>
+<script type="module" src="allo_tapis_erp_firebase.js"></script>
 </body>
 </html>

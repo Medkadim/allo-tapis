@@ -506,5 +506,47 @@ function showToast(msg){
   setTimeout(()=>t.classList.remove('show'), 2500);
 }
 </script>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
+  authDomain: "allo-tapis.firebaseapp.com",
+  projectId: "allo-tapis",
+  storageBucket: "allo-tapis.firebasestorage.app",
+  messagingSenderId: "566002084826",
+  appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
+};
+const fbApp = initializeApp(firebaseConfig);
+const db = getFirestore(fbApp);
+
+// Charger les lignes depuis Firestore (lecture seule)
+onSnapshot(collection(db,'lignes'), snap => {
+  const newArticles = snap.docs.map(d => ({...d.data(), id:ARTICLES.length}));
+  // Remplacer ARTICLES avec les données Firestore
+  ARTICLES.length = 0;
+  newArticles.forEach((a,i) => { a.id=i; ARTICLES.push(a); });
+  if(document.getElementById('art-list')?.style.display !== 'none') {
+    renderKPIs(); renderList();
+  }
+});
+
+// Charger les commandes depuis Firestore pour les métadonnées (urgence, type client)
+onSnapshot(collection(db,'commandes'), snap => {
+  snap.docs.forEach(d => {
+    const cmd = d.data();
+    if(cmd.num && !COMMANDES[cmd.num]){
+      COMMANDES[cmd.num] = {
+        client: cmd.client, typeClient: cmd.typeClient||'Particulier',
+        dateCollecte: cmd.date||'2026-01-01', urgent: cmd.urgent||false
+      };
+    }
+  });
+  if(document.getElementById('art-list')?.style.display !== 'none') renderList();
+});
+</script>
 </body>
 </html>
