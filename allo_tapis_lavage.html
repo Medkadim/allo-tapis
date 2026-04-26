@@ -548,5 +548,65 @@ onSnapshot(collection(db,'commandes'), snap => {
   if(document.getElementById('art-list')?.style.display !== 'none') renderList();
 });
 </script>
+
+<script>
+(async function() {
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, collection, onSnapshot }
+      = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
+      authDomain: "allo-tapis.firebaseapp.com",
+      projectId: "allo-tapis",
+      storageBucket: "allo-tapis.firebasestorage.app",
+      messagingSenderId: "566002084826",
+      appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getFirestore(fbApp);
+
+    // Charger les lignes (articles) en temps réel — lecture seule
+    onSnapshot(collection(db, 'lignes'), snap => {
+      if (snap.empty) return;
+      // Remplacer ARTICLES avec les données Firestore
+      const newArticles = snap.docs.map((d, i) => ({
+        ...d.data(), _id: d.id, id: i
+      }));
+      ARTICLES.length = 0;
+      newArticles.forEach(a => ARTICLES.push(a));
+      // Re-render si l'app est active
+      if (document.getElementById('art-list')?.style.display !== 'none') {
+        renderKPIs();
+        renderList();
+      }
+    }, err => console.warn('Lavage lignes offline:', err.message));
+
+    // Charger les commandes pour les métadonnées (urgent, type client)
+    onSnapshot(collection(db, 'commandes'), snap => {
+      if (snap.empty) return;
+      snap.docs.forEach(d => {
+        const cmd = d.data();
+        if (cmd.num) {
+          COMMANDES[cmd.num] = {
+            client: cmd.client || '—',
+            typeClient: cmd.typeClient || 'Particulier',
+            dateCollecte: cmd.date || new Date().toISOString().split('T')[0],
+            urgent: cmd.urgent || false
+          };
+        }
+      });
+      if (document.getElementById('art-list')?.style.display !== 'none') renderList();
+    }, err => console.warn('Lavage commandes offline:', err.message));
+
+    console.log('✅ Firebase Lavage connecté');
+  } catch(err) {
+    console.warn('Firebase Lavage non disponible:', err.message);
+  }
+})();
+</script>
+
 </body>
 </html>

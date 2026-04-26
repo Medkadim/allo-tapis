@@ -842,5 +842,86 @@ window.saveEmpl = async function(id){
   }
 };
 </script>
+
+<script>
+(async function() {
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, collection, onSnapshot, updateDoc, doc }
+      = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
+      authDomain: "allo-tapis.firebaseapp.com",
+      projectId: "allo-tapis",
+      storageBucket: "allo-tapis.firebasestorage.app",
+      messagingSenderId: "566002084826",
+      appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
+    };
+
+    const fbApp = initializeApp(firebaseConfig);
+    const db = getFirestore(fbApp);
+
+    // Charger les lignes en temps réel
+    onSnapshot(collection(db, 'lignes'), snap => {
+      if (snap.empty) return;
+      // Fusionner avec LIGNES local
+      snap.docs.forEach(d => {
+        const data = d.data();
+        const idx = LIGNES.findIndex(l =>
+          l.cmdNum === data.cmdNum && l.numArt === data.numArt
+        );
+        if (idx >= 0) {
+          LIGNES[idx] = { ...LIGNES[idx], ...data, _id: d.id };
+        } else {
+          LIGNES.push({ ...data, _id: d.id, id: LIGNES.length });
+        }
+      });
+      // Re-render si page active
+      const screen = document.getElementById('screen-search');
+      if (screen && screen.classList.contains('active')) renderResults();
+    }, err => console.warn('Lignes offline:', err.message));
+
+    // Override saveEmpl → écrire dans Firestore
+    const _origSaveEmpl = window.saveEmpl;
+    window.saveEmpl = async function(id) {
+      _origSaveEmpl(id); // logique locale d'abord
+      const l = LIGNES.find(x => x.id === id);
+      if (l && l._id) {
+        try {
+          await updateDoc(doc(db, 'lignes', l._id), {
+            empl: l.empl,
+            etat: l.etat,
+            qteTraitee: l.qteTraitee || 0,
+            syncedBy: currentUser,
+            updatedAt: new Date().toISOString()
+          });
+        } catch(e) { console.warn('Save empl Firebase error:', e); }
+      }
+    };
+
+    // Override changeQte → sync Firestore
+    const _origChangeQte = window.changeQte;
+    window.changeQte = async function(id, delta) {
+      _origChangeQte(id, delta);
+      const l = LIGNES.find(x => x.id === id);
+      if (l && l._id) {
+        try {
+          await updateDoc(doc(db, 'lignes', l._id), {
+            qteTraitee: l.qteTraitee || 0,
+            etat: l.etat,
+            updatedAt: new Date().toISOString()
+          });
+        } catch(e) { console.warn('QteTraitee sync error:', e); }
+      }
+    };
+
+    console.log('✅ Firebase Finition connecté');
+  } catch(err) {
+    console.warn('Firebase Finition non disponible:', err.message);
+  }
+})();
+</script>
+
 </body>
 </html>
