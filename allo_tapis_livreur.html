@@ -766,19 +766,58 @@ async function confirmerRecupere(i){
   }
   artNoteCount = 3;
 
-  // Marquer comme collecté
+  // Marquer comme collecté localement
   myRamassages[i].statut = 'collecte';
   myRamassages[i].articlesNotes = articlesNotes;
   document.getElementById('notes-popup')?.remove();
   renderTour();
-  showToast('✓ Récupération confirmée — '+articlesNotes.length+' article(s)', 'success');
 
-  // Firebase
-  if(r._id) await fsWrite('ramassages', r._id, {
-    statut: 'Collecté',
-    articlesNotes,
-    dateCollecte: new Date().toISOString().split('T')[0]
-  });
+  const today = new Date().toISOString().split('T')[0];
+  const nbArt = articlesNotes.length;
+  showToast('✓ Récupéré — '+nbArt+' article(s) — Commande en cours de création...', 'success');
+
+  // ─── Firebase : 2 actions simultanées ───
+  try {
+    // 1. Mettre à jour le ramassage → Collecté
+    if(r._id){
+      await fsWrite('ramassages', r._id, {
+        statut: 'Collecté',
+        notesLivreur: articlesNotes,
+        articlesNotes,
+        dateCollecte: today
+      });
+    }
+
+    // 2. Créer la commande Brouillon dans Firestore
+    // Générer un N° de commande (année + timestamp pour unicité)
+    const year = new Date().getFullYear().toString().slice(-2);
+    const cmdNum = year + String(Date.now()).slice(-4);
+
+    const newCmd = {
+      num: cmdNum,
+      client: r.client || r.nom || '—',
+      tel: r.tel || '',
+      adresse: r.adresse || r.quartier || '',
+      livreur: r.livreur || currentLivreur,
+      date: today,
+      statut: 'Brouillon',
+      remise: 0,
+      lignes: [],
+      montant: 0,
+      notesLivreur: articlesNotes,
+      sourceRamassage: r._id || null,
+      createdBy: 'App Livreur — ' + currentLivreur,
+    };
+
+    const cmdId = await fsAdd('commandes', newCmd);
+    if(cmdId){
+      showToast('✅ Commande '+cmdNum+' créée — visible dans l'ERP', 'success');
+      console.log('Commande créée:', cmdNum, cmdId);
+    }
+  } catch(e) {
+    console.warn('Erreur création commande:', e);
+    showToast('⚠️ Erreur synchronisation', 'info');
+  }
 }
 
 // Ancienne fonction marquerCollecte (garde pour compatibilité)

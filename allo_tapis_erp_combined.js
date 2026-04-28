@@ -270,6 +270,19 @@ function showCmdForm(i){
     cmdPhotos=c.photos?[...c.photos]:[];
     statutBarUpdate(c.statut);
     setCmdReadOnly(true);
+
+    // ── Afficher notes livreur si présentes ──
+    const notesSection = document.getElementById('cmd-notes-livreur-section');
+    const notesList    = document.getElementById('cmd-notes-livreur-list');
+    if(notesSection && notesList){
+      const notes = c.notesLivreur || [];
+      if(notes.length > 0){
+        notesSection.style.display = 'block';
+        notesList.innerHTML = notes.map(n=>`<li style="margin-bottom:4px;">${n}</li>`).join('');
+      } else {
+        notesSection.style.display = 'none';
+      }
+    }
   }
   renderLignesForm();
   renderPhotosForm();
@@ -3521,16 +3534,26 @@ function changeRamStatut(i, newStatut){
     const num=genCmdNum();
     const todayISO=new Date().toISOString().split('T')[0]; // format YYYY-MM-DD pour input[type=date]
     const todayFR=new Date().toLocaleDateString('fr-FR');
-    commandes.unshift({
+    const newCmd = {
       num,
       client:r.nom,
       tel:r.tel,
       adresse:r.adresse,
       livreur:r.livreur,
-      date:todayISO,        // date collecte = date du ramassage collecté
+      date:todayISO,
       statut:'Brouillon',
-      remise:0,lignes:[],photos:[],montant:0
-    });
+      remise:0,lignes:[],photos:[],montant:0,
+      notesLivreur: r.notesLivreur||r.articlesNotes||[],
+      sourceRamassage: r._id||r.id||null,
+    };
+    commandes.unshift(newCmd);
+    // Sauvegarder la commande dans Firestore
+    (async()=>{
+      const fid = await fbSave('commandes', newCmd, null);
+      if(fid) newCmd._id = fid;
+      // Mettre à jour le ramassage statut dans Firestore
+      if(r._id) await fsUpdate('ramassages', r._id, {statut:'Collecté'});
+    })();
     renderRamassage(ramassages);
     const msg=document.createElement('div');
     msg.style.cssText='position:fixed;top:20px;right:20px;background:#1D9E75;color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer;';
