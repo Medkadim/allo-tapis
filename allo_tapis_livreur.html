@@ -399,7 +399,7 @@ function doLogin(){
   const pinEl = document.getElementById('pin-input');
   const pin = pinEl ? pinEl.value.replace(/[^0-9]/g,'') : '';
   if(pin.length<4){
-    showToast('⚠️ Saisissez votre code PIN (4 chiffres)','info');
+    showToast('Saisissez votre code PIN 4 chiffres','info');
     pinEl?.focus();
     return;
   }
@@ -789,7 +789,7 @@ async function confirmerRecupere(i){
 
   const today = new Date().toISOString().split('T')[0];
   const nbArt = articlesNotes.length;
-  showToast('✓ Récupéré — '+nbArt+' article(s) — Commande en cours de création...', 'success');
+  showToast('Recupere - '+nbArt+' article(s) — Commande en cours de création...', 'success');
 
   // ─── Firebase : 2 actions simultanées ───
   try {
@@ -826,12 +826,12 @@ async function confirmerRecupere(i){
 
     const cmdId = await fsAdd('commandes', newCmd);
     if(cmdId){
-      showToast('✅ Commande '+cmdNum+' créée — visible dans l'ERP', 'success');
+      showToast('Commande '+cmdNum+' cree - visible dans ERP', 'success');
       console.log('Commande créée:', cmdNum, cmdId);
     }
   } catch(e) {
     console.warn('Erreur création commande:', e);
-    showToast('⚠️ Erreur synchronisation', 'info');
+    showToast('Erreur synchronisation', 'info');
   }
 }
 
