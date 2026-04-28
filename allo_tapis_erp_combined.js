@@ -2989,9 +2989,40 @@ function hideArtForm(){
   document.getElementById('art-form-view').style.display='none';
 }
 
+function saveArtForm(){
+  const a = articles[currentArtIdx] || {};
+  a.name = document.getElementById('af-nom').value.trim();
+  a.tp   = parseFloat(document.getElementById('af-tp').value) || 0;
+  a.tpr  = parseFloat(document.getElementById('af-tpr').value) || 0;
+  a.tpro = parseFloat(document.getElementById('af-tpro').value) || 0;
+  a.ta   = parseFloat(document.getElementById('af-ta').value) || 0;
+  a.uom  = currentUomVal || '';
+  a.actif = document.getElementById('af-actif').checked;
+  a.desc  = document.getElementById('af-desc').value;
+
+  if(!a.name){ showToast('⚠️ Saisissez le nom de l\'article','#e53e3e'); return; }
+
+  if(currentArtIdx === -1){
+    articles.unshift(a);
+    currentArtIdx = 0;
+  } else {
+    articles[currentArtIdx] = a;
+  }
+
+  hideArtForm();
+  setArtView(artViewMode);
+  showToast('✓ Article "'+a.name+'" enregistré','#1D9E75');
+
+  // Firebase
+  (async()=>{
+    const fid = await fbSave('articles', a, a._id||null);
+    if(fid && !a._id) a._id = fid;
+  })();
+}
+
 function enableArtEdit(){
   artReadOnly=false;
-  document.getElementById('art-form-actions').innerHTML=`<button class="btn-save" onclick="hideArtForm()">Enregistrer</button> <span style="color:#8899aa">ou</span> <button class="btn-cancel" onclick="showArtForm(${currentArtIdx})">Annuler</button>`;
+  document.getElementById('art-form-actions').innerHTML=`<button class="btn-save" onclick="saveArtForm()">Enregistrer</button> <span style="color:#8899aa">ou</span> <button class="btn-cancel" onclick="showArtForm(${currentArtIdx})">Annuler</button>`;
   document.getElementById('art-ro').classList.remove('show');
   setArtReadOnly(false);
 }
@@ -3099,7 +3130,7 @@ function showPersForm(i){
   document.getElementById('pers-form-view').style.display='block';
   if(i===-1){
     document.getElementById('pers-form-bc').textContent='Nouveau';
-    document.getElementById('pers-form-actions').innerHTML=`<button class="btn-save" onclick="hidePersForm()">Enregistrer</button> <span style="color:#8899aa">ou</span> <button class="btn-cancel" onclick="hidePersForm()">Annuler</button>`;
+    document.getElementById('pers-form-actions').innerHTML=`<button class="btn-save" onclick="savePersForme()">Enregistrer</button> <span style="color:#8899aa">ou</span> <button class="btn-cancel" onclick="hidePersForm()">Annuler</button>`;
     document.getElementById('pers-ro').classList.remove('show');
     fillPersForm({nom:'',fonction:'',telp:'',telper:'',cin:'',lieu:'',ville:'',active:true});
     setPersReadOnly(false);
@@ -3114,7 +3145,7 @@ function showPersForm(i){
 
 function hidePersForm(){document.getElementById('pers-list-view').style.display='';document.getElementById('pers-form-view').style.display='none';}
 function enablePersEdit(){
-  document.getElementById('pers-form-actions').innerHTML=`<button class="btn-save" onclick="hidePersForm()">Enregistrer</button> <span style="color:#8899aa">ou</span> <button class="btn-cancel" onclick="showPersForm(${currentPersIdx})">Annuler</button>`;
+  document.getElementById('pers-form-actions').innerHTML=`<button class="btn-save" onclick="savePersForme()">Enregistrer</button> <span style="color:#8899aa">ou</span> <button class="btn-cancel" onclick="showPersForm(${currentPersIdx})">Annuler</button>`;
   document.getElementById('pers-ro').classList.remove('show');
   setPersReadOnly(false);
 }
@@ -3133,6 +3164,60 @@ function setPersReadOnly(ro){
   document.getElementById('pf-fonction').disabled=ro;
   document.getElementById('pf-ville').disabled=ro;
   document.getElementById('pf-active').disabled=ro;
+}
+
+// Carte fonction → app
+const FONCTION_APP_MAP = {"Gérant": "ERP", "Administrateur": "ERP", "Assistante": "ERP", "Livreur": "App Livreur", "Chauffeur": "App Livreur", "Finition": "App Finition", "Chef Finition": "App Finition", "Lavage": "App Lavage", "Chef Lavage": "App Lavage", "Technicien": "Atelier", "Manutentionnaire": "Atelier"};
+const FONCTION_BADGE = {"ERP": "#DBEAFE;color:#1D4ED8", "App Livreur": "#D1FAE5;color:#065F46", "App Finition": "#EDE9FE;color:#5B21B6", "App Lavage": "#E0F2FE;color:#0369A1", "Atelier": "#FEF3C7;color:#92400E"};
+
+function onFonctionChange(val){
+  const badge = document.getElementById('pf-app-badge');
+  if(!badge) return;
+  const app = FONCTION_APP_MAP[val];
+  if(app && val){
+    const colors = FONCTION_BADGE[app] || '#f0f2f5;color:#5a6a7a';
+    const url = app==='ERP'?'(ERP Admin)':
+                app==='App Livreur'?'→ allotapis.netlify.app/allo_tapis_livreur.html':
+                app==='App Finition'?'→ allotapis.netlify.app/allo_tapis_finition.html':
+                app==='App Lavage'?'→ allotapis.netlify.app/allo_tapis_lavage.html':'';
+    badge.style.display='block';
+    badge.innerHTML=`<div style="background:${colors};padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;">
+      📱 ${app} ${url}
+    </div>`;
+  } else {
+    badge.style.display='none';
+  }
+}
+
+function savePersForme(){
+  const p = personnel[currentPersIdx] || {};
+  p.nom     = document.getElementById('pf-nom').value.trim();
+  p.fonction= document.getElementById('pf-fonction').value;
+  p.telp    = document.getElementById('pf-telp').value.trim();
+  p.cin     = document.getElementById('pf-cin').value.trim();
+  p.lieu    = document.getElementById('pf-lieu').value.trim();
+  p.telper  = document.getElementById('pf-telper').value.trim();
+  p.ville   = document.getElementById('pf-ville').value.trim();
+  p.active  = document.getElementById('pf-active').checked;
+  p.app     = FONCTION_APP_MAP[p.fonction] || '';
+
+  if(!p.nom){ showToast('⚠️ Saisissez le nom','#e53e3e'); return; }
+  if(!p.fonction){ showToast('⚠️ Choisissez une fonction','#e53e3e'); return; }
+
+  if(currentPersIdx === -1){ personnel.unshift(p); currentPersIdx=0; }
+  else { personnel[currentPersIdx] = p; }
+
+  persReadOnly = true;
+  fillPersForm(p);
+  setPersReadOnly(true);
+  document.getElementById('pers-form-actions').innerHTML=`
+    <button class="btn-modify" onclick="enablePersEdit()">Modifier</button>
+    <button class="btn-modify" onclick="showPersForm(-1)">Créer</button>`;
+  document.getElementById('pers-ro-banner').classList.add('show');
+  showToast('✓ '+p.nom+' enregistré — '+p.app,'#1D9E75');
+
+  // Firebase
+  (async()=>{ const fid=await fbSave('personnel',p,p._id||null); if(fid&&!p._id)p._id=fid; })();
 }
 
 // ===== DASHBOARD =====
@@ -3389,8 +3474,9 @@ function viewRamassage(i){
   let actions='';
   if(r.statut==='En attente'){
     actions=`
-      <div style="display:flex;gap:8px;margin-top:16px;">
-        <button onclick="changeRamStatut(${i},'Collecté')" style="flex:1;padding:9px;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">✓ Marquer Collecté</button>
+      <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;">
+        <button onclick="openEditRam(${i})" style="flex:1;padding:9px;background:#EFF6FF;color:#1a5fa8;border:1px solid #93C5FD;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">✏️ Modifier</button>
+        <button onclick="changeRamStatut(${i},'Collecté')" style="flex:1;padding:9px;background:#D1FAE5;color:#065F46;border:1px solid #6EE7B7;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">✓ Collecté</button>
         <button onclick="changeRamStatut(${i},'Annulé')" style="flex:1;padding:9px;background:#FEE2E2;color:#991B1B;border:1px solid #FCA5A5;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">✕ Annuler</button>
       </div>`;
   }
@@ -3477,6 +3563,96 @@ function openRamModal(){
 
 function closeRamModal(){document.getElementById('ram-modal').style.display='none';}
 function closeRamModalOutside(e){if(e.target===e.currentTarget)closeRamModal();}
+function openEditRam(i){
+  // Fermer le popup détail
+  const existing = document.getElementById('ram-detail-popup');
+  if(existing) existing.remove();
+
+  const r = ramassages[i];
+  const livreurs = ['Ourouch Houssam','Koukouss Hafid','Radi Abdellah','Oujane Nadir','Abdessamad Aboulfath','Taakouft Soufiane','Anass Mounaouar','Labiad Yassine'];
+
+  const popup = document.createElement('div');
+  popup.id = 'ram-edit-popup';
+  popup.style.cssText = 'position:fixed;inset:0;background:rgba(15,20,35,.5);display:flex;align-items:center;justify-content:center;z-index:400;';
+  popup.innerHTML = `
+    <div style="background:white;border-radius:14px;width:460px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.2);max-height:85vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+        <div style="font-size:15px;font-weight:700;color:#1a2332;">✏️ Modifier le ramassage</div>
+        <button onclick="document.getElementById('ram-edit-popup').remove()" style="border:none;background:#f0f2f5;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:15px;">✕</button>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Nom client *</div>
+          <input id="re-nom" value="${r.nom||''}" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;" placeholder="Nom du client"/>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Téléphone WhatsApp *</div>
+          <input id="re-tel" value="${r.tel||''}" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;" placeholder="06XXXXXXXX"/>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Adresse pick-up *</div>
+          <input id="re-adresse" value="${r.adresse||''}" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;" placeholder="Quartier, adresse"/>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Livreur assigné *</div>
+          <select id="re-livreur" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;">
+            ${livreurs.map(l=>`<option value="${l}" ${l===r.livreur?'selected':''}>${l}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Créneau horaire</div>
+            <input id="re-creneau" value="${r.creneau||''}" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;" placeholder="Ex: 10:00 - 12:00"/>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Date</div>
+            <input id="re-date" type="date" value="${r.dateISO||new Date().toISOString().split('T')[0]}" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;"/>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Notes</div>
+          <textarea id="re-notes" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;resize:none;height:60px;">${r.notes||''}</textarea>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 0;">
+          <input type="checkbox" id="re-urgent" ${r.urgent?'checked':''} style="width:16px;height:16px;cursor:pointer;accent-color:#DC2626;"/>
+          <label for="re-urgent" style="font-size:13px;font-weight:600;color:#DC2626;cursor:pointer;">🔴 Marquer comme URGENT</label>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:18px;justify-content:flex-end;">
+        <button onclick="document.getElementById('ram-edit-popup').remove()" style="padding:9px 18px;border:1px solid #dde3ec;border-radius:8px;background:white;font-size:13px;cursor:pointer;">Annuler</button>
+        <button onclick="saveEditRam(${i})" style="padding:9px 22px;background:#1D9E75;color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✓ Enregistrer</button>
+      </div>
+    </div>`;
+  popup.addEventListener('click', e => { if(e.target===popup) popup.remove(); });
+  document.body.appendChild(popup);
+}
+
+function saveEditRam(i){
+  const nom     = document.getElementById('re-nom').value.trim();
+  const tel     = document.getElementById('re-tel').value.trim();
+  const adresse = document.getElementById('re-adresse').value.trim();
+  const livreur = document.getElementById('re-livreur').value;
+  if(!nom || !tel || !adresse || !livreur){ showToast('⚠️ Remplissez tous les champs obligatoires','#e53e3e'); return; }
+
+  const r = ramassages[i];
+  r.nom     = nom;
+  r.tel     = tel;
+  r.adresse = adresse;
+  r.livreur = livreur;
+  r.creneau = document.getElementById('re-creneau').value;
+  r.dateISO = document.getElementById('re-date').value;
+  r.notes   = document.getElementById('re-notes').value;
+  r.urgent  = document.getElementById('re-urgent').checked;
+
+  document.getElementById('ram-edit-popup').remove();
+  renderRamassage(ramassages);
+  showToast('✓ Ramassage modifié','#1D9E75');
+
+  // Firebase
+  (async()=>{
+    if(r._id) await fbSave('ramassages', r, r._id);
+  })();
+}
 
 // AUTOCOMPLETE
 function acSearch(field){

@@ -1867,11 +1867,32 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
             <div>
               <div class="field-row"><span class="field-label">Nom et prénom</span><input class="field-input" id="pf-nom"/></div>
               <div class="field-row"><span class="field-label">Fonction</span>
-                <select class="field-select" id="pf-fonction">
-                  <option value="">—</option>
-                  <option>Gérant</option><option>Assistante</option><option>Chef d'atelier</option>
-                  <option>Technicien</option><option>Livreur</option>
+                <select class="field-select" id="pf-fonction" onchange="onFonctionChange(this.value)">
+                  <option value="">— Sélectionner —</option>
+                  <optgroup label="🖥️ ERP">
+                    <option value="Gérant">Gérant — Accès ERP complet</option>
+                    <option value="Administrateur">Administrateur — Accès ERP complet</option>
+                    <option value="Assistante">Assistante — Accès ERP complet</option>
+                  </optgroup>
+                  <optgroup label="🚚 App Livreur">
+                    <option value="Livreur">Livreur — App Livreur</option>
+                    <option value="Chauffeur">Chauffeur — App Livreur</option>
+                  </optgroup>
+                  <optgroup label="✂️ App Finition">
+                    <option value="Finition">Finition — App Finition</option>
+                    <option value="Chef Finition">Chef Finition — App Finition</option>
+                  </optgroup>
+                  <optgroup label="🫧 App Lavage">
+                    <option value="Lavage">Lavage — App Lavage</option>
+                    <option value="Chef Lavage">Chef Lavage — App Lavage</option>
+                  </optgroup>
+                  <optgroup label="⚙️ Atelier">
+                    <option value="Technicien">Technicien — Atelier</option>
+                    <option value="Manutentionnaire">Manutentionnaire — Atelier</option>
+                  </optgroup>
                 </select>
+                <!-- Badge app liée -->
+                <div id="pf-app-badge" style="display:none;margin-top:6px;"></div>
               </div>
               <div class="field-row"><span class="field-label">Tél. professionnel</span><input class="field-input" id="pf-telp"/></div>
             </div>
