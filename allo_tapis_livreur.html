@@ -821,7 +821,7 @@ async function confirmerRecupere(i){
       montant: 0,
       notesLivreur: articlesNotes,
       sourceRamassage: r._id || null,
-      createdBy: 'App Livreur — ' + currentLivreur,
+      createdBy: 'App Livreur - ' + currentLivreur,
     };
 
     const cmdId = await fsAdd('commandes', newCmd);

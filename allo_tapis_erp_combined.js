@@ -3879,10 +3879,41 @@ async function fbDelete(colName, id) {
     // Chaque listener met à jour les données locales ET re-render si nécessaire
 
     onSnapshot(collection(db, 'commandes'), snap => {
-      if (snap.empty) return; // Pas encore de données → garder les statiques
+      if (snap.empty) return;
+
+      // Détecter les nouvelles commandes créées par l'app livreur
+      const prevNums = new Set(commandes.map(c => c.num));
+
       commandes = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
       commandes.sort((a, b) => (b.num || '').localeCompare(a.num || ''));
       setOnline(true);
+
+      // Chercher les commandes nouvelles venant du livreur
+      const newFromLivreur = commandes.filter(c =>
+        !prevNums.has(c.num) &&
+        c.statut === 'Brouillon' &&
+        c.createdBy && c.createdBy.includes('App Livreur')
+      );
+
+      if (newFromLivreur.length > 0) {
+        const cmd = newFromLivreur[0];
+        // Afficher notification cliquable
+        const notif = document.createElement('div');
+        notif.style.cssText = 'position:fixed;top:20px;right:20px;background:#1D9E75;color:white;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);cursor:pointer;max-width:320px;';
+        notif.innerHTML = '🚚 Nouvelle commande <strong>' + cmd.num + '</strong> — ' + (cmd.client||'') + '<br><small style="opacity:.8">Créée par livreur · Cliquez pour ouvrir</small>';
+        notif.onclick = () => {
+          notif.remove();
+          goPage('commandes');
+          // Ouvrir directement la commande
+          setTimeout(() => {
+            const idx = commandes.findIndex(c => c.num === cmd.num);
+            if(idx >= 0) showCmdForm(idx);
+          }, 200);
+        };
+        document.body.appendChild(notif);
+        setTimeout(() => notif && notif.remove(), 8000);
+      }
+
       if (currentPage === 'commandes') renderCommandes(commandes);
       if (currentPage === 'dashboard') initDashboard();
     }, err => { console.warn('Commandes offline:', err.message); });
