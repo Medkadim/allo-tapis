@@ -181,7 +181,7 @@ body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:cent
     <div class="login-logo">🧺</div>
     <div class="login-brand">Allo Tapis</div>
     <div class="login-sub">App Livreur</div>
-    <div class="login-label">Sélectionnez votre nom</div>
+    <div class="login-label">Votre nom</div>
     <select class="login-select" id="login-livreur">
       <option value="">— Choisir le livreur —</option>
       <option value="Ourouch Houssam|DFSK">Ourouch Houssam</option>
@@ -193,9 +193,16 @@ body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:cent
       <option value="Anass Mounaouar|Ford Transit">Anass Mounaouar</option>
       <option value="Labiad Yassine|DFSK">Labiad Yassine</option>
     </select>
-    <div class="login-label" style="margin-top:4px;">Date de tournée</div>
-    <input type="date" class="login-select" id="login-date" style="color:rgba(255,255,255,.7);"/>
+    <div class="login-label" style="margin-top:4px;">Code PIN (4 chiffres)</div>
+    <div style="display:flex;gap:10px;width:100%;margin-bottom:24px;">
+      <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin1" oninput="pinNext(this,'pin2')" style="flex:1;padding:14px;background:#161D17;border:1px solid rgba(255,255,255,.15);border-radius:12px;font-family:'JetBrains Mono';font-size:24px;font-weight:700;color:#fff;text-align:center;"/>
+      <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin2" oninput="pinNext(this,'pin3')" onkeydown="pinPrev(event,this,'pin1')" style="flex:1;padding:14px;background:#161D17;border:1px solid rgba(255,255,255,.15);border-radius:12px;font-family:'JetBrains Mono';font-size:24px;font-weight:700;color:#fff;text-align:center;"/>
+      <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin3" oninput="pinNext(this,'pin4')" onkeydown="pinPrev(event,this,'pin2')" style="flex:1;padding:14px;background:#161D17;border:1px solid rgba(255,255,255,.15);border-radius:12px;font-family:'JetBrains Mono';font-size:24px;font-weight:700;color:#fff;text-align:center;"/>
+      <input type="password" inputmode="numeric" maxlength="1" class="pin-input" id="pin4" onkeydown="pinPrev(event,this,'pin3')" oninput="if(this.value)doLogin()" style="flex:1;padding:14px;background:#161D17;border:1px solid rgba(255,255,255,.15);border-radius:12px;font-family:'JetBrains Mono';font-size:24px;font-weight:700;color:#fff;text-align:center;"/>
+    </div>
+    <div id="login-error" style="display:none;color:#EF4444;font-size:12px;margin-bottom:12px;text-align:center;background:rgba(239,68,68,.1);padding:8px 12px;border-radius:8px;width:100%;">❌ Code PIN incorrect</div>
     <button class="btn-login" onclick="doLogin()">Commencer ma tournée →</button>
+    <div style="margin-top:16px;font-size:11px;color:rgba(255,255,255,.2);text-align:center;">Contactez l'administration si vous avez oublié votre PIN</div>
   </div>
 
   <!-- ======= NAV ======= -->
@@ -351,38 +358,36 @@ function updateTime(){
 }
 
 // ── LOGIN ──
-window.onload=()=>{
-  const today=new Date().toISOString().split('T')[0];
-  document.getElementById('login-date').value=today;
-  updateTime();
-  setInterval(updateTime,30000);
+// ── PINS LIVREURS (configurés par l'admin) ──
+const LIVREUR_PINS = {
+  'Ourouch Houssam':'1234','Koukouss Hafid':'2345','Radi Abdellah':'3456',
+  'Oujane Nadir':'4567','Abdessamad Aboulfath':'5678','Taakouft Soufiane':'6789',
+  'Anass Mounaouar':'7890','Labiad Yassine':'8901'
 };
+
+function pinNext(el,nextId){if(el.value.length===1){const n=document.getElementById(nextId);if(n)n.focus();}}
+function pinPrev(e,el,prevId){if(e.key==='Backspace'&&!el.value){const p=document.getElementById(prevId);if(p){p.focus();p.value='';} }}
+
+window.onload=()=>{ updateTime(); setInterval(updateTime,30000); };
 
 function doLogin(){
   const sel=document.getElementById('login-livreur').value;
-  const dateVal=document.getElementById('login-date').value;
   if(!sel){showToast('⚠️ Choisissez votre nom','info');return;}
-  if(!dateVal){showToast('⚠️ Choisissez une date','info');return;}
-
-  const parts=sel.split('|');
-  currentLivreur=parts[0];
-  currentVehicule=parts[1]||'';
-
-  // Formatter la date
-  const d=new Date(dateVal+'T12:00:00');
-  currentDate=d.toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
-
-  // Filtrer les données pour ce livreur
-  myLivraisons=ERP_LIVRAISONS.filter(l=>l.livreur===currentLivreur).map(l=>({...l}));
-  myRamassages=ERP_RAMASSAGES.filter(r=>r.livreur===currentLivreur).map(r=>({...r}));
-
-  // Si aucune livraison assignée, montrer toutes (mode démo)
-  if(myLivraisons.length===0) myLivraisons=ERP_LIVRAISONS.slice(0,5).map(l=>({...l}));
-  if(myRamassages.length===0) myRamassages=ERP_RAMASSAGES.slice(0,3).map(r=>({...r}));
-
+  const pin=(document.getElementById('pin1')?.value||'')+(document.getElementById('pin2')?.value||'')+(document.getElementById('pin3')?.value||'')+(document.getElementById('pin4')?.value||'');
+  if(pin.length<4){showToast('⚠️ Saisissez votre code PIN (4 chiffres)','info');return;}
+  const nom=sel.split('|')[0];
+  if(LIVREUR_PINS[nom]!==pin){
+    const errEl=document.getElementById('login-error');
+    if(errEl){errEl.style.display='block';setTimeout(()=>errEl.style.display='none',3000);}
+    ['pin1','pin2','pin3','pin4'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    document.getElementById('pin1')?.focus();
+    return;
+  }
+  currentLivreur=nom;
+  currentVehicule=sel.split('|')[1]||'';
+  currentDate=new Date().toLocaleDateString('fr-FR',{weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'});
   deposited=false;
-
-  // Setup UI
+  myRamassages=[];myLivraisons=[];
   document.getElementById('login-screen').style.display='none';
   document.getElementById('nav-tabs').style.display='flex';
   document.getElementById('tour-date-label').textContent=currentLivreur+' · '+currentDate;
@@ -390,14 +395,12 @@ function doLogin(){
   document.getElementById('dp-nom').textContent=currentLivreur;
   document.getElementById('dp-role').textContent='Livreur · '+currentVehicule;
   document.getElementById('dp-avatar').textContent=initials(currentLivreur);
-
-  // Afficher la tournée
   document.querySelectorAll('.screen').forEach(s=>s.style.display='none');
   const st=document.getElementById('screen-tournee');
-  st.classList.add('active');
-  st.style.display='flex';
+  st.classList.add('active');st.style.display='flex';
   renderTour();
   showToast('✓ Bienvenue '+currentLivreur.split(' ')[0]+' !','success');
+  startFirebaseListeners(currentLivreur);
 }
 
 // ── SCREENS ──
@@ -671,5 +674,55 @@ function showToast(msg,type='success'){
   t.textContent=msg;t.className=`toast-app ${type} show`;
   setTimeout(()=>t.classList.remove('show'),2800);
 }
+</script>
+
+<script>
+let fbUnsubRam=null,fbUnsubBL=null;
+async function startFirebaseListeners(livreurNom){
+  try{
+    const {initializeApp,getApps,getApp}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const {getFirestore,collection,onSnapshot,updateDoc,addDoc,doc,query,where}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const cfg={apiKey:"AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",authDomain:"allo-tapis.firebaseapp.com",projectId:"allo-tapis",storageBucket:"allo-tapis.firebasestorage.app",messagingSenderId:"566002084826",appId:"1:566002084826:web:463f92dd116be3ccdfeee3"};
+    const fbApp=getApps().length?getApp():initializeApp(cfg);
+    const db=getFirestore(fbApp);
+    window._db=db;window._fns={updateDoc,addDoc,doc,collection};
+    if(fbUnsubRam)fbUnsubRam();if(fbUnsubBL)fbUnsubBL();
+    fbUnsubRam=onSnapshot(
+      query(collection(db,'ramassages'),where('livreur','==',livreurNom),where('statut','==','En attente')),
+      snap=>{
+        myRamassages=snap.docs.map(d=>({_id:d.id,id:d.data().id||d.id,nom:d.data().nom||d.data().client||'—',tel:d.data().tel||'—',adresse:d.data().adresse||d.data().quartier||'—',rdv:d.data().creneau||'',creneau:d.data().creneau||'',livreur:d.data().livreur,urgent:d.data().urgent||false,statut:'attente',notes:d.data().notes||'',lat:d.data().lat||35.765,lng:d.data().lng||-5.795}));
+        renderTour();
+        const n=myRamassages.length;
+        document.title=n>0?`(${n}) Allo Tapis`:'Allo Tapis Livreur';
+        if(n>0)showToast(`📍 ${n} ramassage(s) en attente`,'info');
+      },err=>console.warn('RAM:',err.message)
+    );
+    fbUnsubBL=onSnapshot(
+      query(collection(db,'bons_livraison'),where('livreur','==',livreurNom),where('etat','==','Prêt à livrer')),
+      snap=>{
+        const fs=snap.docs.map(d=>({_id:d.id,num:d.data().num||d.id,client:d.data().client||'—',quartier:d.data().quartier||'—',montant:d.data().montant||0,articles:d.data().articles||(d.data().lignes?.length||0),collecte:d.data().dateCollecte||'—',dateCollecte:d.data().dateCollecte||'—',livreur:d.data().livreur,statut:'pret',lat:d.data().lat||35.760,lng:d.data().lng||-5.800}));
+        const acted=myLivraisons.filter(l=>l.statut!=='pret');
+        const actedNums=new Set(acted.map(l=>l.num));
+        myLivraisons=[...acted,...fs.filter(l=>!actedNums.has(l.num))];
+        renderTour();updateEncaisse();
+      },err=>console.warn('BL:',err.message)
+    );
+    console.log('Firebase Livreur OK:',livreurNom);
+  }catch(e){
+    console.warn('Firebase non dispo:',e.message);
+    myRamassages=ERP_RAMASSAGES.filter(r=>r.livreur===currentLivreur).map(r=>({...r}));
+    myLivraisons=ERP_LIVRAISONS.filter(l=>l.livreur===currentLivreur).map(l=>({...l}));
+    if(!myRamassages.length)myRamassages=ERP_RAMASSAGES.slice(0,3).map(r=>({...r}));
+    if(!myLivraisons.length)myLivraisons=ERP_LIVRAISONS.slice(0,5).map(l=>({...l}));
+    renderTour();
+  }
+}
+async function fsWrite(col,id,data){if(!window._db)return;try{await window._fns.updateDoc(window._fns.doc(window._db,col,id),{...data,updatedAt:new Date().toISOString()});}catch(e){console.warn(e);}}
+async function fsAdd(col,data){if(!window._db)return null;try{const r=await window._fns.addDoc(window._fns.collection(window._db,col),{...data,createdAt:new Date().toISOString()});return r.id;}catch(e){console.warn(e);return null;}}
+window.marquerCollecte=async function(i){const r=myRamassages[i];myRamassages[i].statut='collecte';renderTour();showToast('✓ Collecté','success');if(r._id)await fsWrite('ramassages',r._id,{statut:'Collecté'});};
+window.marquerLivre=async function(){const l=myLivraisons[selectedLivrIdx];if(!l)return;myLivraisons[selectedLivrIdx].statut='livre';closeModal();renderTour();showToast('✓ Livré','success');if(l._id)await fsWrite('bons_livraison',l._id,{etat:'Livré',dateLivraison:new Date().toISOString().split('T')[0]});};
+window.marquerPayeModal=async function(){const l=myLivraisons[selectedLivrIdx];if(!l)return;myLivraisons[selectedLivrIdx].statut='paye';closeModal();renderTour();showToast('💰 Payé','amber');if(l._id){await fsWrite('bons_livraison',l._id,{etat:'Livré & Payé',datePaiement:new Date().toISOString().split('T')[0]});await fsAdd('tresorerie',{date:new Date().toISOString().split('T')[0],type:'recette',categorie:'Commande payée',libelle:`Paiement BL ${l.num} — ${currentLivreur}`,ref:l.num,montant:l.montant||0,saisi:'App Livreur',mois:new Date().getMonth()});}};
+window.marquerPaye=async function(i){const l=myLivraisons[i];myLivraisons[i].statut='paye';renderTour();showToast('💰 Encaissé','amber');if(l._id){await fsWrite('bons_livraison',l._id,{etat:'Livré & Payé',datePaiement:new Date().toISOString().split('T')[0]});await fsAdd('tresorerie',{date:new Date().toISOString().split('T')[0],type:'recette',categorie:'Commande payée',libelle:`Paiement BL ${l.num} — ${currentLivreur}`,ref:l.num,montant:l.montant||0,saisi:'App Livreur',mois:new Date().getMonth()});}};
+window.deposerTreso=async function(){const p=myLivraisons.filter(l=>l.statut==='paye');const t=p.reduce((s,l)=>s+l.montant,0);if(!p.length)return;await fsAdd('tresorerie',{date:new Date().toISOString().split('T')[0],type:'recette',categorie:'Dépôt livreur',libelle:`Dépôt ${currentLivreur} — ${p.length} cmd`,ref:'Espèces',montant:t,saisi:currentLivreur,mois:new Date().getMonth()});deposited=true;renderDepot();showToast(`✅ ${t.toFixed(2)} MAD déposé`,'success');};
 </script>
 </html>
