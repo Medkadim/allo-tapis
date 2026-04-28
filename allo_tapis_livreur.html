@@ -75,6 +75,20 @@ body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:cent
 .btn-maps{background:rgba(59,158,232,.1);border-color:rgba(59,158,232,.2);color:#3B9EE8;}
 .btn-collect{background:rgba(232,168,56,.1);border-color:rgba(232,168,56,.2);color:#E8A838;}
 .btn-collect-done{background:rgba(46,204,155,.1);border-color:rgba(46,204,155,.2);color:#2ECC9B;}
+.btn-recupere{background:rgba(232,168,56,.12);border-color:rgba(232,168,56,.25);color:#E8A838;}
+.btn-whatsapp{background:rgba(37,211,102,.12);border-color:rgba(37,211,102,.25);color:#25D366;}
+.btn-nav{background:rgba(59,130,246,.12);border-color:rgba(59,130,246,.25);color:#60A5FA;}
+.notes-popup{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(4px);z-index:250;display:flex;align-items:flex-end;}
+.notes-sheet{background:#161D17;border-radius:24px 24px 0 0;padding:20px 18px 36px;width:100%;}
+.notes-handle{width:36px;height:4px;background:rgba(255,255,255,.12);border-radius:2px;margin:0 auto 16px;}
+.notes-title{font-size:16px;font-weight:800;color:#fff;margin-bottom:4px;}
+.notes-sub{font-size:11px;color:rgba(255,255,255,.3);font-family:"JetBrains Mono";margin-bottom:16px;}
+.art-note-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.art-note-num{font-family:"JetBrains Mono";font-size:11px;color:#E8A838;width:20px;flex-shrink:0;}
+.art-note-input{flex:1;background:#0E1212;border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:7px 10px;font-family:"Syne";font-size:12px;color:#fff;outline:none;}
+.art-note-input::placeholder{color:rgba(255,255,255,.2);}
+.art-note-input:focus{border-color:#E8A838;}
+.btn-confirm-recupere{width:100%;padding:14px;background:#E8A838;border:none;border-radius:14px;font-family:"Syne";font-size:14px;font-weight:800;color:#0E1212;cursor:pointer;margin-top:16px;}
 
 /* LIVRAISON CARD */
 .livr-card{background:#161D17;border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:14px;margin-bottom:8px;position:relative;overflow:hidden;transition:border-color .2s;}
@@ -451,13 +465,15 @@ function renderTour(){
             <div class="rc-time">⏰ ${r.rdv}</div>
           </div>
           <div class="rc-addr">📍 ${r.quartier}</div>
-          <div class="rc-footer" style="display:flex;align-items:center;gap:6px;">
-            <span style="font-size:11px;color:rgba(255,255,255,.3);flex:1;">🧺 ${r.articles} article${r.articles>1?'s':''} · 📞 ${r.tel}</span>
-            <button class="btn-sm btn-maps" onclick="openClientMaps(${r.lat},${r.lng},'${r.quartier}')">🗺</button>
-            ${done
-              ?'<span class="btn-sm btn-collect-done">✓ Collecté</span>'
-              :`<button class="btn-sm btn-collect" onclick="marquerCollecte(${i})">✓ Collecté</button>`
-            }
+          <div style="font-size:11px;color:rgba(255,255,255,.25);margin-bottom:8px;">🧺 ${r.articles||'?'} article(s) · ${r.urgent?'<span style="color:#EF4444;font-weight:700;">🔴 URGENT</span>':''}</div>
+          <div class="rc-footer" style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;">
+            ${done ? `
+              <span style="flex:1;font-size:11px;color:rgba(46,204,155,.7);font-weight:600;">✓ Récupéré</span>
+            ` : `
+              <button class="btn-sm" onclick="openNavigation(${r.lat},${r.lng},'${r.adresse||r.quartier}')" style="background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3);color:#60A5FA;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg> Naviguer</button>
+              <button class="btn-sm" onclick="ouvrirWhatsApp('${r.tel}','${r.client}')" style="background:rgba(37,211,102,.15);border-color:rgba(37,211,102,.3);color:#25D366;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.096.54 4.064 1.486 5.772L0 24l6.395-1.671A11.955 11.955 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.882a9.875 9.875 0 01-5.032-1.373l-.36-.215-3.797.993 1.013-3.695-.235-.38A9.84 9.84 0 012.118 12C2.118 6.54 6.54 2.118 12 2.118S21.882 6.54 21.882 12 17.46 21.882 12 21.882z"/></svg> WhatsApp</button>
+              <button class="btn-sm" onclick="marquerRecupere(${i})" style="background:rgba(232,168,56,.15);border-color:rgba(232,168,56,.3);color:#E8A838;display:flex;align-items:center;gap:4px;"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Récupéré</button>
+            `}
           </div>
         </div>`;
       }).join('');
@@ -668,6 +684,108 @@ function openGoogleMaps(){
   showToast('🗺 Navigation démarrée ('+pts.length+' arrêts)','success');
 }
 
+// ── NAVIGATION ──
+function openNavigation(lat, lng, adresse){
+  const url = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
+  window.open(url, '_blank');
+  showToast('🗺 Navigation vers '+adresse, 'info');
+}
+
+// ── WHATSAPP ──
+function ouvrirWhatsApp(tel, client){
+  if(!tel || tel==='—'){showToast('⚠️ Pas de téléphone disponible','info');return;}
+  // Nettoyer le numéro et ajouter indicatif Maroc si nécessaire
+  let num = tel.replace(/\s/g,'').replace(/^0/,'212');
+  const msg = encodeURIComponent(`Bonjour ${client}, votre ramassage Allo Tapis est en route 🚗`);
+  window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+}
+
+// ── MARQUER RÉCUPÉRÉ (avec popup notes articles) ──
+function marquerRecupere(i){
+  const r = myRamassages[i];
+  // Ouvrir popup pour noter les articles récupérés
+  const existing = document.getElementById('notes-popup');
+  if(existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'notes-popup';
+  popup.className = 'notes-popup';
+  popup.innerHTML = `
+    <div class="notes-sheet" onclick="event.stopPropagation()">
+      <div class="notes-handle"></div>
+      <div class="notes-title">📦 Articles récupérés</div>
+      <div class="notes-sub">${r.client} · ${r.adresse}</div>
+      <div id="art-notes-list">
+        <div class="art-note-row">
+          <span class="art-note-num">1</span>
+          <input class="art-note-input" placeholder="Ex: Tapis synthétique 2×3m beige" id="note-art-1"/>
+        </div>
+        <div class="art-note-row">
+          <span class="art-note-num">2</span>
+          <input class="art-note-input" placeholder="Ex: Couette blanche" id="note-art-2"/>
+        </div>
+        <div class="art-note-row">
+          <span class="art-note-num">3</span>
+          <input class="art-note-input" placeholder="Article supplémentaire..." id="note-art-3"/>
+        </div>
+      </div>
+      <button onclick="addArtNoteRow()" style="width:100%;margin-top:8px;padding:8px;background:rgba(255,255,255,.05);border:1px dashed rgba(255,255,255,.15);border-radius:10px;color:rgba(255,255,255,.4);font-family:'Syne';font-size:12px;cursor:pointer;">+ Ajouter un article</button>
+      <button class="btn-confirm-recupere" onclick="confirmerRecupere(${i})">
+        ✓ Confirmer la récupération
+      </button>
+      <button onclick="document.getElementById('notes-popup').remove()" style="width:100%;margin-top:8px;padding:10px;background:none;border:none;color:rgba(255,255,255,.3);font-family:'Syne';font-size:13px;cursor:pointer;">Annuler</button>
+    </div>`;
+  popup.addEventListener('click', e => { if(e.target===popup) popup.remove(); });
+  document.body.appendChild(popup);
+  setTimeout(()=>{ document.getElementById('note-art-1')?.focus(); }, 100);
+}
+
+let artNoteCount = 3;
+function addArtNoteRow(){
+  artNoteCount++;
+  const list = document.getElementById('art-notes-list');
+  if(!list) return;
+  const row = document.createElement('div');
+  row.className = 'art-note-row';
+  row.innerHTML = `
+    <span class="art-note-num">${artNoteCount}</span>
+    <input class="art-note-input" placeholder="Article..." id="note-art-${artNoteCount}"/>`;
+  list.appendChild(row);
+  document.getElementById('note-art-'+artNoteCount)?.focus();
+}
+
+async function confirmerRecupere(i){
+  const r = myRamassages[i];
+  // Collecter les notes d'articles
+  const articlesNotes = [];
+  let k = 1;
+  while(document.getElementById('note-art-'+k)){
+    const val = document.getElementById('note-art-'+k).value.trim();
+    if(val) articlesNotes.push(val);
+    k++;
+  }
+  artNoteCount = 3;
+
+  // Marquer comme collecté
+  myRamassages[i].statut = 'collecte';
+  myRamassages[i].articlesNotes = articlesNotes;
+  document.getElementById('notes-popup')?.remove();
+  renderTour();
+  showToast('✓ Récupération confirmée — '+articlesNotes.length+' article(s)', 'success');
+
+  // Firebase
+  if(r._id) await fsWrite('ramassages', r._id, {
+    statut: 'Collecté',
+    articlesNotes,
+    dateCollecte: new Date().toISOString().split('T')[0]
+  });
+}
+
+// Ancienne fonction marquerCollecte (garde pour compatibilité)
+window.marquerCollecte = async function(i){
+  marquerRecupere(i);
+};
+
 // ── TOAST ──
 function showToast(msg,type='success'){
   const t=document.getElementById('toast');
@@ -690,12 +808,34 @@ async function startFirebaseListeners(livreurNom){
     fbUnsubRam=onSnapshot(
       query(collection(db,'ramassages'),where('livreur','==',livreurNom),where('statut','==','En attente')),
       snap=>{
-        myRamassages=snap.docs.map(d=>({_id:d.id,id:d.data().id||d.id,nom:d.data().nom||d.data().client||'—',tel:d.data().tel||'—',adresse:d.data().adresse||d.data().quartier||'—',rdv:d.data().creneau||'',creneau:d.data().creneau||'',livreur:d.data().livreur,urgent:d.data().urgent||false,statut:'attente',notes:d.data().notes||'',lat:d.data().lat||35.765,lng:d.data().lng||-5.795}));
+        myRamassages=snap.docs.map(d=>{
+          const data=d.data();
+          const idStr=String(data.id||d.id).padStart(3,'0');
+          return {
+            _id:d.id, id:data.id||d.id,
+            client:  data.nom||data.client||'Client',
+            nom:     data.nom||data.client||'Client',
+            num:     data.num||('RAM-'+idStr),
+            quartier:data.adresse||data.quartier||'Adresse',
+            adresse: data.adresse||data.quartier||'Adresse',
+            rdv:     data.creneau||data.rdv||'—',
+            creneau: data.creneau||data.rdv||'',
+            tel:     data.tel||'—',
+            articles:data.articles||'—',
+            urgent:  data.urgent||false,
+            statut:  'attente',
+            notes:   data.notes||'',
+            livreur: data.livreur,
+            lat:     data.lat||35.765+(Math.random()-.5)*.015,
+            lng:     data.lng||-5.795+(Math.random()-.5)*.015,
+          };
+        });
         renderTour();
         const n=myRamassages.length;
         document.title=n>0?`(${n}) Allo Tapis`:'Allo Tapis Livreur';
         if(n>0)showToast(`📍 ${n} ramassage(s) en attente`,'info');
-      },err=>console.warn('RAM:',err.message)
+      },
+      err=>console.warn('RAM:',err.message)
     );
     fbUnsubBL=onSnapshot(
       query(collection(db,'bons_livraison'),where('livreur','==',livreurNom),where('etat','==','Prêt à livrer')),
