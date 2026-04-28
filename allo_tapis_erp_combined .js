@@ -3802,14 +3802,20 @@ let _fbDoc = null;
 let _fbCollection = null;
 
 async function getDb() {
-  // _fbDb est assigné par initFirebase() au démarrage
-  // Si pas encore dispo, attendre jusqu'à 3s
+  // 1. Déjà initialisé par initFirebase
   if (_fbDb) return _fbDb;
-  for(let i=0; i<30; i++){
+  // 2. Essayer window._firestore (SDK compat)
+  if (window._firestore) {
+    _fbDb = window._firestore;
+    return _fbDb;
+  }
+  // 3. Attendre max 5s
+  for(let i=0; i<50; i++){
     await new Promise(r=>setTimeout(r,100));
     if(_fbDb) return _fbDb;
+    if(window._firestore){ _fbDb=window._firestore; return _fbDb; }
   }
-  console.warn('Firebase non disponible après 3s');
+  console.warn('Firebase non disponible');
   return null;
 }
 
@@ -3841,31 +3847,33 @@ async function fbDelete(colName, id) {
 // ============================================================
 (async function initFirebase() {
   try {
-    // Import dynamique Firebase (ne bloque pas le rendu)
-    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-    const { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc, query, where, serverTimestamp }
-      = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    // Utiliser Firebase SDK compat (chargé via <script> dans le HTML)
+    // Pas d'import dynamique → compatible Cloudflare Pages
+    const db = window._firestore;
+    if(!db) throw new Error("Firebase Firestore non initialisé");
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
-      authDomain: "allo-tapis.firebaseapp.com",
-      projectId: "allo-tapis",
-      storageBucket: "allo-tapis.firebasestorage.app",
-      messagingSenderId: "566002084826",
-      appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
+    // Adaptateurs pour compatibilité avec le code existant
+    _fbDb = db;
+    _fbAddDoc     = (col, data) => col.add(data);
+    _fbUpdateDoc  = (ref, data) => ref.update(data);
+    _fbDeleteDoc  = (ref)       => ref.delete();
+    _fbDoc        = (db, col, id) => db.collection(col).doc(id);
+    _fbCollection = (db, col)     => db.collection(col);
+
+    // Helpers pour onSnapshot compatible compat SDK
+    const collection = (col) => db.collection(col);
+    const doc        = (col, id) => db.collection(col).doc(id);
+    const addDoc     = (col, data) => col.add(data);
+    const updateDoc  = (ref, data) => ref.update(data);
+    const deleteDoc  = (ref) => ref.delete();
+    const onSnapshot = (ref, cb, errCb) => ref.onSnapshot(cb, errCb);
+    const query = (col, ...constraints) => {
+      let q = col;
+      for(const c of constraints){ q = c(q); }
+      return q;
     };
-
-    const fbApp = initializeApp(firebaseConfig);
-    const db = getFirestore(fbApp);
-
-    // ── PARTAGER db et les fonctions avec fbSave/fsUpdate ──
-    // Sans ça, fbSave() ne peut pas écrire dans Firestore
-    _fbDb         = db;
-    _fbAddDoc     = addDoc;
-    _fbUpdateDoc  = updateDoc;
-    _fbDeleteDoc  = deleteDoc;
-    _fbDoc        = doc;
-    _fbCollection = collection;
+    const where = (field, op, val) => (q) => q.where(field, op, val);
+    const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
 
     // Indicateur connexion OK
     function setOnline(ok) {
