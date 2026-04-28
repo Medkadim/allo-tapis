@@ -210,7 +210,9 @@ body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:cent
     <div class="login-label" style="margin-top:4px;">Code PIN (4 chiffres)</div>
     <input type="password" inputmode="numeric" maxlength="4" id="pin-input"
       placeholder="••••"
-      oninput="if(this.value.length===4)doLogin()"
+      oninput="onPinInput(this)"
+      onkeydown="if(event.key==='Enter')doLogin()"
+      autocomplete="off"
       style="width:100%;padding:16px;background:#161D17;border:1.5px solid rgba(255,255,255,.15);border-radius:14px;font-family:'JetBrains Mono';font-size:32px;font-weight:700;color:#E8A838;text-align:center;letter-spacing:12px;outline:none;margin-bottom:16px;"
       onfocus="this.style.borderColor='#E8A838'"
       onblur="this.style.borderColor='rgba(255,255,255,.15)'"/>
@@ -379,7 +381,15 @@ const LIVREUR_PINS = {
   'Anass Mounaouar':'7890','Labiad Yassine':'8901'
 };
 
-// PIN: input unique — pinNext/pinPrev non nécessaires
+// PIN: input unique avec délai pour laisser le navigateur enregistrer la valeur
+function onPinInput(el){
+  // Nettoyer : garder seulement les chiffres
+  el.value = el.value.replace(/[^0-9]/g,'');
+  // Attendre que la valeur soit complète avant de tenter la connexion
+  if(el.value.length === 4){
+    setTimeout(()=>doLogin(), 50);
+  }
+}
 
 window.onload=()=>{ updateTime(); setInterval(updateTime,30000); };
 
@@ -387,10 +397,16 @@ function doLogin(){
   const sel=document.getElementById('login-livreur').value;
   if(!sel){showToast('⚠️ Choisissez votre nom','info');return;}
   const pinEl = document.getElementById('pin-input');
-  const pin = pinEl ? pinEl.value.trim() : '';
-  if(pin.length<4){showToast('⚠️ Saisissez votre code PIN (4 chiffres)','info');pinEl?.focus();return;}
-  const nom=sel.split('|')[0];
-  if(LIVREUR_PINS[nom]!==pin){
+  const pin = pinEl ? pinEl.value.replace(/[^0-9]/g,'') : '';
+  if(pin.length<4){
+    showToast('⚠️ Saisissez votre code PIN (4 chiffres)','info');
+    pinEl?.focus();
+    return;
+  }
+  const nom = sel.split('|')[0];
+  const expectedPin = LIVREUR_PINS[nom];
+  console.log('Login:', nom, '| PIN saisi:', pin, '| PIN attendu:', expectedPin);
+  if(!expectedPin || expectedPin !== pin){
     const errEl=document.getElementById('login-error');
     if(errEl){errEl.style.display='block';setTimeout(()=>errEl.style.display='none',3000);}
     if(pinEl){pinEl.value='';pinEl.focus();}
