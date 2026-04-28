@@ -3760,18 +3760,12 @@ function submitRamassage(){
   // ── FIRESTORE : sauvegarder le ramassage ──
   (async () => {
     try {
-      const { initializeApp, getApps, getApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-      const { getFirestore, collection, addDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const firebaseConfig={apiKey:"AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",authDomain:"allo-tapis.firebaseapp.com",projectId:"allo-tapis",storageBucket:"allo-tapis.firebasestorage.app",messagingSenderId:"566002084826",appId:"1:566002084826:web:463f92dd116be3ccdfeee3"};
-      const fbApp2=getApps().length?getApp():initializeApp(firebaseConfig);
-      const db = getFirestore(fbApp2);
-      const docRef = await addDoc(collection(db, 'ramassages'), {
-        ...r,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
-      r._id = docRef.id; // garder l'ID Firestore
-      console.log('✅ Ramassage sauvegardé dans Firestore:', docRef.id);
+      // Utiliser fbSave qui partage la même instance Firebase
+      const fid = await fbSave('ramassages', r, null);
+      if(fid){
+        r._id = fid;
+        console.log('Ramassage sauvegarde Firestore:', fid);
+      }
     } catch(e) {
       console.warn('Firestore non disponible, sauvegarde locale seulement:', e.message);
     }
@@ -3808,18 +3802,15 @@ let _fbDoc = null;
 let _fbCollection = null;
 
 async function getDb() {
+  // _fbDb est assigné par initFirebase() au démarrage
+  // Si pas encore dispo, attendre jusqu'à 3s
   if (_fbDb) return _fbDb;
-  try {
-    const { getFirestore } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    const { addDoc, updateDoc, deleteDoc, doc, collection } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-    _fbDb = getFirestore();
-    _fbAddDoc = addDoc;
-    _fbUpdateDoc = updateDoc;
-    _fbDeleteDoc = deleteDoc;
-    _fbDoc = doc;
-    _fbCollection = collection;
-    return _fbDb;
-  } catch(e) { return null; }
+  for(let i=0; i<30; i++){
+    await new Promise(r=>setTimeout(r,100));
+    if(_fbDb) return _fbDb;
+  }
+  console.warn('Firebase non disponible après 3s');
+  return null;
 }
 
 async function fbSave(colName, data, id) {
@@ -3866,6 +3857,15 @@ async function fbDelete(colName, id) {
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
+
+    // ── PARTAGER db et les fonctions avec fbSave/fsUpdate ──
+    // Sans ça, fbSave() ne peut pas écrire dans Firestore
+    _fbDb         = db;
+    _fbAddDoc     = addDoc;
+    _fbUpdateDoc  = updateDoc;
+    _fbDeleteDoc  = deleteDoc;
+    _fbDoc        = doc;
+    _fbCollection = collection;
 
     // Indicateur connexion OK
     function setOnline(ok) {
