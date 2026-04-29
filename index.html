@@ -598,6 +598,10 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
 .btn-ram-submit{flex:1;padding:10px 20px;background:linear-gradient(135deg,#1D9E75,#16b88a);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:white;box-shadow:0 3px 10px rgba(22,183,138,.3);}
 .btn-ram-submit:hover{background:linear-gradient(135deg,#178a64,#13a07a);}
 </style>
+  <!-- Firebase SDK via CDN fiable -->
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-app-compat.js"></script>
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase initialisé par waitForFirebase() -->
 </head>
 <body>
 <div class="layout">
@@ -2665,24 +2669,7 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
   </div>
 </div>
 
-<!-- Firebase SDK (chargé en premier, globalement disponible) -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script>
-// Initialiser Firebase immédiatement (version compat = pas d'import dynamique)
-const firebaseConfig = {
-  apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
-  authDomain: "allo-tapis.firebaseapp.com",
-  projectId: "allo-tapis",
-  storageBucket: "allo-tapis.firebasestorage.app",
-  messagingSenderId: "566002084826",
-  appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
-};
-firebase.initializeApp(firebaseConfig);
-const _firestore = firebase.firestore();
-window._firestore = _firestore;
-console.log("Firebase initialisé OK");
-</script>
+<!-- Firebase chargé dans <head> -->
 <script>
 
 // ===== DATA =====
@@ -3297,6 +3284,10 @@ function imprimerBC(){
     @page{size:A5 landscape;margin:10mm;}
   }
 </style>
+  <!-- Firebase SDK via CDN fiable -->
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-app-compat.js"></script>
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase initialisé par waitForFirebase() -->
 </head><body>
 
 <div class="header">
@@ -3642,6 +3633,10 @@ function imprimerBL(){
   .footer{text-align:center;font-size:9px;color:#444;border-top:1px solid #999;padding-top:10px;}
   @media print{@page{size:A5 landscape;margin:8mm;}}
 </style>
+  <!-- Firebase SDK via CDN fiable -->
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-app-compat.js"></script>
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase initialisé par waitForFirebase() -->
 </head><body>
 
 <div class="header">
@@ -4143,7 +4138,11 @@ td{border:1px solid #333;padding:6px 8px;font-size:11px;}
 .net-row{display:flex;justify-content:space-between;width:340px;margin-left:auto;padding:10px 12px;font-size:14px;font-weight:bold;border-bottom:2px solid #000;margin-bottom:20px;}
 .footer{text-align:center;font-size:9px;color:#444;border-top:1px solid #999;padding-top:10px;}
 @media print{@page{size:A5 landscape;margin:8mm;}}
-</style></head><body>
+</style>  <!-- Firebase SDK via CDN fiable -->
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-app-compat.js"></script>
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase initialisé par waitForFirebase() -->
+</head><body>
 <div class="header">
   <div>
     <img class="logo-img" src="https://www.allotapis.ma/wp-content/uploads/2021/03/logo-allo-tapis.png"
@@ -4293,7 +4292,11 @@ td{border:1px solid #333;padding:5px 8px;font-size:11px;}
 .total-row{display:flex;justify-content:space-between;width:300px;margin-left:auto;padding:8px 12px;font-weight:bold;font-size:14px;border:2px solid #000;border-radius:4px;margin-bottom:16px;}
 .footer{text-align:center;font-size:9px;color:#444;border-top:1px solid #999;padding-top:10px;}
 @media print{@page{size:A4 portrait;margin:10mm;}}
-</style></head><body>
+</style>  <!-- Firebase SDK via CDN fiable -->
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-app-compat.js"></script>
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase initialisé par waitForFirebase() -->
+</head><body>
 <div class="header">
   <img class="logo-img" src="https://www.allotapis.ma/wp-content/uploads/2021/03/logo-allo-tapis.png" onerror="this.style.display='none'"/>
 </div>
@@ -4361,7 +4364,11 @@ function imprimerChargement(){
 .header-info{text-align:right;}.header-info div{font-size:13px;font-weight:bold;margin-bottom:6px;}
 .footer{text-align:center;font-size:9px;color:#444;border-top:1px solid #999;padding-top:10px;margin-top:16px;}
 @media print{@page{size:A4 portrait;margin:8mm;}}
-</style></head><body>
+</style>  <!-- Firebase SDK via CDN fiable -->
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-app-compat.js"></script>
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-firestore-compat.js"></script>
+<!-- Firebase initialisé par waitForFirebase() -->
+</head><body>
 <div class="header">
   <img class="logo-img" src="https://www.allotapis.ma/wp-content/uploads/2021/03/logo-allo-tapis.png" onerror="this.style.display='none'"/>
   <div class="header-info">
@@ -6531,7 +6538,7 @@ async function fbDelete(colName, id) {
 // Les données statiques s'affichent immédiatement
 // Firebase met à jour en arrière-plan quand disponible
 // ============================================================
-(async function initFirebase() {
+async function initFirebase() {
   try {
     // Utiliser Firebase SDK compat (chargé via <script> dans le HTML)
     // Pas d'import dynamique → compatible Cloudflare Pages
@@ -6776,16 +6783,47 @@ async function fbDelete(colName, id) {
       }
     });
 
-    console.log('✅ Firebase connecté et listeners actifs');
+    console.log('Firebase connecté et listeners actifs');
     setOnline(true);
 
   } catch(err) {
-    // Firebase indisponible → l'app fonctionne quand même en mode statique
-    console.warn('Firebase non disponible, mode offline:', err.message);
+    console.warn('Firebase non disponible:', err.message);
     const lbl = document.getElementById('online-lbl');
-    if (lbl) lbl.textContent = '⚪ Mode hors ligne';
+    if (lbl) lbl.textContent = 'Mode hors ligne';
   }
-})();
+}
+
+// Attendre que Firebase SDK soit chargé avant d'initialiser
+function waitForFirebase(attempts) {
+  if(attempts <= 0) {
+    console.warn('Firebase SDK non disponible après attente');
+    return;
+  }
+  if(typeof firebase !== 'undefined' && firebase.firestore) {
+    // Firebase SDK prêt - initialiser
+    if(!firebase.apps.length) {
+      firebase.initializeApp({
+        apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
+        authDomain: "allo-tapis.firebaseapp.com",
+        projectId: "allo-tapis",
+        storageBucket: "allo-tapis.firebasestorage.app",
+        messagingSenderId: "566002084826",
+        appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
+      });
+    }
+    window._firestore = firebase.firestore();
+    console.log('Firebase SDK prêt, lancement initFirebase...');
+    initFirebase();
+  } else {
+    console.log('Attente Firebase SDK... (' + attempts + ')');
+    setTimeout(() => waitForFirebase(attempts - 1), 200);
+  }
+}
+
+// Lancer après chargement complet de la page
+window.addEventListener('load', () => {
+  setTimeout(() => waitForFirebase(25), 500); // attendre 500ms puis retry 25 fois = 5s max
+});
 
 </script>
 </body>
