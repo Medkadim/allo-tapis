@@ -598,8 +598,2091 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
 .btn-ram-submit{flex:1;padding:10px 20px;background:linear-gradient(135deg,#1D9E75,#16b88a);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:white;box-shadow:0 3px 10px rgba(22,183,138,.3);}
 .btn-ram-submit:hover{background:linear-gradient(135deg,#178a64,#13a07a);}
 </style>
+</head>
+<body>
+<div class="layout">
 
-  
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-inner">
+      <div class="logo-icon">🧺</div>
+      <div class="logo-texts">
+        <div class="logo-title">Allo Tapis</div>
+        <div class="logo-sub">Nettoyage Pro</div>
+      </div>
+    </div>
+  </div>
+  <div class="nav-scroll">
+    <div class="nav-group">
+      <div class="nav-item" onclick="goPage('dashboard')" style="font-weight:600;font-size:13px;color:rgba(255,255,255,.85);padding:10px 16px;"><span class="nav-icon">🏠</span>Dashboard</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Production</div>
+      <div class="nav-item" onclick="goPage('ramassage')"><span class="nav-icon">🛵</span>Ramassage</div>
+      <div class="nav-item" onclick="goPage('commandes')"><span class="nav-icon">📋</span>Commandes</div>
+      <div class="nav-item" onclick="goPage('bons-livraison')"><span class="nav-icon">🚚</span>Bons de livraison</div>
+      <div class="nav-item" onclick="goPage('lignes')"><span class="nav-icon">📄</span>Lignes de commande</div>
+      <div class="nav-item" onclick="goPage('chargements')"><span class="nav-icon">📦</span>Chargements</div>
+      <div class="nav-item" onclick="goPage('stat-clients')"><span class="nav-icon">📊</span>Stat. clients</div>
+      <div class="nav-item" onclick="goPage('stat-articles')"><span class="nav-icon">🥧</span>Stat. articles</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Clients</div>
+      <div class="nav-item" onclick="goPage('clients')"><span class="nav-icon">👥</span>Clients</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Articles</div>
+      <div class="nav-item" onclick="goPage('articles')"><span class="nav-icon">🏷️</span>Articles</div>
+      <div class="nav-item" onclick="goPage('uom')"><span class="nav-icon">📐</span>Unités de mesure</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Personnel</div>
+      <div class="nav-item" onclick="goPage('personnel')"><span class="nav-icon">👤</span>Personnel</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Finance</div>
+      <div class="nav-item" onclick="goPage('tresorerie')"><span class="nav-icon">💰</span>Trésorerie</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Fidélité</div>
+      <div class="nav-item" onclick="goPage('fidelite')"><span class="nav-icon">⭐</span>Programme fidélité</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Marketing</div>
+      <div class="nav-item" onclick="goPage('campagnes')"><span class="nav-icon">📲</span>Campagnes WhatsApp</div>
+    </div>
+    <div class="nav-group">
+      <div class="nav-group-title">Applications</div>
+      <div class="nav-item" onclick="goPage('app-livreur')"><span class="nav-icon">🚚</span>App Livreur</div>
+      <div class="nav-item" onclick="goPage('app-finition')"><span class="nav-icon">✂️</span>App Finition</div>
+      <div class="nav-item" onclick="goPage('app-lavage')"><span class="nav-icon">🫧</span>App Lavage</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topnav">
+    <div class="topnav-links">
+      <div class="topnav-link active">Allo tapis</div>
+      <div class="topnav-link">Messagerie</div>
+      <div class="topnav-link">Configuration</div>
+    </div>
+    <div class="topnav-right">
+      <div style="display:flex;align-items:center;gap:6px;padding:4px 12px;background:rgba(255,255,255,.08);border-radius:20px;margin-right:8px;">
+        <div id="online-dot" style="width:7px;height:7px;border-radius:50%;background:#DC2626;transition:background .3s;"></div>
+        <span id="online-lbl" style="font-size:11px;color:rgba(255,255,255,.7);">Connexion...</span>
+      </div>
+      <div class="topnav-user">
+        <div class="user-avatar">A</div>
+        Administrator ▾
+      </div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ==================== DASHBOARD ==================== -->
+    <div class="page" id="page-dashboard">
+      <div class="dash-welcome" id="dash-greeting">Bonjour 👋</div>
+      <div class="dash-sub" id="dash-date-str">Chargement...</div>
+
+      <!-- KPIs principaux -->
+      <div class="dash-kpi-grid">
+        <div class="dash-kpi blue" onclick="goPage('ramassage')">
+          <div class="dash-kpi-left">
+            <div class="dash-kpi-label">Ramassages en attente</div>
+            <div class="dash-kpi-val" id="kpi-ram">0</div>
+            <div class="dash-kpi-sub">à collecter aujourd'hui</div>
+          </div>
+          <div class="dash-kpi-icon">🛵</div>
+        </div>
+        <div class="dash-kpi orange" onclick="goPage('commandes')">
+          <div class="dash-kpi-left">
+            <div class="dash-kpi-label">Commandes en cours</div>
+            <div class="dash-kpi-val" id="kpi-cmd">0</div>
+            <div class="dash-kpi-sub">Brouillon + En traitement</div>
+          </div>
+          <div class="dash-kpi-icon">📋</div>
+        </div>
+        <div class="dash-kpi green" onclick="goPage('bons-livraison')">
+          <div class="dash-kpi-left">
+            <div class="dash-kpi-label">Prêts à livrer</div>
+            <div class="dash-kpi-val" id="kpi-pret">0</div>
+            <div class="dash-kpi-sub">BL disponibles</div>
+          </div>
+          <div class="dash-kpi-icon">🚚</div>
+        </div>
+        <div class="dash-kpi green" onclick="goPage('bons-livraison')">
+          <div class="dash-kpi-left">
+            <div class="dash-kpi-label">CA du mois</div>
+            <div class="dash-kpi-val" id="kpi-ca">0</div>
+            <div class="dash-kpi-sub">MAD encaissé</div>
+          </div>
+          <div class="dash-kpi-icon">💰</div>
+        </div>
+      </div>
+
+      <!-- Ligne 2 : Statuts commandes + Livreurs actifs + Alertes -->
+      <div class="dash-row cols-3">
+        <!-- Statuts -->
+        <div class="dash-card">
+          <div class="dash-card-title">Répartition des commandes <span class="see-all" onclick="goPage('commandes')">Voir tout →</span></div>
+          <div class="statuts-list" id="dash-statuts"></div>
+        </div>
+        <!-- Livreurs -->
+        <div class="dash-card">
+          <div class="dash-card-title">Livreurs actifs</div>
+          <div id="dash-livreurs"></div>
+        </div>
+        <!-- Alertes -->
+        <div class="dash-card">
+          <div class="dash-card-title">⚠️ Alertes</div>
+          <div id="dash-alertes"></div>
+        </div>
+      </div>
+
+      <!-- Ligne 3 : CA par mois (barres) + Trésorerie résumé -->
+      <div class="dash-row cols-1-2">
+        <!-- Trésorerie résumé — source unique tresoMouvements -->
+        <div class="dash-card" style="display:flex;flex-direction:column;justify-content:space-between;">
+          <div>
+            <div class="dash-card-title">
+              💰 Trésorerie
+              <div style="display:flex;align-items:center;gap:6px;">
+                <button onclick="dashTresoMonth(-1)" style="border:1px solid #dde3ec;background:white;border-radius:5px;padding:2px 8px;cursor:pointer;font-size:12px;">◄</button>
+                <span id="dash-treso-month" style="font-size:12px;color:#8899aa;min-width:80px;text-align:center;">Avril 2026</span>
+                <button onclick="dashTresoMonth(+1)" style="border:1px solid #dde3ec;background:white;border-radius:5px;padding:2px 8px;cursor:pointer;font-size:12px;">►</button>
+              </div>
+            </div>
+            <div class="treso-row">
+              <span class="treso-label">💚 Recettes</span>
+              <span class="treso-val recette" id="treso-recette">0 MAD</span>
+            </div>
+            <div class="treso-row">
+              <span class="treso-label">🔴 Charges</span>
+              <span class="treso-val charge" id="treso-charge">0 MAD</span>
+            </div>
+            <div class="treso-row">
+              <span class="treso-label" style="font-weight:600">📊 Bénéfice net</span>
+              <span class="treso-val benef" id="treso-benef">0 MAD</span>
+            </div>
+          </div>
+          <div style="margin-top:16px;">
+            <button onclick="goPage('tresorerie')" style="width:100%;padding:9px;background:#f0f7ff;border:1px solid #93C5FD;border-radius:8px;font-size:13px;font-weight:600;color:#1a5fa8;cursor:pointer;">
+              Gérer la trésorerie →
+            </button>
+          </div>
+        </div>
+
+        <!-- CA par mois -->
+        <div class="dash-card">
+          <div class="dash-card-title">📈 CA mensuel 2026 <span class="see-all" onclick="goPage('stat-clients')">Stats →</span></div>
+          <div class="ca-bars" id="dash-ca-bars"></div>
+        </div>
+      </div>
+
+      <!-- Ligne 4 : Ramassages du jour + Dernières commandes -->
+      <div class="dash-row cols-2">
+        <!-- Ramassages du jour -->
+        <div class="dash-card">
+          <div class="dash-card-title">🛵 Ramassages du jour <span class="see-all" onclick="goPage('ramassage')">Voir tout →</span></div>
+          <div id="dash-ram-today"></div>
+        </div>
+        <!-- Dernières commandes -->
+        <div class="dash-card">
+          <div class="dash-card-title">📋 Dernières commandes <span class="see-all" onclick="goPage('commandes')">Voir tout →</span></div>
+          <table class="mini-table">
+            <thead><tr><th>N°</th><th>Client</th><th>Livreur</th><th>Statut</th><th style="text-align:right">Montant</th></tr></thead>
+            <tbody id="dash-last-cmds"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Ligne 5 : Hub des 3 Applications mobiles -->
+      <div style="font-size:13px;font-weight:700;color:#1a2332;margin-bottom:12px;margin-top:4px;">📱 Applications Atelier</div>
+      <div class="apps-hub">
+        <div class="app-hub-card" onclick="goPage('app-livreur')">
+          <div class="app-hub-icon">🚚</div>
+          <div class="app-hub-name">App Livreur</div>
+          <div class="app-hub-desc">Tournée, livraisons, carte GPS, dépôt trésorerie</div>
+          <span class="app-hub-badge" style="background:#DBEAFE;color:#1D4ED8;" id="dash-livreur-badge">— BLs</span>
+          <div class="app-hub-stats">
+            <div class="app-hub-stat">
+              <div class="app-hub-stat-val" id="dash-livreur-bls" style="color:#1a5fa8">0</div>
+              <div class="app-hub-stat-lbl">Prêts</div>
+            </div>
+            <div class="app-hub-stat">
+              <div class="app-hub-stat-val" id="dash-livreur-rams" style="color:#D97706">0</div>
+              <div class="app-hub-stat-lbl">Ramassages</div>
+            </div>
+          </div>
+        </div>
+        <div class="app-hub-card" onclick="goPage('app-finition')">
+          <div class="app-hub-icon">✂️</div>
+          <div class="app-hub-name">App Finition</div>
+          <div class="app-hub-desc">Saisie emplacements, suivi état articles par commande</div>
+          <span class="app-hub-badge" style="background:#D1FAE5;color:#065F46;" id="dash-finition-badge">— articles</span>
+          <div class="app-hub-stats">
+            <div class="app-hub-stat">
+              <div class="app-hub-stat-val" id="dash-finition-pret" style="color:#059669">0</div>
+              <div class="app-hub-stat-lbl">Prêts</div>
+            </div>
+            <div class="app-hub-stat">
+              <div class="app-hub-stat-val" id="dash-finition-sans" style="color:#D97706">0</div>
+              <div class="app-hub-stat-lbl">Sans empl.</div>
+            </div>
+          </div>
+        </div>
+        <div class="app-hub-card" onclick="goPage('app-lavage')">
+          <div class="app-hub-icon">🫧</div>
+          <div class="app-hub-name">App Lavage</div>
+          <div class="app-hub-desc">Affichage priorisé articles, temps d'attente, filtres</div>
+          <span class="app-hub-badge" style="background:#FEE2E2;color:#991B1B;" id="dash-lavage-badge">— urgents</span>
+          <div class="app-hub-stats">
+            <div class="app-hub-stat">
+              <div class="app-hub-stat-val" id="dash-lavage-total" style="color:#1a2332">0</div>
+              <div class="app-hub-stat-lbl">Total</div>
+            </div>
+            <div class="app-hub-stat">
+              <div class="app-hub-stat-val" id="dash-lavage-wait" style="color:#DC2626">0j</div>
+              <div class="app-hub-stat-lbl">Max attente</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== RAMASSAGE ==================== -->
+    <div class="page" id="page-ramassage">
+      <div class="page-header">
+        <div class="page-title">Ramassage</div>
+        <div class="header-right">
+          <div class="search-outer"><input class="search-input" placeholder="Rechercher client, tél..." oninput="filterRamassage(this.value)"/><button class="search-icon-btn">🔍</button></div>
+          <span class="pag-info" id="ram-pag">0 ramassages</span>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="btn-primary" onclick="openRamModal()">+ Nouveau ramassage</button>
+        <select id="ram-filter-statut" onchange="filterRamassage('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+          <option value="">Tous les statuts</option>
+          <option value="En attente">En attente</option>
+          <option value="Collecté">Collecté</option>
+          <option value="Annulé">Annulé</option>
+        </select>
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5a6a7a;cursor:pointer;">
+          <input type="checkbox" id="ram-filter-urgent" onchange="filterRamassage('')" style="accent-color:#DC2626;width:14px;height:14px;"/>
+          Urgents uniquement
+        </label>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr>
+            <th><input type="checkbox"/></th>
+            <th>N°</th><th>Client</th><th>Téléphone</th><th>Adresse pick-up</th>
+            <th>Créneau</th><th>Assigné à</th><th>Statut</th><th>Urgent</th><th>Date</th>
+          </tr></thead>
+          <tbody id="ram-body">
+            <tr id="ram-empty-row">
+              <td colspan="10" style="text-align:center;padding:40px;color:#8899aa;">
+                <div style="font-size:32px;margin-bottom:8px;">🛵</div>
+                <div style="font-weight:500;margin-bottom:4px;">Aucun ramassage enregistré</div>
+                <div style="font-size:12px;">Cliquez sur "+ Nouveau ramassage" pour commencer</div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== COMMANDES ==================== -->
+    <div class="page" id="page-commandes">
+
+      <!-- LISTE VIEW -->
+      <div id="cmd-list-view">
+        <div class="page-header">
+          <div class="page-title">Commandes</div>
+          <div class="header-right">
+            <div class="search-outer"><input class="search-input" placeholder="Rechercher client, N°..." oninput="filterCommandes(this.value)"/><button class="search-icon-btn">🔍</button></div>
+            <span class="pag-info" id="cmd-pag">1–20 sur 406</span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-primary" onclick="showCmdForm(-1)">Créer</button>
+          <button class="btn-link">ou Importer</button>
+          <select id="cmd-filter-statut" onchange="filterCommandes('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+            <option value="">Tous les statuts</option>
+            <option>Brouillon</option><option>En traitement</option>
+            <option>Prêt à livrer</option><option>Payé</option>
+          </select>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th><input type="checkbox"/></th>
+              <th>N°</th><th>Client</th><th>Livreur</th><th>Date collecte</th><th>Statut</th>
+            </tr></thead>
+            <tbody id="cmd-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FORM VIEW -->
+      <div id="cmd-form-view" style="display:none">
+        <div class="breadcrumb"><span class="lnk" onclick="hideCmdForm()">Commandes</span> / <span id="cmd-form-bc">Nouveau</span></div>
+
+        <!-- Top actions -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:center;" id="cmd-form-actions"></div>
+          <!-- Barre statut -->
+          <div class="statut-bar" id="cmd-statut-bar">
+            <div class="statut-step" id="ss-brouillon">Brouillon</div>
+            <div class="statut-step" id="ss-traitement">En traitement</div>
+            <div class="statut-step" id="ss-pret">Prêt à livrer</div>
+            <div class="statut-step" id="ss-paye">Payé</div>
+          </div>
+        </div>
+
+        <div class="ro-banner" id="cmd-ro">🔒 Mode lecture — cliquez sur Modifier pour éditer</div>
+
+        <!-- Boutons impression -->
+        <div class="cmd-header-btns">
+          <button class="btn-print" onclick="imprimerBC()">🖨️ Imprimer BC</button>
+          <button class="btn-print">🏷️ Imprimer étiquettes</button>
+        </div>
+
+        <div class="form-card form-card-wide">
+          <!-- Infos principales -->
+          <div class="cmd-form-grid">
+            <div>
+              <div class="cmd-field-row">
+                <span class="cmd-field-label">Client</span>
+                <div style="flex:1;position:relative;">
+                  <input class="cmd-field-input" id="cf-client" placeholder="Rechercher client..." oninput="cfClientSearch()" autocomplete="off"/>
+                  <div id="cf-client-drop" style="position:absolute;top:calc(100%+4px);left:0;right:0;background:white;border:1px solid #dde3ec;border-radius:8px;z-index:50;display:none;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:160px;overflow-y:auto;"></div>
+                </div>
+              </div>
+              <div class="cmd-field-row">
+                <span class="cmd-field-label">Livreur</span>
+                <select class="cmd-field-select" id="cf-livreur">
+                  <option value="">—</option>
+                  <option>Oujane Nadir</option><option>Abdessamad Aboulfath</option>
+                  <option>Taakouft Soufiane</option><option>Messaoud Ameziane</option>
+                  <option>Anass Mounaouar</option><option>Labiad Yassine</option>
+                  <option>Koukouss Hafid</option><option>Radi Abdellah</option>
+                </select>
+              </div>
+              <div class="cmd-field-row">
+                <span class="cmd-field-label">Date collecte</span>
+                <input class="cmd-field-input" id="cf-date" type="date"/>
+              </div>
+              <div class="cmd-field-row" id="row-date-paiement" style="display:none">
+                <span class="cmd-field-label" style="color:#059669;font-weight:600">💰 Date paiement</span>
+                <input class="cmd-field-input" id="cf-date-paiement" type="date" style="border-color:#6EE7B7;"/>
+              </div>
+            </div>
+            <div>
+              <div class="cmd-field-row">
+                <span class="cmd-field-label">Commande N°</span>
+                <input class="cmd-field-input" id="cf-num" readonly/>
+              </div>
+              <div class="cmd-field-row">
+                <span class="cmd-field-label">Téléphone</span>
+                <input class="cmd-field-input" id="cf-tel" readonly/>
+              </div>
+              <div class="cmd-field-row">
+                <span class="cmd-field-label">Adresse</span>
+                <input class="cmd-field-input" id="cf-adresse" readonly/>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lignes de commande -->
+          <div class="lignes-section">
+            <div class="lignes-title">Ligne de commande</div>
+            <div class="lignes-table-wrap">
+              <table class="lignes-table">
+                <thead>
+                  <tr>
+                    <th style="width:80px">N° Article</th>
+                    <th style="width:140px">Article</th>
+                    <th style="width:70px">Largeur</th>
+                    <th style="width:70px">Longueur</th>
+                    <th style="width:70px">Surface</th>
+                    <th style="width:60px">Quantité</th>
+                    <th style="width:90px">Unité de mesure</th>
+                    <th style="width:80px">Prix/unité</th>
+                    <th style="width:60px">P.U.</th>
+                    <th style="width:80px">Total HT</th>
+                    <th style="width:120px">Observation</th>
+                    <th style="width:60px">Photo</th>
+                    <th style="width:30px"></th>
+                  </tr>
+                </thead>
+                <tbody id="lignes-body"></tbody>
+                <tfoot>
+                  <tr>
+                    <td colspan="13" style="padding:4px 8px;">
+                      <button class="btn-add-ligne" onclick="addLigne()" id="btn-add-ligne">+ Ajouter un élément</button>
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+
+
+          <!-- Notes livreur (depuis app livreur) -->
+          <div id="cmd-notes-livreur-section" style="margin-top:12px;display:none;">
+            <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:12px 16px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <span style="font-size:14px;">🚚</span>
+                <span style="font-size:12px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.05em;">Notes livreur à la collecte</span>
+              </div>
+              <ul id="cmd-notes-livreur-list" style="margin:0;padding-left:18px;font-size:13px;color:#78350F;line-height:1.8;"></ul>
+            </div>
+          </div>
+
+          <!-- Totaux -->
+          <div class="totaux-section">
+            <div class="totaux-card">
+              <div class="totaux-row">
+                <span class="totaux-label">Total HT :</span>
+                <span class="totaux-val" id="total-ht">0,00</span>
+              </div>
+              <div class="totaux-row">
+                <span class="totaux-label">Remise :</span>
+                <input class="remise-input" id="cf-remise" type="number" min="0" value="0" oninput="recalcTotaux()"/>
+              </div>
+              <div class="totaux-row">
+                <span class="totaux-label" style="font-weight:600">Net à payer HT :</span>
+                <span class="totaux-val big" id="total-net">0,00</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Photos -->
+          <div class="photos-section">
+            <div class="photos-title">Photos de la commande</div>
+            <div class="photos-grid" id="photos-grid">
+              <button class="btn-add-photo" id="btn-add-photo" onclick="addPhoto()">Ajouter</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== BONS LIVRAISON ==================== -->
+    <div class="page" id="page-bons-livraison">
+
+      <!-- LISTE VIEW -->
+      <div id="bl-list-view">
+        <div class="page-header">
+          <div class="page-title">Bons de livraison</div>
+          <div class="header-right">
+            <div class="search-outer">
+              <input class="search-input" placeholder="Rechercher client, N°..." oninput="filterBL(this.value)"/>
+              <button class="search-icon-btn">🔍</button>
+            </div>
+            <span class="pag-info" id="bl-pag">1–20 sur 18804</span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-primary" onclick="showBLFiche(-1)">Créer</button>
+          <button class="btn-link">ou Importer</button>
+          <select id="bl-filter-etat" onchange="filterBL('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+            <option value="">Tous les états</option>
+            <option value="Prêt à livrer">Prêt à livrer</option>
+            <option value="Livré">Livré</option>
+            <option value="Payé">Payé</option>
+            <option value="Livré & Payé">Livré & Payé</option>
+          </select>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th><input type="checkbox"/></th>
+              <th>Commande N°</th>
+              <th>Client</th>
+              <th>Livreur</th>
+              <th>Date collecte</th>
+              <th>Etat</th>
+            </tr></thead>
+            <tbody id="bl-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FICHE BL -->
+      <div id="bl-fiche-view" style="display:none">
+        <div class="breadcrumb">
+          <span class="lnk" onclick="hideBLFiche()">Bons de livr...</span> / <span id="bl-fiche-bc">264538</span>
+        </div>
+
+        <!-- Actions + nav + statut -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;gap:8px;">
+            <button class="btn-modify" id="bl-btn-modifier" onclick="toggleBLEdit()">Modifier</button>
+            <button class="btn-modify" onclick="showBLFiche(-1)">Créer</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button class="lig-nav-btn" onclick="blNavPrev()">◄</button>
+              <span class="lig-nav-pag" id="bl-nav-pag">1 / 20</span>
+              <button class="lig-nav-btn" onclick="blNavNext()">►</button>
+            </div>
+            <!-- Barre statut BL : Prêt à livrer → Livré → Payé → Livré & Payé -->
+            <div class="bl-statut-bar" id="bl-statut-bar">
+              <div class="bl-step" id="bls-pret"    onclick="changeBLStatut('Prêt à livrer')">Prêt à livrer</div>
+              <div class="bl-step" id="bls-livre"   onclick="changeBLStatut('Livré')">Livré</div>
+              <div class="bl-step" id="bls-paye"    onclick="changeBLStatut('Payé')">Payé</div>
+              <div class="bl-step" id="bls-livpaye" onclick="changeBLStatut('Livré & Payé')">Livré & Payé</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ro-banner" id="bl-ro-banner">🔒 Mode lecture — cliquez sur Modifier pour éditer</div>
+
+        <!-- Dates dynamiques selon statut -->
+        <div class="bl-dates-section" id="bl-dates-section">
+          <div class="section-label" id="bl-dates-label">📅 Dates</div>
+          <div class="bl-dates-grid" id="bl-dates-grid"></div>
+        </div>
+
+        <!-- Bouton imprimer -->
+        <div class="cmd-header-btns">
+          <button class="btn-print" onclick="imprimerBL()">🖨️ Imprimer BL</button>
+        </div>
+
+        <!-- Infos principales -->
+        <div class="form-card form-card-wide">
+          <div class="bl-info-grid">
+            <div>
+              <div class="bl-field">
+                <span class="bl-field-label">Client</span>
+                <span class="bl-field-val lnk" id="bf-client">—</span>
+              </div>
+              <div class="bl-field">
+                <span class="bl-field-label">Livreur</span>
+                <span class="bl-field-val" id="bf-livreur-txt" style="display:none">—</span>
+                <select class="cmd-field-select" id="bf-livreur-sel" style="display:none;max-width:220px;">
+                  <option value="">—</option>
+                  <option>Oujane Nadir</option><option>Abdessamad Aboulfath</option>
+                  <option>Taakouft Soufiane</option><option>Messaoud Ameziane</option>
+                  <option>Anass Mounaouar</option><option>Labiad Yassine</option>
+                  <option>Koukouss Hafid</option><option>Radi Abdellah</option>
+                  <option>Lui-même</option>
+                </select>
+              </div>
+              <div class="bl-field">
+                <span class="bl-field-label">Date collecte</span>
+                <span class="bl-field-val" id="bf-date-collecte">—</span>
+              </div>
+            </div>
+            <div>
+              <div class="bl-field">
+                <span class="bl-field-label">Commande N°</span>
+                <span class="bl-field-val lnk" id="bf-cmd-num" onclick="blGoToCommande()">—</span>
+              </div>
+              <div class="bl-field">
+                <span class="bl-field-label">Bon de livraison N°</span>
+                <span class="bl-field-val" id="bf-bl-num">—</span>
+              </div>
+              <div class="bl-field">
+                <span class="bl-field-label">Etat</span>
+                <span id="bf-etat-badge">—</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Lignes de commande -->
+          <div class="lignes-section">
+            <div class="lignes-title">Ligne de commande</div>
+            <div class="lignes-table-wrap">
+              <table class="lignes-table">
+                <thead>
+                  <tr>
+                    <th style="width:50px">N° Article</th>
+                    <th>Article</th>
+                    <th style="width:65px">Largeur</th>
+                    <th style="width:65px">Longueur</th>
+                    <th style="width:65px">Surface</th>
+                    <th style="width:65px">Quantité</th>
+                    <th style="width:110px">Unité de mesure</th>
+                    <th style="width:80px">Prix/unité</th>
+                    <th style="width:65px">P.U.</th>
+                    <th style="width:80px">Total HT</th>
+                    <th style="width:120px">Observation</th>
+                    <th style="width:60px">Photo</th>
+                  </tr>
+                </thead>
+                <tbody id="bl-lignes-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Photos -->
+          <div class="photos-section">
+            <div class="photos-title">Photos de la commande</div>
+            <div class="photos-grid" id="bl-photos-grid">
+              <span style="font-size:12px;color:#ccd3dc;font-style:italic;">Aucune photo</span>
+            </div>
+          </div>
+
+
+          <!-- Notes livreur (depuis app livreur) -->
+          <div id="cmd-notes-livreur-section" style="margin-top:12px;display:none;">
+            <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;padding:12px 16px;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+                <span style="font-size:14px;">🚚</span>
+                <span style="font-size:12px;font-weight:700;color:#92400E;text-transform:uppercase;letter-spacing:.05em;">Notes livreur à la collecte</span>
+              </div>
+              <ul id="cmd-notes-livreur-list" style="margin:0;padding-left:18px;font-size:13px;color:#78350F;line-height:1.8;"></ul>
+            </div>
+          </div>
+
+          <!-- Totaux -->
+          <div class="totaux-section">
+            <div class="totaux-card">
+              <div class="totaux-row">
+                <span class="totaux-label">Total HT :</span>
+                <span class="totaux-val" id="bl-total-ht">0,00</span>
+              </div>
+              <div class="totaux-row">
+                <span class="totaux-label">Remise :</span>
+                <span class="totaux-val" id="bl-remise">0,00</span>
+              </div>
+              <div class="totaux-row">
+                <span class="totaux-label" style="font-weight:600">Net à payer HT :</span>
+                <span class="totaux-val big" id="bl-net">0,00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== LIGNES ==================== -->
+    <div class="page" id="page-lignes">
+
+      <!-- LISTE VIEW -->
+      <div id="lig-list-view">
+        <div class="page-header">
+          <div class="page-title">Lignes de commande</div>
+          <div class="header-right">
+            <div class="search-outer">
+              <input class="search-input" placeholder="Rechercher commande, article..." oninput="filterLignes(this.value)" id="lig-search"/>
+              <button class="search-icon-btn">🔍</button>
+            </div>
+            <span class="pag-info" id="lig-pag">1–20 sur 47 630</span>
+          </div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th><input type="checkbox"/></th>
+              <th>Commande</th>
+              <th>N° Article</th>
+              <th>Article</th>
+              <th>Largeur</th>
+              <th>Longueur</th>
+              <th>Surface</th>
+              <th>Quantité</th>
+              <th>Unité de mesure</th>
+              <th>Observation</th>
+              <th>Etat</th>
+            </tr></thead>
+            <tbody id="lig-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FICHE VIEW -->
+      <div id="lig-fiche-view" style="display:none">
+        <div class="breadcrumb">
+          <span class="lnk" onclick="hideLigFiche()">Lignes de c...</span> / <span id="lig-fiche-bc">1</span>
+        </div>
+
+        <!-- Top bar : Modifier + navigation + statut -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <button class="btn-modify" id="lig-btn-modifier" onclick="toggleLigEdit()">Modifier</button>
+            <!-- Boutons +1 / -1 / Tous -->
+            <div class="lig-nav-sep"></div>
+            <div class="lig-nav-btns">
+              <button class="lig-nav-btn" onclick="ligQteAction('+1')" title="Ajouter 1 à quantité traitée">+1</button>
+              <button class="lig-nav-btn" onclick="ligQteAction('-1')" title="Retirer 1 de quantité traitée">-1</button>
+              <button class="lig-nav-btn tous" onclick="ligQteAction('tous')" title="Marquer tout traité">Tous</button>
+            </div>
+          </div>
+          <!-- Navigation 1/80 ◄ ► + statut -->
+          <div style="display:flex;align-items:center;gap:12px;">
+            <div style="display:flex;align-items:center;gap:6px;">
+              <button class="lig-nav-btn" onclick="ligNavPrev()">◄</button>
+              <span class="lig-nav-pag" id="lig-nav-pag">1 / 20</span>
+              <button class="lig-nav-btn" onclick="ligNavNext()">►</button>
+            </div>
+            <div class="lig-statut-bar">
+              <div class="lig-statut-step" id="ls-brouillon">Brouillon</div>
+              <div class="lig-statut-step" id="ls-traitement">En traitement</div>
+              <div class="lig-statut-step" id="ls-pret">Prêt à livrer</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ro-banner" id="lig-ro-banner">🔒 Mode lecture — cliquez sur Modifier pour saisir l'emplacement</div>
+
+        <div class="form-card" style="max-width:900px;">
+          <div class="lig-fiche-grid">
+            <!-- Colonne gauche -->
+            <div>
+              <div class="lig-field">
+                <span class="lig-field-label">Commande</span>
+                <span class="lig-field-val link" id="lf-commande" onclick="goToCommande()">—</span>
+              </div>
+              <div class="lig-field">
+                <span class="lig-field-label">N° Article</span>
+                <span class="lig-field-val" id="lf-num-art">—</span>
+              </div>
+              <div class="lig-field">
+                <span class="lig-field-label">Article</span>
+                <span class="lig-field-val link" id="lf-article" style="color:#1a5fa8;">—</span>
+              </div>
+              <div class="lig-field" style="margin-top:8px;">
+                <span class="lig-field-label">Largeur</span>
+                <span class="lig-field-val" id="lf-larg">—</span>
+              </div>
+              <div class="lig-field">
+                <span class="lig-field-label">Longueur</span>
+                <span class="lig-field-val" id="lf-long">—</span>
+              </div>
+              <div class="lig-field">
+                <span class="lig-field-label">Surface</span>
+                <span class="lig-field-val" id="lf-surf">—</span>
+              </div>
+              <div class="lig-field">
+                <span class="lig-field-label">Quantité</span>
+                <span class="lig-field-val" id="lf-qte">—</span>
+              </div>
+              <div class="lig-field">
+                <span class="lig-field-label">Quantité traitée</span>
+                <span class="lig-field-val" id="lf-qte-traitee" style="font-size:16px;font-weight:700;">0</span>
+              </div>
+              <div class="lig-field">
+                <span class="lig-field-label">Emplacement</span>
+                <input class="lig-empl-input" id="lf-emplacement" placeholder="Ex: A-03, Étagère 2..." readonly
+                  onblur="saveEmplacement()"/>
+              </div>
+              <div class="lig-field">
+                <span class="lig-field-label">Unité de mesure</span>
+                <span class="lig-field-val" id="lf-uom">—</span>
+              </div>
+            </div>
+            <!-- Colonne droite -->
+            <div>
+              <div class="lig-field">
+                <span class="lig-field-label">Observation</span>
+                <span class="lig-field-val" id="lf-obs" style="color:#5a6a7a;">—</span>
+              </div>
+              <div class="lig-field" style="margin-top:16px;">
+                <span class="lig-field-label">État</span>
+                <span id="lf-etat">—</span>
+              </div>
+              <!-- Info emplacement -->
+              <div id="lig-empl-hint" style="display:none;margin-top:20px;background:#EEF4FF;border:1px solid #C7D9F8;border-radius:8px;padding:12px 14px;">
+                <div style="font-size:11px;font-weight:700;color:#1a5fa8;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px;">💡 Saisie emplacement</div>
+                <div style="font-size:12px;color:#3a5a8a;line-height:1.6;">
+                  Saisissez le code d'emplacement après emballage/finition.<br>
+                  Ex: <strong>A-01</strong>, <strong>B-03</strong>, <strong>Étagère 2</strong>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CHARGEMENTS ==================== -->
+    <div class="page" id="page-chargements">
+
+      <!-- LISTE VIEW -->
+      <div id="charg-list-view">
+        <div class="page-header">
+          <div class="page-title">Chargements</div>
+          <div class="header-right">
+            <div class="search-outer"><input class="search-input" placeholder="Rechercher livreur, date..." oninput="filterChargements(this.value)"/><button class="search-icon-btn">🔍</button></div>
+            <span class="pag-info" id="charg-pag">1–20 sur 1197</span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-primary" onclick="showChargFiche(-1)">Créer</button>
+          <button class="btn-link">ou Importer</button>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th><input type="checkbox"/></th>
+              <th>Date</th><th>Ville</th><th>Livreur</th><th>Véhicule</th>
+              <th style="text-align:right">Montant</th><th>Libellé</th>
+            </tr></thead>
+            <tbody id="charg-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- FICHE CHARGEMENT -->
+      <div id="charg-fiche-view" style="display:none">
+        <div class="breadcrumb">
+          <span class="lnk" onclick="hideChargFiche()">Chargements</span> / <span id="charg-fiche-bc">2026-04-16</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;gap:8px;">
+            <button class="btn-save" id="charg-btn-enreg" onclick="saveChargement()" style="display:none">Enregistrer</button>
+            <button class="btn-modify" id="charg-btn-modifier" onclick="toggleChargEdit()">Modifier</button>
+            <button class="btn-cancel" id="charg-btn-annuler" onclick="hideChargFiche()" style="display:none">ou Annuler</button>
+            <button class="btn-modify" onclick="showChargFiche(-1)">Créer</button>
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="lig-nav-btn" onclick="chargNavPrev()">◄</button>
+            <span class="lig-nav-pag" id="charg-nav-pag">1 / 20</span>
+            <button class="lig-nav-btn" onclick="chargNavNext()">►</button>
+          </div>
+        </div>
+
+        <div class="ro-banner" id="charg-ro-banner">🔒 Mode lecture — cliquez sur Modifier pour éditer</div>
+
+        <!-- Boutons impression -->
+        <div class="cmd-header-btns">
+          <button class="btn-print" onclick="imprimerChargement()">🖨️ Imprimer Chargement</button>
+          <button class="btn-print" onclick="imprimerChargementLivraison()">🖨️ Imprimer chargement pour livraison</button>
+        </div>
+
+        <!-- Infos principales -->
+        <div class="form-card form-card-wide" style="margin-bottom:1rem;">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 60px;">
+            <div>
+              <div class="charg-field">
+                <span class="charg-field-label">Libellé</span>
+                <input class="charg-input" id="cf2-libelle" readonly/>
+              </div>
+              <div class="charg-field">
+                <span class="charg-field-label">Véhicule</span>
+                <select class="charg-select" id="cf2-vehicule" disabled>
+                  <option>DFSK</option><option>Ford Transit</option><option>Renault Express</option>
+                </select>
+              </div>
+              <div class="charg-field">
+                <span class="charg-field-label">Livreur</span>
+                <select class="charg-select" id="cf2-livreur" disabled>
+                  <option value="">—</option>
+                  <option>Ourouch Houssam</option><option>Koukouss Hafid</option>
+                  <option>Radi Abdellah</option><option>Oujane Nadir</option>
+                  <option>Abdessamad Aboulfath</option><option>Taakouft Soufiane</option>
+                  <option>Anass Mounaouar</option><option>Labiad Yassine</option>
+                  <option>Lui-même</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <div class="charg-field">
+                <span class="charg-field-label">Date</span>
+                <input class="charg-input" id="cf2-date" type="date" readonly/>
+              </div>
+              <div class="charg-field">
+                <span class="charg-field-label">Montant</span>
+                <span class="charg-field-val" id="cf2-montant" style="color:#059669;font-weight:700;">0,00 MAD</span>
+              </div>
+              <div class="charg-field">
+                <span class="charg-field-label">Ville</span>
+                <select class="charg-select" id="cf2-ville" disabled>
+                  <option>Tanger</option><option>Casablanca</option><option>Rabat</option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tableau BLs du chargement -->
+        <div class="form-card form-card-wide">
+          <table class="charg-bl-table">
+            <thead>
+              <tr>
+                <th style="width:100px">N° BL</th>
+                <th>Client</th>
+                <th>Quartier / Adresse</th>
+                <th style="text-align:right">Montant</th>
+                <th>Date collecte</th>
+                <th>Article(s)</th>
+                <th style="width:70px">🖨️ BL</th>
+                <th style="width:36px"></th>
+              </tr>
+            </thead>
+            <tbody id="charg-bl-body"></tbody>
+            <tfoot>
+              <tr>
+                <td colspan="7" style="padding:6px 12px;">
+                  <button class="btn-add-element" id="charg-btn-add-bl" onclick="openChargModal()" style="display:none">Ajouter un élément</button>
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+          <div class="charg-montant-total">
+            <span>Montant total du chargement :</span>
+            <strong id="charg-total-montant">0,00 MAD</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL AJOUTER BL AU CHARGEMENT -->
+    <div id="charg-bl-modal" style="display:none">
+      <div class="charg-modal-overlay" onclick="closeChargModal(event)">
+        <div class="charg-modal">
+          <div class="charg-modal-header">
+            <div class="charg-modal-title">Ajouter Bon de livraison</div>
+            <div class="charg-modal-search">
+              <input id="charg-modal-search" placeholder="Rechercher client, N°..." oninput="filterChargModal(this.value)"/>
+              <button class="search-icon-btn">🔍</button>
+            </div>
+            <button class="charg-modal-close" onclick="closeChargModal()">✕</button>
+          </div>
+          <div class="charg-modal-pag">
+            <span id="charg-modal-pag">1–80 sur 306</span>
+          </div>
+          <div class="charg-modal-body">
+            <table class="charg-modal-table">
+              <thead><tr>
+                <th><input type="checkbox"/></th>
+                <th>Commande N°</th><th>Client</th><th>Livreur</th>
+                <th>Date collecte</th><th>Etat</th>
+              </tr></thead>
+              <tbody id="charg-modal-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== STAT CLIENTS ==================== -->
+    <div class="page" id="page-stat-clients">
+      <div class="page-header"><div class="page-title">Statistique clients</div></div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-label">Total clients</div><div class="stat-value">5 500</div><div class="stat-sub">Base active</div></div>
+        <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-label">Total commandes</div><div class="stat-value">15 387</div><div class="stat-sub">Depuis 2020</div></div>
+        <div class="stat-card"><div class="stat-icon">💰</div><div class="stat-label">CA total</div><div class="stat-value">2.4M</div><div class="stat-sub">MAD</div></div>
+        <div class="stat-card"><div class="stat-icon">🔄</div><div class="stat-label">Moy. / client</div><div class="stat-value">2.8</div><div class="stat-sub">commandes</div></div>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th><input type="checkbox"/></th><th>Client</th><th>Ville</th><th style="text-align:right">Nb commandes</th><th style="text-align:right">CA total (MAD)</th><th>Dernière commande</th></tr></thead>
+          <tbody id="stat-cl-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== STAT ARTICLES ==================== -->
+    <div class="page" id="page-stat-articles">
+      <div class="page-header"><div class="page-title">Statistique articles</div></div>
+      <div class="stat-row">
+        <div class="stat-card"><div class="stat-icon">🏷️</div><div class="stat-label">Articles actifs</div><div class="stat-value">41</div></div>
+        <div class="stat-card"><div class="stat-icon">📄</div><div class="stat-label">Lignes totales</div><div class="stat-value">47 630</div></div>
+        <div class="stat-card"><div class="stat-icon">⭐</div><div class="stat-label">Top article</div><div class="stat-value" style="font-size:14px">Tapis synthétique</div></div>
+        <div class="stat-card"><div class="stat-icon">📐</div><div class="stat-label">Surface totale</div><div class="stat-value">38 420</div><div class="stat-sub">m²</div></div>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead><tr><th>Article</th><th>Unité</th><th style="text-align:right">Nb lignes</th><th style="text-align:right">T. Particulier</th><th style="text-align:right">T. Pressing</th><th style="text-align:right">T. Pro</th></tr></thead>
+          <tbody id="stat-art-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================== CLIENTS ==================== -->
+    <div class="page" id="page-clients">
+
+      <!-- VUE KANBAN -->
+      <div id="cl-kanban-view">
+        <div class="page-header">
+          <div class="page-title">Clients</div>
+          <div class="header-right">
+            <div class="search-outer">
+              <input class="search-input" placeholder="Rechercher nom, téléphone, quartier..." oninput="filterClients(this.value)" id="cl-search"/>
+              <button class="search-icon-btn">🔍</button>
+            </div>
+            <div class="view-btns">
+              <button class="view-btn active" id="cl-kanban-btn" onclick="setClientView('kanban')">⊞</button>
+              <button class="view-btn" id="cl-list-btn" onclick="setClientView('list')">≡</button>
+            </div>
+            <span class="pag-info" id="cl-pag">1–20 sur 5 500</span>
+          </div>
+        </div>
+        <div class="toolbar">
+          <button class="btn-primary" onclick="showClientForm(-1)">Créer</button>
+          <button class="btn-link">ou Importer</button>
+          <select id="cl-filter-type" onchange="filterClients('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+            <option value="">Tous les types</option>
+            <option>Particulier</option><option>Pressing</option><option>Professionnel</option><option>Autre</option>
+          </select>
+        </div>
+
+        <!-- VUE KANBAN CARDS -->
+        <div id="cl-kanban-grid" style="display:grid;grid-template-columns:repeat(5,1fr);gap:10px;"></div>
+
+        <!-- VUE LISTE -->
+        <div id="cl-list-grid" style="display:none;">
+          <div class="table-card">
+            <table>
+              <thead><tr>
+                <th><input type="checkbox"/></th>
+                <th>Nom</th><th>Téléphone 1</th><th>Quartier</th><th>Ville</th><th>Type</th>
+              </tr></thead>
+              <tbody id="clients-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="plus-btn" style="margin-top:10px;">Plus.. (7 182 restant)</div>
+      </div>
+
+      <!-- FICHE CLIENT -->
+      <div id="cl-fiche-view" style="display:none">
+        <div class="breadcrumb">
+          <span class="lnk" onclick="hideClientForm()">Clients</span> / <span id="cl-fiche-bc">Nouveau</span>
+        </div>
+        <div class="form-topbar" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;gap:8px;align-items:center;" id="cl-form-actions"></div>
+          <div style="display:flex;align-items:center;gap:6px;">
+            <button class="lig-nav-btn" onclick="clNavPrev()">◄</button>
+            <span class="lig-nav-pag" id="cl-nav-pag">1 / 8</span>
+            <button class="lig-nav-btn" onclick="clNavNext()">►</button>
+            <div class="view-btns" style="margin-left:8px;">
+              <button class="view-btn active">⊞</button>
+              <button class="view-btn">≡</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="ro-banner" id="cl-ro-banner">🔒 Mode lecture — cliquez sur Modifier pour éditer</div>
+
+        <div class="form-card" style="max-width:780px;">
+          <!-- Top : photo + nom + type -->
+          <div style="display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;">
+            <div style="width:72px;height:72px;border-radius:50%;background:#e8edf4;border:2px solid #dde3ec;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;font-size:28px;">👤</div>
+            <div style="flex:1;">
+              <div style="font-size:11px;color:#8899aa;font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Nom</div>
+              <input class="name-big-input" id="clf-nom" placeholder="Nom"/>
+              <div style="margin-top:10px;">
+                <select class="field-select" id="clf-type" style="max-width:200px;padding:6px 28px 6px 10px;border:1px solid #dde3ec;border-radius:6px;font-size:13px;">
+                  <option>Particulier</option><option>Pressing</option><option>Professionnel</option><option>Autre</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Adresse + Téléphones en grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 40px;margin-bottom:16px;">
+            <!-- Adresse marocaine -->
+            <div>
+              <div style="font-size:12px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px;">Adresse</div>
+              <div style="display:grid;grid-template-columns:80px 80px 1fr;gap:6px;margin-bottom:6px;">
+                <input class="field-input" id="clf-num" placeholder="N°" style="padding:6px 8px;border:1px solid #dde3ec;border-radius:5px;font-size:13px;"/>
+                <input class="field-input" id="clf-etage" placeholder="Etage" style="padding:6px 8px;border:1px solid #dde3ec;border-radius:5px;font-size:13px;"/>
+                <input class="field-input" id="clf-residence" placeholder="Résidence" style="padding:6px 8px;border:1px solid #dde3ec;border-radius:5px;font-size:13px;"/>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:6px;margin-bottom:6px;">
+                <input class="field-input" id="clf-avenue" placeholder="Avenue" style="padding:6px 8px;border:1px solid #dde3ec;border-radius:5px;font-size:13px;"/>
+                <input class="field-input" id="clf-quartier" placeholder="Quartier" style="padding:6px 8px;border:1px solid #dde3ec;border-radius:5px;font-size:13px;"/>
+                <input class="field-input" id="clf-codepost" placeholder="Code post." style="padding:6px 8px;border:1px solid #dde3ec;border-radius:5px;font-size:13px;"/>
+              </div>
+              <input class="field-input" id="clf-ville" placeholder="Ville" style="width:160px;padding:6px 8px;border:1px solid #dde3ec;border-radius:5px;font-size:13px;"/>
+            </div>
+            <!-- Téléphones + Email + Localisation -->
+            <div>
+              <div class="field-row" style="padding:7px 0;border-bottom:1px solid #f5f6f8;">
+                <span class="field-label">Téléphone 1</span>
+                <input class="field-input" id="clf-tel1" style="flex:1;"/>
+              </div>
+              <div class="field-row" style="padding:7px 0;border-bottom:1px solid #f5f6f8;">
+                <span class="field-label">Téléphone 2</span>
+                <input class="field-input" id="clf-tel2" style="flex:1;"/>
+              </div>
+              <div class="field-row" style="padding:7px 0;border-bottom:1px solid #f5f6f8;">
+                <span class="field-label">Email</span>
+                <input class="field-input" id="clf-email" type="email" style="flex:1;"/>
+              </div>
+              <!-- Localisation Google Maps -->
+              <div class="field-row" style="padding:7px 0;border-bottom:1px solid #f5f6f8;">
+                <span class="field-label">📍 Localisation</span>
+                <div style="flex:1;display:flex;gap:6px;align-items:center;">
+                  <input class="field-input" id="clf-maps" placeholder="https://maps.app.goo.gl/..." style="flex:1;font-size:12px;"/>
+                  <button id="clf-maps-btn" onclick="openMaps()" style="padding:5px 8px;border:1px solid #dde3ec;border-radius:6px;background:white;cursor:pointer;font-size:13px;" title="Ouvrir dans Maps">🗺️</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Onglets Contact / Notes internes -->
+          <div style="border-bottom:2px solid #edf0f5;display:flex;margin-bottom:12px;">
+            <div id="cltab-contact" onclick="switchClTab('contact')" style="padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid #1a5fa8;margin-bottom:-2px;color:#1a5fa8;">Contact</div>
+            <div id="cltab-notes" onclick="switchClTab('notes')" style="padding:8px 18px;font-size:13px;font-weight:500;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-2px;color:#8899aa;">Notes internes</div>
+          </div>
+
+          <!-- Tab Contact -->
+          <div id="cltab-contact-body">
+            <div class="field-row" style="padding:8px 0;border-bottom:1px solid #f5f6f8;">
+              <span class="field-label">Nom du contact</span>
+              <input class="field-input" id="clf-contact-nom" style="flex:1;"/>
+            </div>
+            <div class="field-row" style="padding:8px 0;border-bottom:1px solid #f5f6f8;">
+              <span class="field-label">Téléphone 1</span>
+              <input class="field-input" id="clf-contact-tel1" style="flex:1;"/>
+            </div>
+            <div class="field-row" style="padding:8px 0;">
+              <span class="field-label">Téléphone 2</span>
+              <input class="field-input" id="clf-contact-tel2" style="flex:1;"/>
+            </div>
+          </div>
+
+          <!-- Tab Notes -->
+          <div id="cltab-notes-body" style="display:none;">
+            <textarea id="clf-notes" placeholder="Notes internes..." style="width:100%;min-height:100px;padding:10px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;font-family:inherit;resize:vertical;"></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== ARTICLES ==================== -->
+    <div class="page" id="page-articles">
+      <div id="articles-list-view">
+        <div class="page-header">
+          <div class="page-title">Articles</div>
+          <div class="header-right">
+            <div class="search-outer"><input class="search-input" placeholder="Rechercher..." oninput="filterArticles(this.value)"/><button class="search-icon-btn">🔍</button></div>
+            <div class="view-btns">
+              <button class="view-btn active" id="art-kanban-btn" onclick="setArtView('kanban')">⊞</button>
+              <button class="view-btn" id="art-list-btn" onclick="setArtView('list')">≡</button>
+            </div>
+          </div>
+        </div>
+        <div class="toolbar"><button class="btn-primary" onclick="showArtForm(-1)">Créer</button></div>
+        <div id="art-kanban-view"><div class="kanban-grid" id="art-kanban-grid"></div><div class="plus-btn">Plus.. (2 restant)</div></div>
+        <div id="art-list-view" style="display:none">
+          <div class="table-card">
+            <table>
+              <thead><tr>
+                <th><input type="checkbox"/></th><th>Nom</th>
+                <th style="text-align:right">T. Particulier</th><th style="text-align:right">T. Pressing</th><th style="text-align:right">T. Pro</th>
+                <th>Unité</th><th style="text-align:center">Actif</th>
+              </tr></thead>
+              <tbody id="art-list-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- FORM ARTICLE -->
+      <div id="art-form-view" style="display:none">
+        <div class="breadcrumb"><span class="lnk" onclick="hideArtForm()">Articles</span> / <span id="art-form-bc">Nouveau</span></div>
+        <div class="form-topbar" id="art-form-actions"></div>
+        <div class="ro-banner" id="art-ro">🔒 Mode lecture — cliquez sur Modifier pour éditer</div>
+        <div class="form-card">
+          <div class="form-card-top">
+            <div class="photo-box">🏷️</div>
+            <div class="name-block">
+              <div class="name-label-sm">Nom de l'article</div>
+              <input class="name-big-input" id="af-nom" placeholder="Nom de l'article"/>
+            </div>
+          </div>
+          <div class="tab-bar"><div class="tab-active">Information</div></div>
+          <div class="form-grid">
+            <div>
+              <div class="field-row"><span class="field-label">Tarif Particulier</span><input class="field-input field-input-num" id="af-tp" type="number" step="0.01" min="0"/></div>
+              <div class="field-row"><span class="field-label">Tarif Pressing</span><input class="field-input field-input-num" id="af-tpr" type="number" step="0.01" min="0"/></div>
+              <div class="field-row"><span class="field-label">Tarif Professionnel</span><input class="field-input field-input-num" id="af-tpro" type="number" step="0.01" min="0"/></div>
+              <div class="field-row"><span class="field-label">Tarif Autre</span><input class="field-input field-input-num" id="af-ta" type="number" step="0.01" min="0"/></div>
+            </div>
+            <div>
+              <div class="field-row">
+                <span class="field-label">Unité de mesure</span>
+                <div class="uom-wrap">
+                  <div class="uom-trigger" id="uom-trigger" onclick="toggleUom()">
+                    <span id="uom-val">—</span><span style="font-size:10px;color:#8899aa">▾</span>
+                  </div>
+                  <div class="uom-drop" id="uom-drop" style="display:none">
+                    <div class="uom-opt" onclick="pickUom('Forfait')">Forfait</div>
+                    <div class="uom-opt" onclick="pickUom('m')">m</div>
+                    <div class="uom-opt" onclick="pickUom('m²')">m²</div>
+                    <div class="uom-opt" onclick="pickUom('mL')">mL</div>
+                    <div class="uom-opt" onclick="pickUom('Place')">Place</div>
+                    <div class="uom-opt" onclick="pickUom('Pièce')">Pièce</div>
+                    <div class="uom-create" onclick="openUomModal()">+ Créer et modifier...</div>
+                  </div>
+                </div>
+              </div>
+              <div class="field-row"><span class="field-label">Actif</span><input type="checkbox" class="check-box" id="af-actif" checked/></div>
+            </div>
+          </div>
+          <div class="desc-wrap">
+            <textarea class="desc-textarea" id="af-desc" placeholder="Décrivez les caractéristiques de l'article"></textarea>
+            <div class="info-btn" onclick="toggleDescTooltip()">?</div>
+            <div class="info-tooltip" id="desc-tooltip">Une description précise du produit uniquement utilisée en interne.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== UOM ==================== -->
+    <div class="page" id="page-uom">
+      <div id="uom-list-view">
+        <div class="page-header">
+          <div class="page-title">Unités de mesure</div>
+          <div class="header-right">
+            <div class="search-outer"><input class="search-input" placeholder="Rechercher..."/><button class="search-icon-btn">🔍</button></div>
+            <span class="pag-info">1–6 sur 6</span>
+          </div>
+        </div>
+        <div class="toolbar"><button class="btn-primary" onclick="showUomForm(-1)">Créer</button><button class="btn-link">ou Importer</button></div>
+        <div class="table-card">
+          <table>
+            <thead><tr><th><input type="checkbox"/></th><th>Unité de mesure</th><th>Type</th></tr></thead>
+            <tbody id="uom-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="uom-form-view" style="display:none">
+        <div class="breadcrumb"><span class="lnk" onclick="hideUomForm()">Unités de mesure</span> / <span id="uom-form-bc">Nouveau</span></div>
+        <div class="form-topbar" id="uom-form-actions"></div>
+        <div class="ro-banner" id="uom-ro">🔒 Mode lecture</div>
+        <div class="form-card">
+          <div class="field-row"><span class="field-label">Unité de mesure</span><input class="field-input" id="uf-nom"/></div>
+          <div class="field-row"><span class="field-label">Type</span><span style="font-size:13px;color:#8899aa">Unité de mesure de référence pour cette catégorie</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== PERSONNEL ==================== -->
+    <div class="page" id="page-personnel">
+      <div id="pers-list-view">
+        <div class="page-header">
+          <div class="page-title">Liste du personnel</div>
+          <div class="header-right">
+            <div class="search-outer"><input class="search-input" placeholder="Rechercher..." oninput="filterPersonnel(this.value)"/><button class="search-icon-btn">🔍</button></div>
+            <span class="pag-info">1–22 sur 22</span>
+          </div>
+        </div>
+        <div class="toolbar"><button class="btn-primary" onclick="showPersForm(-1)">Créer</button><button class="btn-link">ou Importer</button></div>
+        <div class="table-card" style="overflow-x:auto">
+          <table style="min-width:900px">
+            <thead><tr>
+              <th><input type="checkbox"/></th>
+              <th>Matricule</th><th>Nom et prénom</th><th>Fonction</th>
+              <th>Tél. professionnel</th><th>Tél. personnel</th><th>CIN</th><th>Lieu</th><th>Ville</th>
+            </tr></thead>
+            <tbody id="pers-body"></tbody>
+          </table>
+        </div>
+      </div>
+      <div id="pers-form-view" style="display:none">
+        <div class="breadcrumb"><span class="lnk" onclick="hidePersForm()">Liste du per...</span> / <span id="pers-form-bc">Nouveau</span></div>
+        <div class="form-topbar" id="pers-form-actions"></div>
+        <div class="ro-banner" id="pers-ro">🔒 Mode lecture — cliquez sur Modifier pour éditer</div>
+        <div class="form-card">
+          <div class="form-grid">
+            <div>
+              <div class="field-row"><span class="field-label">Nom et prénom</span><input class="field-input" id="pf-nom"/></div>
+              <div class="field-row"><span class="field-label">Fonction</span>
+                <select class="field-select" id="pf-fonction" onchange="onFonctionChange(this.value)">
+                  <option value="">— Sélectionner —</option>
+                  <optgroup label="🖥️ ERP">
+                    <option value="Gérant">Gérant — Accès ERP complet</option>
+                    <option value="Administrateur">Administrateur — Accès ERP complet</option>
+                    <option value="Assistante">Assistante — Accès ERP complet</option>
+                  </optgroup>
+                  <optgroup label="🚚 App Livreur">
+                    <option value="Livreur">Livreur — App Livreur</option>
+                    <option value="Chauffeur">Chauffeur — App Livreur</option>
+                  </optgroup>
+                  <optgroup label="✂️ App Finition">
+                    <option value="Finition">Finition — App Finition</option>
+                    <option value="Chef Finition">Chef Finition — App Finition</option>
+                  </optgroup>
+                  <optgroup label="🫧 App Lavage">
+                    <option value="Lavage">Lavage — App Lavage</option>
+                    <option value="Chef Lavage">Chef Lavage — App Lavage</option>
+                  </optgroup>
+                  <optgroup label="⚙️ Atelier">
+                    <option value="Technicien">Technicien — Atelier</option>
+                    <option value="Manutentionnaire">Manutentionnaire — Atelier</option>
+                  </optgroup>
+                </select>
+                <!-- Badge app liée -->
+                <div id="pf-app-badge" style="display:none;margin-top:6px;"></div>
+              </div>
+              <div class="field-row"><span class="field-label">Tél. professionnel</span><input class="field-input" id="pf-telp"/></div>
+            </div>
+            <div>
+              <div class="field-row"><span class="field-label">CIN</span><input class="field-input" id="pf-cin"/></div>
+              <div class="field-row"><span class="field-label">Lieu</span><input class="field-input" id="pf-lieu"/></div>
+              <div class="field-row"><span class="field-label">Tél. personnel</span><input class="field-input" id="pf-telper"/></div>
+              <div class="field-row"><span class="field-label">Ville</span>
+                <select class="field-select" id="pf-ville">
+                  <option value="">—</option><option>Tanger</option><option>Casablanca</option>
+                  <option>Rabat</option><option>Marrakech</option>
+                </select>
+              </div>
+              <div class="field-row"><span class="field-label">Active</span><input type="checkbox" class="check-box" id="pf-active" checked/></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TRÉSORERIE ==================== -->
+    <div class="page" id="page-tresorerie">
+      <div class="page-header">
+        <div class="page-title">Trésorerie</div>
+        <div class="header-right">
+          <select id="treso-page-month" onchange="initTresoreriePage()" style="padding:7px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+            <option value="0">Janvier 2026</option><option value="1">Février 2026</option>
+            <option value="2">Mars 2026</option><option value="3" selected>Avril 2026</option>
+            <option value="4">Mai 2026</option><option value="5">Juin 2026</option>
+            <option value="6">Juillet 2026</option><option value="7">Août 2026</option>
+            <option value="8">Septembre 2026</option><option value="9">Octobre 2026</option>
+            <option value="10">Novembre 2026</option><option value="11">Décembre 2026</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bannière solde -->
+      <div class="treso-solde-banner positif" id="treso-page-banner">
+        <div>
+          <div style="font-size:12px;font-weight:600;color:#166534;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;">Solde net du mois</div>
+          <div style="font-size:28px;font-weight:800;" id="treso-page-solde">0 MAD</div>
+        </div>
+        <div style="display:flex;gap:24px;text-align:center;">
+          <div><div style="font-size:11px;color:#166534;font-weight:600;margin-bottom:4px;">RECETTES</div><div style="font-size:18px;font-weight:700;color:#059669" id="treso-page-rec">0 MAD</div></div>
+          <div style="width:1px;background:#86EFAC;"></div>
+          <div><div style="font-size:11px;color:#991B1B;font-weight:600;margin-bottom:4px;">CHARGES</div><div style="font-size:18px;font-weight:700;color:#DC2626" id="treso-page-chg">0 MAD</div></div>
+        </div>
+      </div>
+
+      <!-- KPIs détail -->
+      <div class="treso-page-kpi">
+        <div class="treso-page-kpi-card">
+          <div class="treso-page-kpi-label">Commandes payées</div>
+          <div class="treso-page-kpi-val" id="treso-kpi-nb-cmd" style="color:#059669">0</div>
+          <div class="treso-page-kpi-sub">ce mois</div>
+        </div>
+        <div class="treso-page-kpi-card">
+          <div class="treso-page-kpi-label">Nb mouvements charges</div>
+          <div class="treso-page-kpi-val" id="treso-kpi-nb-charges" style="color:#DC2626">0</div>
+          <div class="treso-page-kpi-sub">enregistrés</div>
+        </div>
+        <div class="treso-page-kpi-card">
+          <div class="treso-page-kpi-label">Plus grande recette</div>
+          <div class="treso-page-kpi-val" id="treso-kpi-max-rec" style="color:#1a5fa8">0 MAD</div>
+          <div class="treso-page-kpi-sub">commande unique</div>
+        </div>
+        <div class="treso-page-kpi-card">
+          <div class="treso-page-kpi-label">Plus grande charge</div>
+          <div class="treso-page-kpi-val" id="treso-kpi-max-chg" style="color:#D97706">0 MAD</div>
+          <div class="treso-page-kpi-sub">mouvement unique</div>
+        </div>
+      </div>
+
+      <!-- Onglets + tableau -->
+      <div class="dash-card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:8px;">
+          <div class="treso-tabs" style="margin-bottom:0;">
+            <div class="treso-tab active" id="ttab-tous" onclick="switchTresoTab('tous')">Tous les mouvements</div>
+            <div class="treso-tab" id="ttab-recettes" onclick="switchTresoTab('recettes')">💚 Recettes</div>
+            <div class="treso-tab" id="ttab-charges" onclick="switchTresoTab('charges')">🔴 Charges</div>
+          </div>
+          <div class="treso-filters">
+            <select class="treso-filter-select" id="treso-filter-cat" onchange="renderTresoTable()">
+              <option value="">Toutes catégories</option>
+              <option>Salaires</option><option>Carburant</option><option>Loyer</option>
+              <option>Entretien</option><option>Commande payée</option><option>Divers</option>
+            </select>
+            <button class="btn-add-charge" onclick="openAddCharge()">+ Ajouter une charge</button>
+          </div>
+        </div>
+
+        <div class="table-card" style="box-shadow:none;border:1px solid #edf0f5;">
+          <table class="treso-mouvement-table">
+            <thead><tr>
+              <th>Date</th><th>Type</th><th>Catégorie</th><th>Libellé</th>
+              <th>Référence</th><th style="text-align:right">Montant</th><th>Saisi par</th><th style="width:36px"></th>
+            </tr></thead>
+            <tbody id="treso-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL AJOUTER CHARGE -->
+    <div id="add-charge-modal" style="display:none">
+      <div style="position:fixed;inset:0;background:rgba(15,20,35,.5);display:flex;align-items:center;justify-content:center;z-index:600;" onclick="closeAddCharge(event)">
+        <div style="background:white;border-radius:14px;width:440px;padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.2);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+            <div style="font-size:15px;font-weight:700;color:#1a2332;">🔴 Nouvelle charge</div>
+            <button onclick="document.getElementById('add-charge-modal').style.display='none'" style="border:none;background:#f0f2f5;border-radius:50%;width:30px;height:30px;cursor:pointer;font-size:15px;">✕</button>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Date *</div>
+              <input type="date" id="ac-date" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;"/>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Catégorie *</div>
+              <select id="ac-cat" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;">
+                <option>Salaires</option><option>Carburant</option><option>Loyer</option>
+                <option>Entretien</option><option>Divers</option>
+              </select>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Libellé *</div>
+              <input type="text" id="ac-libelle" placeholder="Ex: Salaire Koukouss Avril..." style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;"/>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Montant (MAD) *</div>
+              <input type="number" id="ac-montant" placeholder="0.00" step="0.01" min="0" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;"/>
+            </div>
+            <div>
+              <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Référence / Note</div>
+              <input type="text" id="ac-ref" placeholder="Ex: Facture N°123, Reçu..." style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;"/>
+            </div>
+          </div>
+          <div style="margin-top:20px;display:flex;gap:8px;justify-content:flex-end;">
+            <button onclick="document.getElementById('add-charge-modal').style.display='none'" style="padding:8px 18px;border:1px solid #dde3ec;border-radius:7px;background:white;font-size:13px;cursor:pointer;">Annuler</button>
+            <button onclick="saveNewCharge()" style="padding:8px 20px;background:#DC2626;color:white;border:none;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;">Enregistrer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== CAMPAGNES WHATSAPP ==================== -->
+    <div class="page" id="page-campagnes">
+      <div class="page-header">
+        <div class="page-title">Campagnes WhatsApp</div>
+        <div class="header-right">
+          <span style="font-size:12px;color:#8899aa;">42 800 messages · 68% ouverture</span>
+          <button class="btn-wa-green" onclick="switchCampTab('creer')">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z"/></svg>
+            Nouvelle campagne
+          </button>
+        </div>
+      </div>
+
+      <!-- Onglets -->
+      <div class="camp-tabs">
+        <div class="camp-tab active" id="ctab-dashboard" onclick="switchCampTab('dashboard')">Vue d'ensemble</div>
+        <div class="camp-tab" id="ctab-creer" onclick="switchCampTab('creer')">Créer campagne</div>
+        <div class="camp-tab" id="ctab-historique" onclick="switchCampTab('historique')">Historique</div>
+        <div class="camp-tab" id="ctab-templates" onclick="switchCampTab('templates')">Templates</div>
+        <div class="camp-tab" id="ctab-analytics" onclick="switchCampTab('analytics')">Performances</div>
+      </div>
+
+      <!-- ===== DASHBOARD ===== -->
+      <div id="camp-view-dashboard">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:1.25rem;">
+          <div class="stat-card"><div class="stat-icon" style="font-size:22px;">📲</div><div class="stat-label">Campagnes envoyées</div><div class="stat-value" style="color:#25D366;">18</div><div class="stat-sub">↑ 3 ce mois</div></div>
+          <div class="stat-card"><div class="stat-icon" style="font-size:22px;">✉️</div><div class="stat-label">Messages envoyés</div><div class="stat-value" style="color:#3B82F6;">42 800</div><div class="stat-sub">↑ 12% vs mois dernier</div></div>
+          <div class="stat-card"><div class="stat-icon" style="font-size:22px;">👁️</div><div class="stat-label">Taux d'ouverture</div><div class="stat-value" style="color:#F59E0B;">68%</div><div class="stat-sub">vs email 22%</div></div>
+          <div class="stat-card"><div class="stat-icon" style="font-size:22px;">🛒</div><div class="stat-label">Taux de conversion</div><div class="stat-value" style="color:#8B5CF6;">24%</div><div class="stat-sub">↑ vers commande</div></div>
+        </div>
+        <div style="font-size:12px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Campagnes récentes</div>
+        <div id="camp-recent-list"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:4px;">
+          <div class="dash-card">
+            <div class="dash-card-title">📊 Performance par segment</div>
+            <div id="camp-seg-perf"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">⏰ Meilleur moment d'envoi</div>
+            <div id="camp-timing-perf"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CRÉER CAMPAGNE (WIZARD) ===== -->
+      <div id="camp-view-creer" style="display:none;">
+        <div style="background:white;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.08);">
+          <!-- Steps -->
+          <div style="display:flex;border-bottom:1px solid #edf0f5;background:#f8f9fb;">
+            <div class="wiz-step-erp active" id="ws-1"><div class="wiz-num-erp">1</div><div>Ciblage</div></div>
+            <div class="wiz-step-erp" id="ws-2"><div class="wiz-num-erp">2</div><div>Message</div></div>
+            <div class="wiz-step-erp" id="ws-3"><div class="wiz-num-erp">3</div><div>Planification</div></div>
+            <div class="wiz-step-erp" id="ws-4"><div class="wiz-num-erp">4</div><div>Confirmation</div></div>
+          </div>
+          <div style="padding:24px;">
+
+            <!-- STEP 1 CIBLAGE -->
+            <div id="camp-step-1">
+              <div style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:4px;">Qui voulez-vous cibler ?</div>
+              <div style="font-size:12px;color:#8899aa;margin-bottom:16px;">Sélectionnez un segment ou créez un ciblage personnalisé</div>
+              <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;" id="camp-seg-options"></div>
+              <!-- Filtres avancés -->
+              <div style="background:#f8f9fb;border-radius:10px;padding:14px;margin-bottom:14px;">
+                <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Filtres avancés (optionnel)</div>
+                <div style="display:flex;gap:10px;margin-bottom:8px;align-items:center;">
+                  <span style="font-size:11px;font-weight:600;color:#8899aa;width:120px;">Quartier</span>
+                  <select style="flex:1;padding:6px 10px;border:1px solid #dde3ec;border-radius:8px;font-size:12px;background:white;"><option>Tous</option><option>Hay Hassani</option><option>Malabata</option><option>Tanja balia</option><option>Boubana</option><option>Castilla</option></select>
+                </div>
+                <div style="display:flex;gap:10px;margin-bottom:8px;align-items:center;">
+                  <span style="font-size:11px;font-weight:600;color:#8899aa;width:120px;">Dernière cmd</span>
+                  <select style="flex:1;padding:6px 10px;border:1px solid #dde3ec;border-radius:8px;font-size:12px;background:white;"><option>Toutes périodes</option><option>Ce mois</option><option>3 derniers mois</option><option>+6 mois sans cmd</option><option>+1 an sans cmd</option></select>
+                </div>
+                <div style="display:flex;gap:10px;align-items:center;">
+                  <span style="font-size:11px;font-weight:600;color:#8899aa;width:120px;">Palier fidélité</span>
+                  <select style="flex:1;padding:6px 10px;border:1px solid #dde3ec;border-radius:8px;font-size:12px;background:white;"><option>Tous</option><option>💎 Platine</option><option>🥇 Or</option><option>🥈 Argent</option><option>🥉 Bronze</option></select>
+                </div>
+              </div>
+              <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;padding:10px 14px;display:flex;align-items:center;gap:8px;font-size:12px;font-weight:500;color:#065F46;">
+                👥 Cible estimée : <strong id="camp-target-count">5 500 contacts</strong>
+              </div>
+            </div>
+
+            <!-- STEP 2 MESSAGE -->
+            <div id="camp-step-2" style="display:none;">
+              <div style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:4px;">Rédigez votre message</div>
+              <div style="font-size:12px;color:#8899aa;margin-bottom:16px;">Choisissez un template ou rédigez librement</div>
+              <div style="display:grid;grid-template-columns:1fr 260px;gap:16px;">
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Templates rapides</div>
+                  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;" id="camp-tpl-grid"></div>
+                  <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;">Variables personnalisées</div>
+                  <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px;">
+                    <span style="font-size:11px;color:#8899aa;font-weight:500;line-height:24px;">Insérer :</span>
+                    <span class="var-chip-erp" onclick="campInsertVar('{Prénom}')">Prénom</span>
+                    <span class="var-chip-erp" onclick="campInsertVar('{Points}')">Points</span>
+                    <span class="var-chip-erp" onclick="campInsertVar('{Palier}')">Palier</span>
+                    <span class="var-chip-erp" onclick="campInsertVar('{Remise}')">% Remise</span>
+                    <span class="var-chip-erp" onclick="campInsertVar('{LastCmd}')">Dernière cmd</span>
+                  </div>
+                  <div class="msg-editor-erp">
+                    <div class="msg-toolbar-erp">
+                      <button class="toolbar-btn-erp" onclick="campFormat('bold')"><b>B</b></button>
+                      <button class="toolbar-btn-erp" onclick="campFormat('italic')"><i>I</i></button>
+                      <button class="toolbar-btn-erp" onclick="campFormat('emoji')">😊</button>
+                      <span style="margin-left:auto;font-size:10px;color:#8899aa;" id="camp-char-count">0 / 1024</span>
+                    </div>
+                    <textarea id="camp-msg-input" placeholder="Rédigez votre message WhatsApp..." oninput="campUpdatePreview();campUpdateCharCount()" style="width:100%;border:none;outline:none;padding:12px;font-size:13px;min-height:100px;resize:none;background:white;color:#2c3e50;font-family:inherit;"></textarea>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Aperçu WhatsApp</div>
+                  <div class="wa-phone-erp">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                      <div style="width:30px;height:30px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">AT</div>
+                      <div><div style="font-size:12px;font-weight:600;color:#fff;">Allo Tapis</div><div style="font-size:10px;color:rgba(255,255,255,.4);">En ligne</div></div>
+                    </div>
+                    <div class="wa-bubble-erp">
+                      <div class="wa-bubble-text-erp" id="camp-wa-preview">Votre message apparaîtra ici...</div>
+                      <div style="font-size:9px;color:rgba(255,255,255,.4);text-align:right;margin-top:4px;">09:41 ✓✓</div>
+                    </div>
+                    <div class="wa-cta-erp">📞 Réserver maintenant</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 3 PLANIFICATION -->
+            <div id="camp-step-3" style="display:none;">
+              <div style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:4px;">Quand envoyer ?</div>
+              <div style="font-size:12px;color:#8899aa;margin-bottom:16px;">Choisissez l'heure d'envoi optimale</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+                <div class="plan-opt-erp selected" id="camp-plan-now" onclick="campSelectPlan('now')">
+                  <div style="font-size:22px;margin-bottom:6px;">⚡</div>
+                  <div style="font-size:13px;font-weight:600;color:#1a2332;">Envoyer maintenant</div>
+                  <div style="font-size:11px;color:#8899aa;margin-top:3px;">La campagne sera lancée immédiatement</div>
+                </div>
+                <div class="plan-opt-erp" id="camp-plan-later" onclick="campSelectPlan('later')">
+                  <div style="font-size:22px;margin-bottom:6px;">📅</div>
+                  <div style="font-size:13px;font-weight:600;color:#1a2332;">Programmer</div>
+                  <div style="font-size:11px;color:#8899aa;margin-top:3px;">Choisissez une date et heure précises</div>
+                </div>
+              </div>
+              <div id="camp-plan-dt" style="display:none;margin-bottom:16px;">
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                  <div><div style="font-size:11px;font-weight:600;color:#8899aa;margin-bottom:4px;">DATE</div><input type="date" style="width:100%;padding:8px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;" value="2026-04-30"/></div>
+                  <div><div style="font-size:11px;font-weight:600;color:#8899aa;margin-bottom:4px;">HEURE</div>
+                    <select style="width:100%;padding:8px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;background:white;">
+                      <option>09:00 — Matin</option><option>12:00 — Pause déjeuner</option>
+                      <option selected>17:00 — Fin de journée ⭐ Top</option><option>19:00 — Soirée</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <div style="background:#f8f9fb;border-radius:10px;padding:14px;">
+                <div style="font-size:11px;font-weight:600;color:#8899aa;margin-bottom:10px;text-transform:uppercase;letter-spacing:.07em;">💡 Conseils d'envoi</div>
+                <div style="display:flex;flex-direction:column;gap:8px;">
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span>⭐</span><span style="color:#8899aa;">17h00 — Meilleur taux d'ouverture (68%)</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span>📅</span><span style="color:#8899aa;">Mardi & Jeudi — Jours les plus efficaces</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span>⏰</span><span style="color:#8899aa;">Évitez les envois après 21h00</span></div>
+                  <div style="display:flex;align-items:center;gap:8px;font-size:12px;"><span>💡</span><span style="color:#8899aa;">Personnalisez avec le prénom pour +23% d'engagement</span></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- STEP 4 CONFIRMATION -->
+            <div id="camp-step-4" style="display:none;">
+              <div style="font-size:14px;font-weight:700;color:#1a2332;margin-bottom:16px;">Résumé de la campagne</div>
+              <div style="display:grid;grid-template-columns:1fr 260px;gap:16px;">
+                <div>
+                  <div style="background:#f8f9fb;border-radius:12px;padding:16px;margin-bottom:12px;" id="camp-summary-box"></div>
+                  <div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:14px;font-size:12px;color:#065F46;">
+                    <div style="font-weight:700;margin-bottom:6px;">✅ Prêt à envoyer</div>
+                    <div>Votre campagne sera envoyée à <strong id="camp-final-count">5 500</strong> contacts via WhatsApp Business API.</div>
+                    <div style="margin-top:6px;">Coût estimé : <strong id="camp-final-cost">~2.75 USD</strong> (0.05 USD/message)</div>
+                  </div>
+                </div>
+                <div>
+                  <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Aperçu final</div>
+                  <div class="wa-phone-erp">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+                      <div style="width:30px;height:30px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;">AT</div>
+                      <div><div style="font-size:12px;font-weight:600;color:#fff;">Allo Tapis</div><div style="font-size:10px;color:rgba(255,255,255,.4);">En ligne</div></div>
+                    </div>
+                    <div class="wa-bubble-erp"><div class="wa-bubble-text-erp" id="camp-wa-preview-final">—</div><div style="font-size:9px;color:rgba(255,255,255,.4);text-align:right;margin-top:4px;">09:41 ✓✓</div></div>
+                    <div class="wa-cta-erp">📞 Réserver maintenant</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Footer wizard -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-top:20px;padding-top:16px;border-top:1px solid #edf0f5;">
+              <button id="camp-btn-prev" onclick="campPrevStep()" style="display:none;padding:8px 18px;border:1px solid #dde3ec;border-radius:8px;background:none;font-size:12px;font-weight:600;cursor:pointer;color:#8899aa;">← Retour</button>
+              <div style="display:flex;gap:8px;margin-left:auto;">
+                <button onclick="switchCampTab('dashboard')" style="padding:8px 18px;border:1px solid #dde3ec;border-radius:8px;background:none;font-size:12px;font-weight:600;cursor:pointer;color:#8899aa;">Annuler</button>
+                <button id="camp-btn-next" onclick="campNextStep()" style="padding:8px 20px;background:#25D366;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">Suivant →</button>
+                <button id="camp-btn-send" onclick="campSend()" style="display:none;padding:10px 24px;background:#25D366;color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">🚀 Lancer la campagne</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== HISTORIQUE ===== -->
+      <div id="camp-view-historique" style="display:none;">
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th>Campagne</th><th>Segment</th><th>Envois</th>
+              <th>Ouverts</th><th>Réponses</th><th>Conversions</th><th>Date</th><th>Statut</th>
+            </tr></thead>
+            <tbody id="camp-history-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== TEMPLATES ===== -->
+      <div id="camp-view-templates" style="display:none;">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;" id="camp-all-templates"></div>
+      </div>
+
+      <!-- ===== ANALYTICS ===== -->
+      <div id="camp-view-analytics" style="display:none;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="dash-card"><div class="dash-card-title">📊 Taux d'ouverture par segment</div><div id="camp-open-chart"></div></div>
+          <div class="dash-card"><div class="dash-card-title">💰 CA généré par campagne</div><div id="camp-ca-chart"></div></div>
+          <div class="dash-card"><div class="dash-card-title">⏰ Meilleur moment d'envoi</div><div id="camp-timing-chart"></div></div>
+          <div class="dash-card"><div class="dash-card-title">📈 Évolution mensuelle</div><div id="camp-monthly-chart"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== APP LIVREUR ==================== -->
+    <div class="page" id="page-app-livreur">
+      <div class="page-header">
+        <div class="page-title">🚚 App Livreur</div>
+        <div class="header-right">
+          <div class="sync-dot" id="livreur-sync-dot"></div>
+          <span style="font-size:12px;color:#8899aa;" id="livreur-sync-lbl">Synchronisé</span>
+          <button class="btn-primary" onclick="openAppExternal('livreur')">↗ Ouvrir plein écran</button>
+        </div>
+      </div>
+      <div class="app-sync-banner" id="livreur-banner">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="sync-dot"></div>
+          <div>
+            <strong id="livreur-bl-count">0</strong> BLs "Prêt à livrer" disponibles pour les livreurs
+            · <strong id="livreur-ram-count">0</strong> ramassages en attente
+          </div>
+        </div>
+        <button onclick="syncLivreurData()" style="padding:5px 12px;background:#059669;color:white;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">🔄 Sync données</button>
+      </div>
+      <!-- Résumé par livreur -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.25rem;" id="livreur-cards"></div>
+      <!-- Iframe de l'app -->
+      <div class="app-frame-wrap">
+        <iframe class="app-iframe-phone" id="iframe-livreur" src="about:blank" title="App Livreur"></iframe>
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:#8899aa;">
+        💡 Les données sont synchronisées depuis l'ERP · Les livreurs accèdent via <strong>allo_tapis_livreur.html</strong>
+      </div>
+    </div>
+
+    <!-- ==================== APP FINITION ==================== -->
+    <div class="page" id="page-app-finition">
+      <div class="page-header">
+        <div class="page-title">✂️ App Finition</div>
+        <div class="header-right">
+          <div class="sync-dot" id="finition-sync-dot"></div>
+          <span style="font-size:12px;color:#8899aa;" id="finition-sync-lbl">Synchronisé</span>
+          <button class="btn-primary" onclick="openAppExternal('finition')">↗ Ouvrir plein écran</button>
+        </div>
+      </div>
+      <div class="app-sync-banner" id="finition-banner">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="sync-dot"></div>
+          <div>
+            <strong id="finition-sans-empl">0</strong> articles sans emplacement
+            · <strong id="finition-pret">0</strong> prêts à livrer
+            · <strong id="finition-maj">0</strong> mise(s) à jour reçue(s) de l'atelier
+          </div>
+        </div>
+        <button onclick="applyFinitionUpdates()" style="padding:5px 12px;background:#059669;color:white;border:none;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;">✓ Appliquer</button>
+      </div>
+      <!-- Barre progression finition -->
+      <div class="dash-card" style="margin-bottom:1rem;" id="finition-progress-card"></div>
+      <!-- Iframe -->
+      <div class="app-frame-wrap">
+        <iframe class="app-iframe-phone" id="iframe-finition" src="about:blank" title="App Finition"></iframe>
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:#8899aa;">
+        💡 L'équipe finition accède via <strong>allo_tapis_finition.html</strong> · Les emplacements remontent automatiquement
+      </div>
+    </div>
+
+    <!-- ==================== APP LAVAGE ==================== -->
+    <div class="page" id="page-app-lavage">
+      <div class="page-header">
+        <div class="page-title">🫧 App Lavage</div>
+        <div class="header-right">
+          <div class="sync-dot" id="lavage-sync-dot"></div>
+          <span style="font-size:12px;color:#8899aa;" id="lavage-sync-lbl">Synchronisé</span>
+          <button class="btn-primary" onclick="openAppExternal('lavage')">↗ Ouvrir plein écran</button>
+        </div>
+      </div>
+      <div class="app-sync-banner warn" id="lavage-banner">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="sync-dot warn"></div>
+          <div>
+            <strong id="lavage-urgent-count">0</strong> articles urgents en attente
+            · Temps d'attente max : <strong id="lavage-max-wait">—</strong>
+          </div>
+        </div>
+        <span style="font-size:11px;color:#92400E;font-weight:500;">Affichage lecture seule</span>
+      </div>
+      <!-- KPIs lavage depuis ERP -->
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:1.25rem;" id="lavage-kpis"></div>
+      <!-- Iframe -->
+      <div class="app-frame-wrap">
+        <iframe class="app-iframe-phone" id="iframe-lavage" src="about:blank" title="App Lavage"></iframe>
+      </div>
+      <div style="text-align:center;margin-top:12px;font-size:12px;color:#8899aa;">
+        💡 L'équipe lavage accède via <strong>allo_tapis_lavage.html</strong> · Vue lecture seule des articles à traiter
+      </div>
+    </div>
+
+    <!-- ==================== FIDÉLITÉ ==================== -->
+    <div class="page" id="page-fidelite">
+      <div class="page-header">
+        <div class="page-title">Programme de Fidélité</div>
+        <div class="header-right">
+          <span style="font-size:12px;color:#8899aa">5 500 membres actifs</span>
+          <button class="btn-primary" onclick="openFidAddPoints(null)" style="background:#F59E0B;color:#0f1923;">+ Ajouter points</button>
+        </div>
+      </div>
+
+      <!-- Onglets -->
+      <div class="fid-tabs">
+        <div class="fid-tab active" id="ftab-overview" onclick="switchFidTab('overview')">Vue d'ensemble</div>
+        <div class="fid-tab" id="ftab-clients" onclick="switchFidTab('clients')">Clients & Points</div>
+        <div class="fid-tab" id="ftab-carte" onclick="switchFidTab('carte')">Carte digitale</div>
+        <div class="fid-tab" id="ftab-recompenses" onclick="switchFidTab('recompenses')">Récompenses</div>
+        <div class="fid-tab" id="ftab-regles" onclick="switchFidTab('regles')">Règles & Config</div>
+      </div>
+
+      <!-- ===== OVERVIEW ===== -->
+      <div id="fid-view-overview">
+        <div class="fid-tiers-grid">
+          <div class="fid-tier-card fid-tier-bronze" onclick="switchFidTab('clients');fidFilterTier('bronze')">
+            <div class="fid-tier-icon">🥉</div><div class="fid-tier-name">Bronze</div>
+            <div class="fid-tier-range">1 — 500 points</div>
+            <div class="fid-tier-count">2 840</div><div class="fid-tier-lbl">membres</div>
+            <div class="fid-tier-reward">🎁 5% de remise sur chaque commande</div>
+            <div class="fid-tier-bg">🥉</div>
+          </div>
+          <div class="fid-tier-card fid-tier-silver" onclick="switchFidTab('clients');fidFilterTier('silver')">
+            <div class="fid-tier-icon">🥈</div><div class="fid-tier-name">Argent</div>
+            <div class="fid-tier-range">501 — 1 500 points</div>
+            <div class="fid-tier-count">1 420</div><div class="fid-tier-lbl">membres</div>
+            <div class="fid-tier-reward">🎁 10% remise + collecte prioritaire</div>
+            <div class="fid-tier-bg">🥈</div>
+          </div>
+          <div class="fid-tier-card fid-tier-gold" onclick="switchFidTab('clients');fidFilterTier('gold')">
+            <div class="fid-tier-icon">🥇</div><div class="fid-tier-name">Or</div>
+            <div class="fid-tier-range">1 501 — 5 000 points</div>
+            <div class="fid-tier-count">890</div><div class="fid-tier-lbl">membres</div>
+            <div class="fid-tier-reward">🎁 15% remise + 1 collecte offerte/mois</div>
+            <div class="fid-tier-bg">🥇</div>
+          </div>
+          <div class="fid-tier-card fid-tier-platine" onclick="switchFidTab('clients');fidFilterTier('platine')">
+            <div class="fid-tier-icon">💎</div><div class="fid-tier-name">Platine</div>
+            <div class="fid-tier-range">5 000+ points</div>
+            <div class="fid-tier-count">350</div><div class="fid-tier-lbl">membres</div>
+            <div class="fid-tier-reward">🎁 20% remise + service VIP</div>
+            <div class="fid-tier-bg">💎</div>
+          </div>
+        </div>
+        <div class="fid-stats-row">
+          <div class="fid-stat-box"><div class="fid-stat-val" style="color:#F59E0B">2.4M</div><div class="fid-stat-lbl">Points distribués</div></div>
+          <div class="fid-stat-box"><div class="fid-stat-val" style="color:#10B981">340K</div><div class="fid-stat-lbl">Points échangés</div></div>
+          <div class="fid-stat-box"><div class="fid-stat-val" style="color:#3B82F6">14.2%</div><div class="fid-stat-lbl">Taux d'échange</div></div>
+          <div class="fid-stat-box"><div class="fid-stat-val" style="color:#8B5CF6">+23%</div><div class="fid-stat-lbl">CA clients fidèles</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="dash-card">
+            <div class="dash-card-title">⭐ Règles d'accumulation</div>
+            <div id="fid-rules-accum"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">🎁 Avantages par palier</div>
+            <div id="fid-rules-paliers"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== CLIENTS & POINTS ===== -->
+      <div id="fid-view-clients" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;" id="fid-tier-filters"></div>
+          <div class="search-outer" style="min-width:200px;">
+            <input class="search-input" placeholder="Rechercher client..." oninput="fidFilterSearch(this.value)" id="fid-client-search"/>
+            <button class="search-icon-btn">🔍</button>
+          </div>
+        </div>
+        <div class="table-card">
+          <table>
+            <thead><tr>
+              <th>Client</th><th>Palier</th><th>Points</th><th>Progression</th>
+              <th>Prochain palier</th><th>CA total</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="fid-clients-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== CARTE DIGITALE ===== -->
+      <div id="fid-view-carte" style="display:none">
+        <div style="display:grid;grid-template-columns:380px 1fr;gap:20px;">
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Aperçu carte</div>
+            <select onchange="fidUpdateCarte(parseInt(this.value))" id="fid-carte-select" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;background:white;margin-bottom:12px;"></select>
+            <div id="fid-carte-preview"></div>
+            <div style="display:flex;gap:8px;margin-top:14px;">
+              <button onclick="showToast('📲 Carte envoyée par WhatsApp !')" style="flex:1;padding:10px;background:#25D366;color:white;border:none;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">📲 Envoyer WhatsApp</button>
+              <button onclick="showToast('📤 Carte téléchargée !')" style="flex:1;padding:10px;background:#f0f2f5;border:1px solid #dde3ec;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;">📤 Télécharger</button>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px;">Détails du membre</div>
+            <div id="fid-carte-details"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== RÉCOMPENSES ===== -->
+      <div id="fid-view-recompenses" style="display:none">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:1.25rem;" id="fid-rewards-grid"></div>
+        <div class="dash-card">
+          <div class="dash-card-title">📊 Échanges récents</div>
+          <table style="width:100%;border-collapse:collapse;font-size:13px;">
+            <thead style="background:#f8f9fb;"><tr>
+              <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;color:#8899aa;border-bottom:1px solid #edf0f5;">Client</th>
+              <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;color:#8899aa;border-bottom:1px solid #edf0f5;">Récompense</th>
+              <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;color:#8899aa;border-bottom:1px solid #edf0f5;">Points</th>
+              <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;color:#8899aa;border-bottom:1px solid #edf0f5;">Date</th>
+              <th style="padding:8px 12px;text-align:left;font-size:11px;font-weight:600;color:#8899aa;border-bottom:1px solid #edf0f5;">Palier</th>
+            </tr></thead>
+            <tbody id="fid-exchanges-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ===== RÈGLES ===== -->
+      <div id="fid-view-regles" style="display:none">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div class="dash-card">
+            <div class="dash-card-title">⭐ Règles d'accumulation
+              <button onclick="showToast('+ Nouvelle règle (bientôt disponible)')" style="padding:4px 10px;background:#F59E0B;color:#0f1923;border:none;border-radius:6px;font-size:10px;font-weight:700;cursor:pointer;">+ Ajouter</button>
+            </div>
+            <div id="fid-rules-edit"></div>
+          </div>
+          <div class="dash-card">
+            <div class="dash-card-title">🎯 Seuils des paliers</div>
+            <div id="fid-paliers-edit"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- MODAL FIDÉLITÉ -->
+    <div id="fid-modal" style="display:none">
+      <div class="fid-add-modal" onclick="closeFidModal(event)">
+        <div class="fid-modal-box">
+          <button onclick="document.getElementById('fid-modal').style.display='none'" style="position:absolute;top:16px;right:16px;border:none;background:none;font-size:22px;cursor:pointer;color:#8899aa;">×</button>
+          <div style="font-size:16px;font-weight:700;color:#1a2332;margin-bottom:16px;">+ Ajouter des points</div>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Client</div>
+            <select id="fid-m-client" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;background:white;"></select>
+          </div>
+          <div style="margin-bottom:12px;">
+            <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Motif</div>
+            <select id="fid-m-motif" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;background:white;">
+              <option>Achat commande</option><option>Bonus 1ère commande</option>
+              <option>Parrainage</option><option>Anniversaire</option>
+              <option>Avis Google</option><option>Ajustement manuel</option>
+            </select>
+          </div>
+          <div style="margin-bottom:16px;">
+            <div style="font-size:11px;font-weight:600;color:#8899aa;text-transform:uppercase;margin-bottom:4px;">Points à ajouter</div>
+            <input type="number" id="fid-m-pts" placeholder="Ex: 50" min="1" style="width:100%;padding:8px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;"/>
+          </div>
+          <button onclick="fidSavePoints()" style="width:100%;padding:11px;background:#F59E0B;color:#0f1923;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;">✓ Confirmer l'ajout</button>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<!-- MODAL RAMASSAGE -->
+<div id="ram-modal" style="display:none">
+  <div class="ram-modal-overlay" onclick="closeRamModalOutside(event)">
+    <div class="ram-modal">
+      <div class="ram-modal-header">
+        <div class="ram-modal-title">
+          <div class="plus-icon">+</div>
+          Nouvelle commande
+        </div>
+        <button class="ram-modal-close" onclick="closeRamModal()">✕</button>
+      </div>
+      <div style="font-size:11px;color:#e53e3e;padding:0 22px 8px;margin-top:-6px;">* obligatoires</div>
+      <div class="ram-modal-body">
+
+        <!-- CLIENT SEARCH -->
+        <div class="ram-field-group">
+          <div class="ram-field-label">NOM DU CLIENT <span class="req">*</span></div>
+          <div class="autocomplete-wrap">
+            <input class="ram-input" id="ram-nom" placeholder="Marie Dupont" oninput="acSearch('nom')" autocomplete="off"/>
+            <div class="autocomplete-dropdown" id="ac-dropdown"></div>
+          </div>
+          <div class="new-client-hint" id="new-client-hint">
+            ⚡ Nouveau client — sera enregistré automatiquement à la création
+          </div>
+        </div>
+
+        <div class="ram-field-group">
+          <div class="ram-field-label">TÉLÉPHONE WHATSAPP <span class="req">*</span></div>
+          <input class="ram-input" id="ram-tel" placeholder="06 xx xx xx xx" oninput="acSearch('tel')" autocomplete="off"/>
+        </div>
+
+        <!-- SECTION RAMASSAGE -->
+        <div class="ram-section">
+          <div class="ram-section-title"><span class="section-icon">🛵</span> RAMASSAGE</div>
+          <div class="ram-field-group">
+            <div class="ram-field-label">ADRESSE PICK-UP <span class="req">*</span></div>
+            <input class="ram-input" id="ram-adresse" placeholder="Ex: Hay Saddam, Tanger"/>
+          </div>
+          <div class="ram-input-row">
+            <div class="ram-field-group">
+              <div class="ram-field-label">LIEN GOOGLE MAPS</div>
+              <input class="ram-input" id="ram-maps" placeholder="https://maps.app.goo.gl/..."/>
+            </div>
+            <div class="ram-field-group">
+              <div class="ram-field-label">CRÉNEAU</div>
+              <input class="ram-input" id="ram-creneau" placeholder="Ex: 10h00–12h00"/>
+            </div>
+          </div>
+        </div>
+
+        <!-- ASSIGNER -->
+        <div class="ram-input-row" style="margin-bottom:14px;">
+          <div class="ram-field-group" style="margin-bottom:0">
+            <div class="ram-field-label">ASSIGNER À <span class="req">*</span></div>
+            <select class="ram-input" id="ram-livreur" style="cursor:pointer;">
+              <option value="">— Choisir —</option>
+              <option>Oujane Nadir</option>
+              <option>Abdessamad Aboulfath</option>
+              <option>Taakouft Soufiane</option>
+              <option>Messaoud Ameziane</option>
+              <option>Anass Mounaouar</option>
+              <option>Labiad Yassine</option>
+              <option>Koukouss Hafid</option>
+              <option>Radi Abdellah</option>
+            </select>
+          </div>
+          <div class="ram-field-group" style="margin-bottom:0">
+            <div class="ram-field-label">NOTES SPÉCIALES</div>
+            <input class="ram-input" id="ram-notes" placeholder="Ex: 2 sacs, couette..."/>
+          </div>
+        </div>
+
+        <!-- URGENCE -->
+        <label class="urgent-row" for="ram-urgent">
+          <input type="checkbox" id="ram-urgent"/>
+          <div class="urgent-row-text">
+            <div class="title">🔴 Commande urgente</div>
+            <div class="sub">Le livreur verra un badge URGENT</div>
+          </div>
+        </label>
+
+      </div>
+      <div class="ram-modal-footer">
+        <button class="btn-ram-cancel" onclick="closeRamModal()">Annuler</button>
+        <button class="btn-ram-submit" onclick="submitRamassage()">✓ Créer et assigner</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- UOM MODAL -->
+<div id="uom-modal" style="display:none">
+  <div class="modal-overlay" onclick="closeUomModal()">
+    <div class="modal-box" onclick="event.stopPropagation()">
+      <div class="modal-title">Créer une unité de mesure</div>
+      <input class="modal-input" type="text" id="new-uom-input" placeholder="Ex: kg, litre..."/>
+      <div class="modal-btns">
+        <button class="btn-secondary" onclick="closeUomModal()">Annuler</button>
+        <button class="btn-primary" onclick="saveNewUom()">Enregistrer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDK (chargé en premier, globalement disponible) -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+// Initialiser Firebase immédiatement (version compat = pas d'import dynamique)
+const firebaseConfig = {
+  apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
+  authDomain: "allo-tapis.firebaseapp.com",
+  projectId: "allo-tapis",
+  storageBucket: "allo-tapis.firebasestorage.app",
+  messagingSenderId: "566002084826",
+  appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
+};
+firebase.initializeApp(firebaseConfig);
+const _firestore = firebase.firestore();
+window._firestore = _firestore;
+console.log("Firebase initialisé OK");
+</script>
 <script>
 
 // ===== DATA =====
@@ -1214,22 +3297,6 @@ function imprimerBC(){
     @page{size:A5 landscape;margin:10mm;}
   }
 </style>
-
-  <!-- Firebase SDK - chargé avant tout le reste -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-  <script>
-    firebase.initializeApp({
-      apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
-      authDomain: "allo-tapis.firebaseapp.com",
-      projectId: "allo-tapis",
-      storageBucket: "allo-tapis.firebasestorage.app",
-      messagingSenderId: "566002084826",
-      appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
-    });
-    window._firestore = firebase.firestore();
-    console.log("Firebase OK - Firestore prêt");
-  </script>
 </head><body>
 
 <div class="header">
