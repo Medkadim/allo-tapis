@@ -6225,20 +6225,22 @@ function changeRamStatut(i, newStatut){
       sourceRamassage: r._id||r.id||null,
     };
     commandes.unshift(newCmd);
-    // Sauvegarder la commande dans Firestore
+    // Sauvegarder dans Firestore
     (async()=>{
       const fid = await fbSave('commandes', newCmd, null);
       if(fid) newCmd._id = fid;
-      // Mettre à jour le ramassage statut dans Firestore
       if(r._id) await fsUpdate('ramassages', r._id, {statut:'Collecté'});
     })();
     renderRamassage(ramassages);
-    const msg=document.createElement('div');
-    msg.style.cssText='position:fixed;top:20px;right:20px;background:#1D9E75;color:white;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:500;z-index:999;box-shadow:0 4px 16px rgba(0,0,0,.2);cursor:pointer;';
-    msg.innerHTML=`✓ Collecté — Commande <strong>${num}</strong> créée en Brouillon · <u>Ouvrir</u>`;
-    msg.onclick=()=>{msg.remove();goPage('commandes');};
-    document.body.appendChild(msg);
-    setTimeout(()=>msg&&msg.remove(),6000);
+    // Naviguer vers la commande créée
+    showToast('Commande '+num+' creee en Brouillon','#1D9E75');
+    setTimeout(()=>{
+      goPage('commandes');
+      setTimeout(()=>{
+        const idx = commandes.findIndex(c=>c.num===num);
+        if(idx>=0) showCmdForm(idx);
+      }, 300);
+    }, 800);
   } else {
     renderRamassage(ramassages);
     showToast(`✓ RAM-${String(ramassages[i].id).padStart(3,'0')} → ${newStatut}`,'#1D9E75');
@@ -6574,15 +6576,13 @@ async function initFirebase() {
       commandes.sort((a, b) => (b.num || '').localeCompare(a.num || ''));
       setOnline(true);
 
-      // Chercher les commandes nouvelles venant du livreur
-      const newFromLivreur = commandes.filter(c =>
-        !prevNums.has(c.num) &&
-        c.statut === 'Brouillon' &&
-        c.createdBy && c.createdBy.includes('App Livreur')
+      // Détecter toutes les nouvelles commandes Brouillon (livreur OU ERP)
+      const newBrouillon = commandes.filter(c =>
+        !prevNums.has(c.num) && c.statut === 'Brouillon'
       );
 
-      if (newFromLivreur.length > 0) {
-        const cmd = newFromLivreur[0];
+      if (newBrouillon.length > 0) {
+        const cmd = newBrouillon[0];
         // Afficher notification cliquable
         const notif = document.createElement('div');
         notif.style.cssText = 'position:fixed;top:20px;right:20px;background:#1D9E75;color:white;padding:14px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,.3);cursor:pointer;max-width:320px;';
