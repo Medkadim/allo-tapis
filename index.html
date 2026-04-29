@@ -6203,47 +6203,55 @@ function viewRamassage(i){
 }
 
 function changeRamStatut(i, newStatut){
-  ramassages[i].statut=newStatut;
-  document.getElementById('ram-detail-popup').remove();
+  ramassages[i].statut = newStatut;
 
-  // Si Collecté → créer commande Brouillon automatiquement
-  if(newStatut==='Collecté'){
-    const r=ramassages[i];
-    const num=genCmdNum();
-    const todayISO=new Date().toISOString().split('T')[0]; // format YYYY-MM-DD pour input[type=date]
-    const todayFR=new Date().toLocaleDateString('fr-FR');
+  // Fermer le popup ramassage si ouvert
+  const popup = document.getElementById('ram-detail-popup');
+  if(popup) popup.remove();
+
+  if(newStatut === 'Collecté'){
+    const r = ramassages[i];
+    const num = genCmdNum();
+    const todayISO = new Date().toISOString().split('T')[0];
+
+    // Créer la commande Brouillon
     const newCmd = {
       num,
-      client:r.nom,
-      tel:r.tel,
-      adresse:r.adresse,
-      livreur:r.livreur,
-      date:todayISO,
-      statut:'Brouillon',
-      remise:0,lignes:[],photos:[],montant:0,
-      notesLivreur: r.notesLivreur||r.articlesNotes||[],
-      sourceRamassage: r._id||r.id||null,
+      client:  r.nom    || r.client || '',
+      tel:     r.tel    || '',
+      adresse: r.adresse|| r.quartier || '',
+      livreur: r.livreur|| '',
+      date:    todayISO,
+      statut:  'Brouillon',
+      remise:0, lignes:[], photos:[], montant:0,
+      notesLivreur:   r.notesLivreur || r.articlesNotes || [],
+      sourceRamassage: r._id || r.id || null,
     };
+
+    // Ajouter en tête des commandes
     commandes.unshift(newCmd);
-    // Sauvegarder dans Firestore
+
+    // Sauvegarder dans Firestore (en arrière-plan)
     (async()=>{
       const fid = await fbSave('commandes', newCmd, null);
       if(fid) newCmd._id = fid;
-      if(r._id) await fsUpdate('ramassages', r._id, {statut:'Collecté'});
+      if(r._id) await fsUpdate('ramassages', r._id, { statut:'Collecté' });
     })();
+
+    // Re-render ramassages (pour retirer le collecté de la liste)
     renderRamassage(ramassages);
-    // Naviguer vers la commande créée
-    showToast('Commande '+num+' creee en Brouillon','#1D9E75');
+
+    // Navigation IMMÉDIATE vers Commandes + ouvrir la fiche
+    goPage('commandes');
+    // Petit délai pour laisser renderCommandes s'exécuter
     setTimeout(()=>{
-      goPage('commandes');
-      setTimeout(()=>{
-        const idx = commandes.findIndex(c=>c.num===num);
-        if(idx>=0) showCmdForm(idx);
-      }, 300);
-    }, 800);
+      const idx = commandes.findIndex(c => c.num === num);
+      if(idx >= 0) showCmdForm(idx);
+    }, 150);
+
   } else {
     renderRamassage(ramassages);
-    showToast(`✓ RAM-${String(ramassages[i].id).padStart(3,'0')} → ${newStatut}`,'#1D9E75');
+    showToast('Statut mis a jour : ' + newStatut, '#1D9E75');
   }
 }
 
