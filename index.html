@@ -6530,27 +6530,27 @@ async function initFirebase() {
     const db = window._firestore;
     if(!db) throw new Error("Firebase Firestore non initialisé");
 
-    // Adaptateurs pour compatibilité avec le code existant
-    _fbDb = db;
-    _fbAddDoc     = (col, data) => col.add(data);
-    _fbUpdateDoc  = (ref, data) => ref.update(data);
-    _fbDeleteDoc  = (ref)       => ref.delete();
-    _fbDoc        = (db, col, id) => db.collection(col).doc(id);
-    _fbCollection = (db, col)     => db.collection(col);
+    // Adaptateurs SDK compat — même signatures que l'API modulaire
+    _fbDb         = db;
+    _fbAddDoc     = (colRef, data) => colRef.add(data);
+    _fbUpdateDoc  = (docRef, data) => docRef.update(data);
+    _fbDeleteDoc  = (docRef)       => docRef.delete();
+    _fbDoc        = (database, colName, id) => database.collection(colName).doc(id);
+    _fbCollection = (database, colName)     => database.collection(colName);
 
-    // Helpers pour onSnapshot compatible compat SDK
-    const collection = (col) => db.collection(col);
-    const doc        = (col, id) => db.collection(col).doc(id);
-    const addDoc     = (col, data) => col.add(data);
-    const updateDoc  = (ref, data) => ref.update(data);
-    const deleteDoc  = (ref) => ref.delete();
-    const onSnapshot = (ref, cb, errCb) => ref.onSnapshot(cb, errCb);
-    const query = (col, ...constraints) => {
-      let q = col;
-      for(const c of constraints){ q = c(q); }
+    // Helpers locaux avec les BONNES signatures (2 args pour collection et doc)
+    const collection   = (database, colName) => database.collection(colName);
+    const doc          = (database, colName, id) => database.collection(colName).doc(id);
+    const addDoc       = (colRef, data) => colRef.add(data);
+    const updateDoc    = (docRef, data) => docRef.update(data);
+    const deleteDoc    = (docRef) => docRef.delete();
+    const onSnapshot   = (ref, cb, errCb) => ref.onSnapshot(cb, errCb);
+    const query = (colRef, ...constraints) => {
+      let q = colRef;
+      for(const fn of constraints){ q = fn(q); }
       return q;
     };
-    const where = (field, op, val) => (q) => q.where(field, op, val);
+    const where = (field, op, val) => (qRef) => qRef.where(field, op, val);
     const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
 
     // Indicateur connexion OK
