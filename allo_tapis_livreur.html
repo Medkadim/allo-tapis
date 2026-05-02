@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Allo Tapis — App Livreur</title>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-app-compat.js"></script>
+  <script src="https://unpkg.com/firebase@10.12.0/firebase-firestore-compat.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
@@ -771,7 +773,6 @@ function addArtNoteRow(){
 
 async function confirmerRecupere(i){
   const r = myRamassages[i];
-  // Collecter les notes d'articles
   const articlesNotes = [];
   let k = 1;
   while(document.getElementById('note-art-'+k)){
@@ -781,57 +782,22 @@ async function confirmerRecupere(i){
   }
   artNoteCount = 3;
 
-  // Marquer comme collecté localement
+  // Marquer comme récupéré localement
   myRamassages[i].statut = 'collecte';
-  myRamassages[i].articlesNotes = articlesNotes;
   document.getElementById('notes-popup')?.remove();
   renderTour();
+  showToast('Recuperation confirmee - '+articlesNotes.length+' article(s)','success');
 
-  const today = new Date().toISOString().split('T')[0];
-  const nbArt = articlesNotes.length;
-  showToast('Recupere - '+nbArt+' article(s) — Commande en cours de création...', 'success');
-
-  // ─── Firebase : 2 actions simultanées ───
-  try {
-    // 1. Mettre à jour le ramassage → Collecté
-    if(r._id){
-      await fsWrite('ramassages', r._id, {
-        statut: 'Collecté',
-        notesLivreur: articlesNotes,
-        articlesNotes,
-        dateCollecte: today
-      });
-    }
-
-    // 2. Créer la commande Brouillon dans Firestore
-    // Générer un N° de commande (année + timestamp pour unicité)
-    const year = new Date().getFullYear().toString().slice(-2);
-    const cmdNum = year + String(Date.now()).slice(-4);
-
-    const newCmd = {
-      num: cmdNum,
-      client: r.client || r.nom || '—',
-      tel: r.tel || '',
-      adresse: r.adresse || r.quartier || '',
-      livreur: r.livreur || currentLivreur,
-      date: today,
-      statut: 'Brouillon',
-      remise: 0,
-      lignes: [],
-      montant: 0,
+  // Firestore : changer statut → "Récupéré par livreur"
+  // L'admin ERP confirmera et créera la commande Brouillon
+  if(r._id){
+    await fsWrite('ramassages', r._id, {
+      statut: 'Récupéré par livreur',
       notesLivreur: articlesNotes,
-      sourceRamassage: r._id || null,
-      createdBy: 'App Livreur - ' + currentLivreur,
-    };
-
-    const cmdId = await fsAdd('commandes', newCmd);
-    if(cmdId){
-      showToast('Commande '+cmdNum+' cree - visible dans ERP', 'success');
-      console.log('Commande créée:', cmdNum, cmdId);
-    }
-  } catch(e) {
-    console.warn('Erreur création commande:', e);
-    showToast('Erreur synchronisation', 'info');
+      dateCollecte: new Date().toISOString().split('T')[0],
+      recuperePar: currentLivreur
+    });
+    console.log('Statut ramassage mis a jour: Recupere par livreur');
   }
 }
 
@@ -852,67 +818,53 @@ function showToast(msg,type='success'){
 let fbUnsubRam=null,fbUnsubBL=null;
 async function startFirebaseListeners(livreurNom){
   try{
-    const {initializeApp,getApps,getApp}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
-    const {getFirestore,collection,onSnapshot,updateDoc,addDoc,doc,query,where}=await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
     const cfg={apiKey:"AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",authDomain:"allo-tapis.firebaseapp.com",projectId:"allo-tapis",storageBucket:"allo-tapis.firebasestorage.app",messagingSenderId:"566002084826",appId:"1:566002084826:web:463f92dd116be3ccdfeee3"};
-    const fbApp=getApps().length?getApp():initializeApp(cfg);
-    const db=getFirestore(fbApp);
-    window._db=db;window._fns={updateDoc,addDoc,doc,collection};
-    if(fbUnsubRam)fbUnsubRam();if(fbUnsubBL)fbUnsubBL();
-    fbUnsubRam=onSnapshot(
-      query(collection(db,'ramassages'),where('livreur','==',livreurNom),where('statut','==','En attente')),
-      snap=>{
-        myRamassages=snap.docs.map(d=>{
+    if(!firebase.apps.length) firebase.initializeApp(cfg);
+    const db = firebase.firestore();
+    window._db = db;
+    if(fbUnsubRam) fbUnsubRam();
+    if(fbUnsubBL) fbUnsubBL();
+    fbUnsubRam = db.collection('ramassages')
+      .where('livreur','==',livreurNom)
+      .where('statut','==','En attente')
+      .onSnapshot(snap=>{
+        myRamassages = snap.docs.map(d=>{
           const data=d.data();
-          const idStr=String(data.id||d.id).padStart(3,'0');
-          return {
-            _id:d.id, id:data.id||d.id,
-            client:  data.nom||data.client||'Client',
-            nom:     data.nom||data.client||'Client',
-            num:     data.num||('RAM-'+idStr),
-            quartier:data.adresse||data.quartier||'Adresse',
-            adresse: data.adresse||data.quartier||'Adresse',
-            rdv:     data.creneau||data.rdv||'—',
-            creneau: data.creneau||data.rdv||'',
-            tel:     data.tel||'—',
-            articles:data.articles||'—',
-            urgent:  data.urgent||false,
-            statut:  'attente',
-            notes:   data.notes||'',
-            livreur: data.livreur,
-            lat:     data.lat||35.765+(Math.random()-.5)*.015,
-            lng:     data.lng||-5.795+(Math.random()-.5)*.015,
-          };
+          return {_id:d.id,id:data.id||d.id,client:data.nom||data.client||'Client',nom:data.nom||data.client||'Client',num:data.num||('RAM-'+String(data.id||d.id).padStart(3,'0')),quartier:data.adresse||data.quartier||'Adresse',adresse:data.adresse||data.quartier||'Adresse',rdv:data.creneau||data.rdv||'',creneau:data.creneau||'',tel:data.tel||'',articles:data.articles||'',urgent:data.urgent||false,statut:'attente',notes:data.notes||'',livreur:data.livreur,lat:data.lat||35.765,lng:data.lng||-5.795};
         });
         renderTour();
         const n=myRamassages.length;
-        document.title=n>0?`(${n}) Allo Tapis`:'Allo Tapis Livreur';
-        if(n>0)showToast(`📍 ${n} ramassage(s) en attente`,'info');
-      },
-      err=>console.warn('RAM:',err.message)
-    );
-    fbUnsubBL=onSnapshot(
-      query(collection(db,'bons_livraison'),where('livreur','==',livreurNom),where('etat','==','Prêt à livrer')),
-      snap=>{
-        const fs=snap.docs.map(d=>({_id:d.id,num:d.data().num||d.id,client:d.data().client||'—',quartier:d.data().quartier||'—',montant:d.data().montant||0,articles:d.data().articles||(d.data().lignes?.length||0),collecte:d.data().dateCollecte||'—',dateCollecte:d.data().dateCollecte||'—',livreur:d.data().livreur,statut:'pret',lat:d.data().lat||35.760,lng:d.data().lng||-5.800}));
+        document.title=n>0?'('+n+') Allo Tapis':'Allo Tapis Livreur';
+        if(n>0) showToast(n+' ramassage(s) en attente','info');
+      },err=>console.warn('RAM:',err.message));
+    fbUnsubBL = db.collection('bons_livraison')
+      .where('livreur','==',livreurNom)
+      .where('etat','==','Prêt à livrer')
+      .onSnapshot(snap=>{
+        const fs=snap.docs.map(d=>({_id:d.id,num:d.data().num||d.id,client:d.data().client||'',quartier:d.data().quartier||'',montant:d.data().montant||0,articles:d.data().articles||(d.data().lignes?.length||0),collecte:d.data().dateCollecte||'',dateCollecte:d.data().dateCollecte||'',livreur:d.data().livreur,statut:'pret',lat:d.data().lat||35.760,lng:d.data().lng||-5.800}));
         const acted=myLivraisons.filter(l=>l.statut!=='pret');
         const actedNums=new Set(acted.map(l=>l.num));
         myLivraisons=[...acted,...fs.filter(l=>!actedNums.has(l.num))];
         renderTour();updateEncaisse();
-      },err=>console.warn('BL:',err.message)
-    );
+      },err=>console.warn('BL:',err.message));
     console.log('Firebase Livreur OK:',livreurNom);
   }catch(e){
     console.warn('Firebase non dispo:',e.message);
     myRamassages=ERP_RAMASSAGES.filter(r=>r.livreur===currentLivreur).map(r=>({...r}));
     myLivraisons=ERP_LIVRAISONS.filter(l=>l.livreur===currentLivreur).map(l=>({...l}));
-    if(!myRamassages.length)myRamassages=ERP_RAMASSAGES.slice(0,3).map(r=>({...r}));
-    if(!myLivraisons.length)myLivraisons=ERP_LIVRAISONS.slice(0,5).map(l=>({...l}));
+    if(!myRamassages.length) myRamassages=ERP_RAMASSAGES.slice(0,3).map(r=>({...r}));
+    if(!myLivraisons.length) myLivraisons=ERP_LIVRAISONS.slice(0,5).map(l=>({...l}));
     renderTour();
   }
 }
-async function fsWrite(col,id,data){if(!window._db)return;try{await window._fns.updateDoc(window._fns.doc(window._db,col,id),{...data,updatedAt:new Date().toISOString()});}catch(e){console.warn(e);}}
-async function fsAdd(col,data){if(!window._db)return null;try{const r=await window._fns.addDoc(window._fns.collection(window._db,col),{...data,createdAt:new Date().toISOString()});return r.id;}catch(e){console.warn(e);return null;}}
+async function fsWrite(col,id,data){
+  if(!window._db){console.warn("fsWrite: _db non init");return;}
+  try{ await window._db.collection(col).doc(id).update({...data,updatedAt:new Date().toISOString()}); }catch(e){console.warn("fsWrite err:",e.message);}
+}
+async function fsAdd(col,data){
+  if(!window._db){console.warn("fsAdd: _db non init");return null;}
+  try{ const ref=await window._db.collection(col).add({...data,createdAt:new Date().toISOString()}); return ref.id; }catch(e){console.warn("fsAdd err:",e.message);return null;}
+}
 window.marquerCollecte=async function(i){const r=myRamassages[i];myRamassages[i].statut='collecte';renderTour();showToast('✓ Collecté','success');if(r._id)await fsWrite('ramassages',r._id,{statut:'Collecté'});};
 window.marquerLivre=async function(){const l=myLivraisons[selectedLivrIdx];if(!l)return;myLivraisons[selectedLivrIdx].statut='livre';closeModal();renderTour();showToast('✓ Livré','success');if(l._id)await fsWrite('bons_livraison',l._id,{etat:'Livré',dateLivraison:new Date().toISOString().split('T')[0]});};
 window.marquerPayeModal=async function(){const l=myLivraisons[selectedLivrIdx];if(!l)return;myLivraisons[selectedLivrIdx].statut='paye';closeModal();renderTour();showToast('💰 Payé','amber');if(l._id){await fsWrite('bons_livraison',l._id,{etat:'Livré & Payé',datePaiement:new Date().toISOString().split('T')[0]});await fsAdd('tresorerie',{date:new Date().toISOString().split('T')[0],type:'recette',categorie:'Commande payée',libelle:`Paiement BL ${l.num} — ${currentLivreur}`,ref:l.num,montant:l.montant||0,saisi:'App Livreur',mois:new Date().getMonth()});}};
