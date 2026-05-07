@@ -116,6 +116,17 @@ body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:cent
 .as-traitement{background:rgba(59,158,232,.1);color:#3B9EE8;border:1px solid rgba(59,158,232,.15);}
 .as-pret{background:rgba(46,204,155,.1);color:#2ECC9B;border:1px solid rgba(46,204,155,.15);}
 
+/* ACTION BUTTONS */
+.art-actions{display:flex;gap:6px;margin-top:8px;}
+.btn-action{flex:1;padding:8px 0;border:none;border-radius:10px;font-family:'Syne';font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;letter-spacing:.03em;}
+.btn-action:active{transform:scale(.96);}
+.btn-start{background:rgba(59,158,232,.15);color:#3B9EE8;border:1px solid rgba(59,158,232,.25);}
+.btn-start:hover{background:rgba(59,158,232,.25);}
+.btn-done{background:rgba(46,204,155,.15);color:#2ECC9B;border:1px solid rgba(46,204,155,.25);}
+.btn-done:hover{background:rgba(46,204,155,.25);}
+.btn-done-full{background:rgba(46,204,155,.2);color:#2ECC9B;border:1px solid rgba(46,204,155,.3);}
+.btn-already{background:rgba(255,255,255,.04);color:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.06);cursor:default;}
+
 /* QTE badge */
 .art-qte{font-family:'JetBrains Mono';font-size:11px;font-weight:600;color:#E8A838;background:rgba(232,168,56,.1);border:1px solid rgba(232,168,56,.2);padding:2px 8px;border-radius:6px;}
 
@@ -189,73 +200,14 @@ body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:cent
 // ══ DONNÉES (miroir ERP) ══
 // Commandes avec type client (Particulier / Pressing / Professionnel)
 // urgent = commandes flaggées urgentes dans l'ERP
-const COMMANDES = {
-  '264504':{client:'Ahmed bou9tib',      typeClient:'Particulier', dateCollecte:'2026-04-15', urgent:false},
-  '264503':{client:'Laundry Service',    typeClient:'Pressing',    dateCollecte:'2026-04-15', urgent:false},
-  '264495':{client:'Pressing Roudaina', typeClient:'Pressing',    dateCollecte:'2026-04-14', urgent:true},
-  '264491':{client:'Rachida',            typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
-  '264488':{client:'Abdeljalil Salma',   typeClient:'Particulier', dateCollecte:'2026-04-15', urgent:false},
-  '264487':{client:'Hanane',             typeClient:'Particulier', dateCollecte:'2026-04-15', urgent:false},
-  '264486':{client:'Ibrahim elkhalil',   typeClient:'Professionnel',dateCollecte:'2026-04-15', urgent:false},
-  '264485':{client:'Laundry Irfane',     typeClient:'Pressing',    dateCollecte:'2026-04-15', urgent:false},
-  '264484':{client:'Homat el warda',     typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:true},
-  '264483':{client:'Touria',             typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
-  '264482':{client:'Rachida Bennani',    typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
-  '264475':{client:'Greenzer',           typeClient:'Professionnel',dateCollecte:'2026-04-14', urgent:false},
-  '264474':{client:'Laundry Mesnana',    typeClient:'Pressing',    dateCollecte:'2026-04-13', urgent:false},
-  '264472':{client:'Thibeau Isabelle',   typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
-  '264469':{client:'Homat el warda',     typeClient:'Particulier', dateCollecte:'2026-04-13', urgent:false},
-  '264099':{client:'Amrani Mustapha',    typeClient:'Particulier', dateCollecte:'2026-02-23', urgent:false},
-  '264298':{client:'Zeyneb',             typeClient:'Particulier', dateCollecte:'2026-03-30', urgent:false},
-  '264423':{client:'Mohamed Yahya',      typeClient:'Particulier', dateCollecte:'2026-04-08', urgent:false},
-};
+let COMMANDES = {}; // chargé depuis Firestore
 
-// Articles en attente de lavage (lignesData ERP — statut Brouillon ou En traitement)
-const ARTICLES = [
-  // 264495 URGENT Pressing
-  {id:0,  cmdNum:'264495',numArt:1,article:'Tapis synthétique',larg:2.95,long:3.50,surface:10.33,qte:1,obs:'beige marron',etat:'En traitement'},
-  // 264484 URGENT Particulier
-  {id:1,  cmdNum:'264484',numArt:1,article:'Tapis synthétique',larg:2.50,long:4.55,surface:11.38,qte:1,obs:'doré',       etat:'En traitement'},
-  {id:2,  cmdNum:'264484',numArt:2,article:'Tapis shaggy',     larg:1.65,long:3.15,surface:5.20, qte:1,obs:'marron',     etat:'En traitement'},
-  {id:3,  cmdNum:'264484',numArt:3,article:'Tapis synthétique',larg:1.20,long:2.30,surface:2.76, qte:3,obs:'multi-coleur',etat:'En traitement'},
-  {id:4,  cmdNum:'264484',numArt:4,article:'Tapis synthétique',larg:0.96,long:2.90,surface:2.78, qte:1,obs:'beige',      etat:'En traitement'},
-  {id:5,  cmdNum:'264484',numArt:5,article:'Lhouf',            larg:0,   long:0,   surface:0,    qte:6,obs:'',           etat:'Brouillon'},
-  {id:6,  cmdNum:'264484',numArt:6,article:'Tapis synthétique',larg:2.96,long:3.50,surface:10.36,qte:1,obs:'jaune',      etat:'Brouillon'},
-  // 264486 Pro
-  {id:7,  cmdNum:'264486',numArt:1,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68, qte:1,obs:'blanc',      etat:'Brouillon'},
-  // 264485 Pressing
-  {id:8,  cmdNum:'264485',numArt:1,article:'Tapis synthétique',larg:1.70,long:2.30,surface:3.91, qte:1,obs:'rouge beige',etat:'Brouillon'},
-  // 264503 Pressing
-  {id:9,  cmdNum:'264503',numArt:1,article:'Divers',           larg:0,   long:0,   surface:0,    qte:1,obs:'',           etat:'Brouillon'},
-  // 264488 Particulier
-  {id:10, cmdNum:'264488',numArt:2,article:'Couverture',       larg:0,   long:0,   surface:0,    qte:5,obs:'',           etat:'En traitement'},
-  {id:11, cmdNum:'264488',numArt:3,article:'Couette',          larg:0,   long:0,   surface:0,    qte:1,obs:'',           etat:'En traitement'},
-  // 264491 Particulier
-  {id:12, cmdNum:'264491',numArt:2,article:'Rideau',           larg:0,   long:0,   surface:0,    qte:2,obs:'',           etat:'Brouillon'},
-  {id:13, cmdNum:'264491',numArt:1,article:'Tapis synthétique',larg:3.60,long:4.00,surface:14.40,qte:1,obs:'beige',      etat:'En traitement'},
-  // 264487 Particulier
-  {id:14, cmdNum:'264487',numArt:1,article:'Tapis shaggy',     larg:1.65,long:2.30,surface:3.79, qte:1,obs:'beige',      etat:'Brouillon'},
-  {id:15, cmdNum:'264487',numArt:2,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68, qte:1,obs:'gris',       etat:'Brouillon'},
-  // 264504 Particulier
-  {id:16, cmdNum:'264504',numArt:1,article:'Tapis synthétique',larg:3.48,long:3.48,surface:12.11,qte:1,obs:'rouge beige',etat:'Brouillon'},
-  // 264483 Particulier
-  {id:17, cmdNum:'264483',numArt:1,article:'Tapis synthétique',larg:2.05,long:3.00,surface:6.15, qte:1,obs:'rouge',      etat:'En traitement'},
-  // 264482 Particulier
-  {id:18, cmdNum:'264482',numArt:1,article:'Tapis synthétique',larg:2.00,long:3.10,surface:6.20, qte:2,obs:'blanc',      etat:'Brouillon'},
-  // 264475 Pro
-  {id:19, cmdNum:'264475',numArt:1,article:'Tapis synthétique',larg:2.50,long:3.80,surface:9.50, qte:1,obs:'gris noir',  etat:'En traitement'},
-  {id:20, cmdNum:'264475',numArt:2,article:'Tapis synthétique',larg:2.98,long:2.50,surface:7.45, qte:1,obs:'rouge',      etat:'En traitement'},
-  // Anciens
-  {id:21, cmdNum:'264099',numArt:1,article:'Tapis synthétique',larg:2.80,long:3.80,surface:10.64,qte:1,obs:'beige',      etat:'En traitement'},
-  {id:22, cmdNum:'264099',numArt:2,article:'Tapis shaggy',     larg:1.60,long:2.30,surface:3.68, qte:1,obs:'gris',       etat:'En traitement'},
-  {id:23, cmdNum:'264298',numArt:1,article:'Tapis synthétique',larg:3.00,long:4.00,surface:12.00,qte:1,obs:'rouge',      etat:'En traitement'},
-  {id:24, cmdNum:'264423',numArt:1,article:'Tapis synthétique',larg:2.95,long:3.50,surface:10.33,qte:1,obs:'blanc',      etat:'En traitement'},
-];
+let ARTICLES = []; // chargé depuis Firestore
 
 // ══ STATE ══
 let currentUser = '';
 let currentFilter = 'all';
-const TODAY = new Date('2026-04-25');
+const TODAY = new Date();
 
 // ══ UTILS ══
 function updateTime(){
@@ -492,6 +444,7 @@ function renderList(){
             <span class="art-date">Collecté le ${(cmd.dateCollecte||'').split('-').reverse().join('/')}</span>
             <span class="art-statut ${statutClass}">${a.etat}</span>
           </div>
+
         </div>
       </div>`;
   });
@@ -505,49 +458,57 @@ function showToast(msg){
   t.className = 'toast-lav blue show';
   setTimeout(()=>t.classList.remove('show'), 2500);
 }
-</script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+// Changer le statut d'un article dans Firestore
+async function setEtat(artId, newEtat) {
+  // Trouver l'article localement
+  const art = ARTICLES.find(a => (a._id && a._id === artId) || String(a.id) === String(artId));
+  if(!art){ showToast('⚠️ Article introuvable'); return; }
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
-  authDomain: "allo-tapis.firebaseapp.com",
-  projectId: "allo-tapis",
-  storageBucket: "allo-tapis.firebasestorage.app",
-  messagingSenderId: "566002084826",
-  appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
-};
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
+  const oldEtat = art.etat;
+  // Mise à jour locale immédiate
+  art.etat = newEtat;
+  renderKPIs();
+  renderList();
 
-// Charger les lignes depuis Firestore (lecture seule)
-onSnapshot(collection(db,'lignes'), snap => {
-  const newArticles = snap.docs.map(d => ({...d.data(), id:ARTICLES.length}));
-  // Remplacer ARTICLES avec les données Firestore
-  ARTICLES.length = 0;
-  newArticles.forEach((a,i) => { a.id=i; ARTICLES.push(a); });
-  if(document.getElementById('art-list')?.style.display !== 'none') {
-    renderKPIs(); renderList();
-  }
-});
+  const etatLabel = newEtat === 'En traitement' ? '▶ Lavage démarré' : '✓ Prêt à livrer !';
+  showToast(etatLabel);
 
-// Charger les commandes depuis Firestore pour les métadonnées (urgence, type client)
-onSnapshot(collection(db,'commandes'), snap => {
-  snap.docs.forEach(d => {
-    const cmd = d.data();
-    if(cmd.num && !COMMANDES[cmd.num]){
-      COMMANDES[cmd.num] = {
-        client: cmd.client, typeClient: cmd.typeClient||'Particulier',
-        dateCollecte: cmd.date||'2026-01-01', urgent: cmd.urgent||false
-      };
+  // Mise à jour Firestore
+  if(art._id && window._db){
+    try {
+      const { doc, updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      await updateDoc(doc(window._db, 'lignes', art._id), {
+        etat: newEtat,
+        updatedAt: new Date().toISOString(),
+        updatedBy: currentUser
+      });
+      // Si tous les articles de la commande sont Prêt à livrer → mettre à jour la commande
+      const cmdArticles = ARTICLES.filter(a => a.cmdNum === art.cmdNum);
+      if(newEtat === 'Prêt à livrer' && cmdArticles.every(a => a.etat === 'Prêt à livrer')){
+        const { collection, query, where, getDocs } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+        const q = query(collection(window._db, 'commandes'), where('num', '==', art.cmdNum));
+        const snap = await getDocs(q);
+        snap.forEach(async d => {
+          await updateDoc(doc(window._db, 'commandes', d.id), {
+            statut: 'Prêt à livrer',
+            updatedAt: new Date().toISOString()
+          });
+        });
+        showToast('🎉 Commande ' + art.cmdNum + ' → Prêt à livrer !');
+      }
+    } catch(e) {
+      console.warn('setEtat Firestore error:', e.message);
+      // Rollback local si erreur
+      art.etat = oldEtat;
+      renderKPIs(); renderList();
+      showToast('⚠️ Erreur sync — réessayez');
     }
-  });
-  if(document.getElementById('art-list')?.style.display !== 'none') renderList();
-});
+  }
+}
 </script>
+
+<!-- Firebase géré dans le bloc async ci-dessous -->
 
 <script>
 (async function() {
@@ -567,39 +528,64 @@ onSnapshot(collection(db,'commandes'), snap => {
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
+    window._db = db;
 
-    // Charger les lignes (articles) en temps réel — lecture seule
-    onSnapshot(collection(db, 'lignes'), snap => {
-      if (snap.empty) return;
-      // Remplacer ARTICLES avec les données Firestore
-      const newArticles = snap.docs.map((d, i) => ({
-        ...d.data(), _id: d.id, id: i
-      }));
-      ARTICLES.length = 0;
-      newArticles.forEach(a => ARTICLES.push(a));
-      // Re-render si l'app est active
-      if (document.getElementById('art-list')?.style.display !== 'none') {
+    let _lignesLoaded = false;
+    let _commandesLoaded = false;
+
+    function tryRender(){
+      // Rendre seulement quand les deux collections sont chargées
+      if(!_lignesLoaded || !_commandesLoaded) return;
+      if(document.getElementById('art-list')?.style.display !== 'none'){
         renderKPIs();
         renderList();
       }
+    }
+
+    // ── LIGNES (articles) ──
+    onSnapshot(collection(db, 'lignes'), snap => {
+      ARTICLES.length = 0;
+      snap.docs.forEach((d, i) => {
+        const data = d.data();
+        // Afficher tous les articles sauf ceux déjà Prêt à livrer
+        if(data.etat !== 'Prêt à livrer'){
+          ARTICLES.push({ ...data, _id: d.id, id: i });
+        }
+      });
+      _lignesLoaded = true;
+      tryRender();
     }, err => console.warn('Lavage lignes offline:', err.message));
 
-    // Charger les commandes pour les métadonnées (urgent, type client)
+    // ── COMMANDES ──
     onSnapshot(collection(db, 'commandes'), snap => {
-      if (snap.empty) return;
+      // Vider et reconstruire depuis Firestore
+      Object.keys(COMMANDES).forEach(k => delete COMMANDES[k]);
       snap.docs.forEach(d => {
         const cmd = d.data();
-        if (cmd.num) {
+        if(cmd.num){
           COMMANDES[cmd.num] = {
-            client: cmd.client || '—',
-            typeClient: cmd.typeClient || 'Particulier',
+            client      : cmd.client || '—',
+            typeClient  : cmd.typeClient || 'Particulier',
             dateCollecte: cmd.date || new Date().toISOString().split('T')[0],
-            urgent: cmd.urgent || false
+            urgent      : cmd.urgent || false
           };
         }
       });
-      if (document.getElementById('art-list')?.style.display !== 'none') renderList();
+      _commandesLoaded = true;
+      tryRender();
     }, err => console.warn('Lavage commandes offline:', err.message));
+
+    // ── PERSONNEL (login select) ──
+    onSnapshot(collection(db, 'personnel'), snap => {
+      const sel = document.getElementById('login-user');
+      if(!sel) return;
+      const list = snap.docs.map(d => d.data())
+        .filter(p => p.active !== false && /lavage/i.test(p.fonction||''));
+      if(list.length > 0){
+        sel.innerHTML = '<option value="">— Sélectionner —</option>' +
+          list.map(p => `<option value="${p.nom}">${p.nom}${p.fonction ? ' — '+p.fonction : ''}</option>`).join('');
+      }
+    }, err => console.warn('Lavage personnel offline:', err.message));
 
     console.log('✅ Firebase Lavage connecté');
   } catch(err) {

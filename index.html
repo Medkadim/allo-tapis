@@ -881,14 +881,27 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
           <span class="pag-info" id="ram-pag">0 ramassages</span>
         </div>
       </div>
-      <div class="toolbar">
+      <div class="toolbar" style="flex-wrap:wrap;gap:8px;">
         <button class="btn-primary" onclick="openRamModal()">+ Nouveau ramassage</button>
         <select id="ram-filter-statut" onchange="filterRamassage('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
-          <option value="">Tous les statuts</option>
+          <option value="">Actifs (En attente + Récupéré)</option>
           <option value="En attente">En attente</option>
+          <option value="Récupéré par livreur">Récupéré par livreur</option>
           <option value="Collecté">Collecté</option>
           <option value="Annulé">Annulé</option>
+          <option value="__tous__">Tous les statuts</option>
         </select>
+        <select id="ram-filter-livreur" onchange="filterRamassage('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+          <option value="">Tous les livreurs</option>
+        </select>
+        <select id="ram-sort" onchange="filterRamassage('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+          <option value="date-desc">Date ↓</option>
+          <option value="date-asc">Date ↑</option>
+          <option value="nom-asc">Client A→Z</option>
+          <option value="livreur-asc">Livreur A→Z</option>
+          <option value="creneau-asc">Créneau ↑</option>
+        </select>
+        <button onclick="resetFilterRam()" style="padding:7px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;color:#8899aa;">✕ Réinitialiser</button>
         <label style="display:flex;align-items:center;gap:6px;font-size:13px;color:#5a6a7a;cursor:pointer;">
           <input type="checkbox" id="ram-filter-urgent" onchange="filterRamassage('')" style="accent-color:#DC2626;width:14px;height:14px;"/>
           Urgents uniquement
@@ -898,8 +911,14 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
         <table>
           <thead><tr>
             <th><input type="checkbox"/></th>
-            <th>N°</th><th>Client</th><th>Téléphone</th><th>Adresse pick-up</th>
-            <th>Créneau</th><th>Assigné à</th><th>Statut</th><th>Urgent</th><th>Date</th>
+            <th onclick="setSortRam('id')" style="cursor:pointer;user-select:none;">N° <span id="sort-ram-id">↕</span></th>
+            <th onclick="setSortRam('nom')" style="cursor:pointer;user-select:none;">Client <span id="sort-ram-nom">↕</span></th>
+            <th>Téléphone</th>
+            <th>Adresse pick-up</th>
+            <th onclick="setSortRam('creneau')" style="cursor:pointer;user-select:none;">Créneau <span id="sort-ram-creneau">↕</span></th>
+            <th onclick="setSortRam('livreur')" style="cursor:pointer;user-select:none;">Assigné à <span id="sort-ram-livreur">↕</span></th>
+            <th>Statut</th><th>Urgent</th>
+            <th onclick="setSortRam('date')" style="cursor:pointer;user-select:none;">Date <span id="sort-ram-date">↕</span></th>
           </tr></thead>
           <tbody id="ram-body">
             <tr id="ram-empty-row">
@@ -926,20 +945,40 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
             <span class="pag-info" id="cmd-pag">1–20 sur 406</span>
           </div>
         </div>
-        <div class="toolbar">
+        <div class="toolbar" style="flex-wrap:wrap;gap:8px;">
           <button class="btn-primary" onclick="showCmdForm(-1)">Créer</button>
           <button class="btn-link">ou Importer</button>
           <select id="cmd-filter-statut" onchange="filterCommandes('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
-            <option value="">Tous les statuts</option>
-            <option>Brouillon</option><option>En traitement</option>
-            <option>Prêt à livrer</option><option>Payé</option>
+            <option value="">Toutes (sauf Payé)</option>
+            <option>Brouillon</option>
+            <option>En traitement</option>
+            <option>Prêt à livrer</option>
+            <option>Payé</option>
+            <option value="__tous__">Tous les statuts</option>
           </select>
+          <select id="cmd-filter-livreur" onchange="filterCommandes('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+            <option value="">Tous les livreurs</option>
+          </select>
+          <select id="cmd-sort" onchange="filterCommandes('')" style="padding:7px 10px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
+            <option value="num-desc">N° ↓</option>
+            <option value="num-asc">N° ↑</option>
+            <option value="date-desc">Date ↓</option>
+            <option value="date-asc">Date ↑</option>
+            <option value="client-asc">Client A→Z</option>
+            <option value="client-desc">Client Z→A</option>
+            <option value="livreur-asc">Livreur A→Z</option>
+          </select>
+          <button onclick="resetFilterCmd()" style="padding:7px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;color:#8899aa;">✕ Réinitialiser</button>
         </div>
         <div class="table-card">
           <table>
             <thead><tr>
               <th><input type="checkbox"/></th>
-              <th>N°</th><th>Client</th><th>Livreur</th><th>Date collecte</th><th>Statut</th>
+              <th onclick="setSortCmd('num')" style="cursor:pointer;user-select:none;" title="Trier par N°">N° <span id="sort-cmd-num">↕</span></th>
+              <th onclick="setSortCmd('client')" style="cursor:pointer;user-select:none;" title="Trier par client">Client <span id="sort-cmd-client">↕</span></th>
+              <th onclick="setSortCmd('livreur')" style="cursor:pointer;user-select:none;" title="Trier par livreur">Livreur <span id="sort-cmd-livreur">↕</span></th>
+              <th onclick="setSortCmd('date')" style="cursor:pointer;user-select:none;" title="Trier par date">Date <span id="sort-cmd-date">↕</span></th>
+              <th>Statut</th>
             </tr></thead>
             <tbody id="cmd-body"></tbody>
           </table>
@@ -977,7 +1016,16 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
               <div class="cmd-field-row">
                 <span class="cmd-field-label">Client</span>
                 <div style="flex:1;position:relative;">
-                  <input class="cmd-field-input" id="cf-client" placeholder="Rechercher client..." oninput="cfClientSearch()" autocomplete="off"/>
+                  <div style="display:flex;gap:6px;align-items:center;">
+                    <input class="cmd-field-input" id="cf-client" placeholder="Rechercher client..." oninput="cfClientSearch()" autocomplete="off" style="flex:1;"/>
+                    <button id="cf-client-add-btn" onclick="openNewClientFromCmd()" title="Créer un nouveau client"
+                      style="display:none;padding:7px 10px;background:#1D9E75;color:white;border:none;border-radius:8px;font-size:13px;cursor:pointer;white-space:nowrap;flex-shrink:0;">
+                      + Créer client
+                    </button>
+                  </div>
+                  <span id="cf-client-lbl" onclick="showClientPopup(this.textContent)"
+                    style="display:none;padding:9px 12px;font-size:13px;font-weight:600;color:#1a5fa8;cursor:pointer;text-decoration:underline dotted;border:1px solid #dde3ec;border-radius:8px;background:white;width:100%;box-sizing:border-box;"
+                    title="Voir fiche client"></span>
                   <div id="cf-client-drop" style="position:absolute;top:calc(100%+4px);left:0;right:0;background:white;border:1px solid #dde3ec;border-radius:8px;z-index:50;display:none;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:160px;overflow-y:auto;"></div>
                 </div>
               </div>
@@ -985,10 +1033,11 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
                 <span class="cmd-field-label">Livreur</span>
                 <select class="cmd-field-select" id="cf-livreur">
                   <option value="">—</option>
+                  <option>Ourouch Houssam</option>
+                  <option>Koukouss Hafid</option><option>Radi Abdellah</option>
                   <option>Oujane Nadir</option><option>Abdessamad Aboulfath</option>
                   <option>Taakouft Soufiane</option><option>Messaoud Ameziane</option>
                   <option>Anass Mounaouar</option><option>Labiad Yassine</option>
-                  <option>Koukouss Hafid</option><option>Radi Abdellah</option>
                 </select>
               </div>
               <div class="cmd-field-row">
@@ -1179,7 +1228,17 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
             <div>
               <div class="bl-field">
                 <span class="bl-field-label">Client</span>
-                <span class="bl-field-val lnk" id="bf-client">—</span>
+                <span class="bl-field-val lnk" id="bf-client" onclick="showClientPopup(this.textContent)" style="cursor:pointer;color:#1a5fa8;text-decoration:underline dotted;" title="Voir fiche client">—</span>
+                <div id="bf-client-search-zone" style="display:none;position:relative;width:100%;">
+                  <input id="bf-client-input"
+                    style="padding:9px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;width:100%;box-sizing:border-box;outline:none;"
+                    placeholder="Rechercher client..."
+                    oninput="bfClientSearch()"
+                    autocomplete="off"/>
+                  <div id="bf-client-drop"
+                    style="position:absolute;top:calc(100% + 4px);left:0;right:0;background:white;border:1px solid #dde3ec;border-radius:8px;z-index:100;display:none;box-shadow:0 8px 24px rgba(0,0,0,.12);max-height:180px;overflow-y:auto;">
+                  </div>
+                </div>
               </div>
               <div class="bl-field">
                 <span class="bl-field-label">Livreur</span>
@@ -1301,13 +1360,13 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
             <thead><tr>
               <th><input type="checkbox"/></th>
               <th>Commande</th>
-              <th>N° Article</th>
+              <th>Client</th>
+              <th>N°</th>
               <th>Article</th>
-              <th>Largeur</th>
-              <th>Longueur</th>
-              <th>Surface</th>
-              <th>Quantité</th>
-              <th>Unité de mesure</th>
+              <th>Surface / Qté</th>
+              <th>Unité</th>
+              <th style="color:#1D9E75;font-weight:700;">Qté traitée</th>
+              <th style="color:#1a5fa8;font-weight:700;">Emplacement</th>
               <th>Observation</th>
               <th>Etat</th>
             </tr></thead>
@@ -1385,7 +1444,14 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
               </div>
               <div class="lig-field">
                 <span class="lig-field-label">Quantité traitée</span>
-                <span class="lig-field-val" id="lf-qte-traitee" style="font-size:16px;font-weight:700;">0</span>
+                <div style="display:flex;align-items:center;gap:8px;">
+                  <button onclick="ligQteAction('-1')" style="width:30px;height:30px;border-radius:50%;border:1px solid #dde3ec;background:white;font-size:16px;cursor:pointer;font-weight:700;">−</button>
+                  <input id="lf-qte-traitee" type="number" min="0"
+                    style="width:60px;text-align:center;font-size:16px;font-weight:700;border:1px solid #dde3ec;border-radius:8px;padding:4px 8px;"
+                    value="0" oninput="this.value=Math.max(0,Math.min(parseInt(this.max||99),parseInt(this.value)||0))"/>
+                  <button onclick="ligQteAction('+1')" style="width:30px;height:30px;border-radius:50%;border:1px solid #1a5fa8;background:#1a5fa8;color:white;font-size:16px;cursor:pointer;font-weight:700;">+</button>
+                  <button onclick="ligQteAction('tous')" style="padding:4px 10px;border-radius:6px;border:1px solid #1D9E75;background:#f0fdf4;color:#059669;font-size:12px;font-weight:600;cursor:pointer;">Tous</button>
+                </div>
               </div>
               <div class="lig-field">
                 <span class="lig-field-label">Emplacement</span>
@@ -1951,6 +2017,20 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
               <div class="field-row"><span class="field-label">Active</span><input type="checkbox" class="check-box" id="pf-active" checked/></div>
             </div>
           </div>
+
+          <!-- Section Accès App -->
+          <div id="pf-app-section" style="margin-top:16px;padding:14px;background:#f8f9fb;border-radius:10px;border:1px solid #edf0f5;display:none;">
+            <div style="font-size:11px;font-weight:700;color:#8899aa;text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px;">📱 Accès Application</div>
+            <div id="pf-app-info" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <div id="pf-app-badge-main" style="flex:1;"></div>
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:13px;color:#5a6a7a;">Code PIN :</span>
+                <input class="field-input" id="pf-pin" type="text" maxlength="4" placeholder="4 chiffres" style="width:80px;text-align:center;font-size:16px;font-weight:700;letter-spacing:4px;"/>
+              </div>
+              <button id="pf-app-btn" onclick="ouvrirAppPersonnel()" style="padding:8px 16px;background:#1D9E75;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">↗ Ouvrir l'app</button>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -1962,7 +2042,7 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
         <div class="header-right">
           <select id="treso-page-month" onchange="initTresoreriePage()" style="padding:7px 12px;border:1px solid #dde3ec;border-radius:7px;font-size:13px;background:white;cursor:pointer;">
             <option value="0">Janvier 2026</option><option value="1">Février 2026</option>
-            <option value="2">Mars 2026</option><option value="3" selected>Avril 2026</option>
+            <option value="2">Mars 2026</option><option value="3">Avril 2026</option>
             <option value="4">Mai 2026</option><option value="5">Juin 2026</option>
             <option value="6">Juillet 2026</option><option value="7">Août 2026</option>
             <option value="8">Septembre 2026</option><option value="9">Octobre 2026</option>
@@ -2687,49 +2767,7 @@ td input[type=checkbox],th input[type=checkbox]{width:14px;height:14px;cursor:po
 <script>
 
 // ===== DATA =====
-const articles=[
-  {name:'Barch',tp:20,tpr:0,tpro:0,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'fout',tp:15,tpr:0,tpro:0,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Lizar',tp:20,tpr:0,tpro:0,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Housse de couette',tp:15,tpr:10,tpro:10,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Nettoyage de moquette',tp:20,tpr:10,tpro:10,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Transport',tp:100,tpr:0,tpro:0,ta:0,uom:'Forfait',actif:true,desc:''},
-  {name:'Banquette',tp:200,tpr:200,tpro:200,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Oreiller',tp:25,tpr:15,tpro:15,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:"Taie d'oreillers",tp:15,tpr:10,tpro:30,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Nappe',tp:25,tpr:15,tpro:15,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Tête de lit',tp:150,tpr:100,tpro:150,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Pouffe',tp:80,tpr:60,tpro:60,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Divers',tp:0,tpr:0,tpro:0,ta:0,uom:'Forfait',actif:true,desc:''},
-  {name:'Assise fauteuil',tp:0,tpr:0,tpro:0,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Sur-Matelas',tp:100,tpr:100,tpro:100,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Coussin plein',tp:25,tpr:20,tpro:20,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Housse de matelas',tp:15,tpr:10,tpro:10,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Traitement spécial',tp:200,tpr:100,tpro:100,ta:0,uom:'Forfait',actif:true,desc:''},
-  {name:'Siège bébé',tp:50,tpr:50,tpro:50,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Coussin peau de vache',tp:30,tpr:20,tpro:30,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Tapis peau de vache',tp:40,tpr:25,tpro:40,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Matelas 2P',tp:400,tpr:300,tpro:300,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Matelas 1P',tp:200,tpr:150,tpro:150,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Drap',tp:20,tpr:15,tpro:15,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Chaise',tp:70,tpr:50,tpro:50,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Fauteuil',tp:100,tpr:50,tpro:50,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Housse de coussin PF',tp:10,tpr:8,tpro:8,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Housse de coussin MF',tp:12,tpr:10,tpro:10,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Housse de coussin GF',tp:15,tpr:12,tpro:12,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Lhouf',tp:15,tpr:10,tpro:10,ta:0,uom:'m',actif:true,desc:''},
-  {name:'Couvre-lit',tp:50,tpr:30,tpro:30,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Couverture',tp:30,tpr:20,tpro:25,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Tapis perse',tp:40,tpr:25,tpro:25,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Tapis velour',tp:40,tpr:25,tpro:25,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Tapis soie',tp:40,tpr:25,tpro:25,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Tapis laine',tp:40,tpr:25,tpro:25,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Tapis shaggy',tp:30,tpr:15,tpro:15,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Canapé',tp:100,tpr:60,tpro:60,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Rideau',tp:70,tpr:50,tpro:60,ta:0,uom:'m²',actif:true,desc:''},
-  {name:'Couette',tp:50,tpr:25,tpro:25,ta:0,uom:'Pièce',actif:true,desc:''},
-  {name:'Tapis synthétique',tp:22,tpr:15,tpro:15,ta:30,uom:'m²',actif:true,desc:''},
-];
+let articles = []; // Chargé depuis Firestore via onSnapshot
 
 const uoms=[{name:'Forfait'},{name:'m'},{name:'m²'},{name:'mL'},{name:'Place'},{name:'Pièce'}];
 
@@ -2758,22 +2796,7 @@ const personnel=[
   {mat:'26',nom:'Radi Abdellah',fonction:'Livreur',telp:'',telper:'',cin:'BK362103',lieu:'',ville:'',active:true},
 ];
 
-let commandes=[
-  {num:'264489',client:'Ahmed bou9tib',livreur:'Lui-même',date:'15/04/2026',statut:'Brouillon',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:0},
-  {num:'264488',client:'Abdeljalil Salma',livreur:'Koukouss Hafid',date:'15/04/2026',statut:'Brouillon',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:0},
-  {num:'264487',client:'Hanane',livreur:'Koukouss Hafid',date:'15/04/2026',statut:'Brouillon',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:0},
-  {num:'264486',client:'Ibrahim elkhalil',livreur:'Koukouss Hafid',date:'15/04/2026',statut:'Brouillon',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:0},
-  {num:'264485',client:'Laundry Service Irfane 1',livreur:'Koukouss Hafid',date:'15/04/2026',statut:'Brouillon',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:0},
-  {num:'264475',client:'Greenzer',livreur:'Ourouch Houssam',date:'14/04/2026',statut:'Prêt à livrer',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:560},
-  {num:'264474',client:'Laundry Service Mesnana',livreur:'Ourouch Houssam',date:'13/04/2026',statut:'Prêt à livrer',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:320},
-  {num:'264472',client:'Thibeau Isabelle',livreur:'Ourouch Houssam',date:'13/04/2026',statut:'En traitement',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:180},
-  {num:'264470',client:'Ouidad aboud',livreur:'Ourouch Houssam',date:'13/04/2026',statut:'Prêt à livrer',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:440},
-  {num:'264469',client:'Homat el warda',livreur:'Koukouss Hafid',date:'13/04/2026',statut:'Prêt à livrer',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:260},
-  {num:'264467',client:'Touria',livreur:'Koukouss Hafid',date:'13/04/2026',statut:'Prêt à livrer',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:150},
-  {num:'264466',client:'Rachida',livreur:'Koukouss Hafid',date:'13/04/2026',statut:'Prêt à livrer',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:200},
-  {num:'264465',client:'Tabari Sara',livreur:'Koukouss Hafid',date:'13/04/2026',statut:'Brouillon',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:0},
-  {num:'264464',client:'Anass temsamani',livreur:'Koukouss Hafid',date:'13/04/2026',statut:'Brouillon',tel:'',adresse:'',remise:0,lignes:[],photos:[],montant:0},
-];
+let commandes = []; // Chargé depuis Firestore via onSnapshot
 
 const lignes=[
   {num:'L-001',article:'Tapis synthétique',larg:2.5,long:3.0,surface:7.5,empl:'A-01',statut:'Prêt',prix:165},
@@ -2852,7 +2875,10 @@ function initPage(p){
   else if(p==='app-lavage'){initAppLavage();}
   else if(p==='ramassage')renderRamassage(getRamassagesActifs());
   else if(p==='commandes')renderCommandes(commandes);
-  else if(p==='bons-livraison')renderBL(blData);
+  else if(p==='bons-livraison'){
+    buildBlData();
+    renderBL(blData);
+  }
   else if(p==='lignes'){renderLignes(lignesData);}
   else if(p==='chargements')renderChargements(chargementsData);
   else if(p==='stat-clients')renderStatClients();
@@ -2882,6 +2908,7 @@ function fmt(n){return n>0?n.toFixed(2):'0,00';}
 // ===== COMMANDES =====
 let cmdCounter = 1406; // dernier N° connu
 let currentCmdIdx = -1;
+let currentCmdFirestoreId = null; // _id Firestore de la commande en cours
 let cmdReadOnly = false;
 let cmdLignes = []; // lignes en cours d'édition
 let cmdPhotos = [];
@@ -2899,7 +2926,7 @@ function renderCommandes(data){
       <td class="link-cell" style="${['Prêt à livrer'].includes(c.statut)?'color:#1a5fa8':''}">
         ${c.num}
       </td>
-      <td style="${['Prêt à livrer'].includes(c.statut)?'color:#1a5fa8;font-weight:500':''}">${c.client}</td>
+      <td style="${['Prêt à livrer'].includes(c.statut)?'color:#1a5fa8;font-weight:500':''}" class="link-cell-client" onclick="event.stopPropagation();showClientPopup(commandes[${data.indexOf(c)}].client)" style="cursor:pointer;" title="Voir fiche client">${c.client}</td>
       <td style="${['Prêt à livrer'].includes(c.statut)?'color:#1a5fa8':'color:#8899aa'}">${c.livreur||'—'}</td>
       <td style="${['Prêt à livrer'].includes(c.statut)?'color:#1a5fa8':'color:#8899aa'}">${c.date}</td>
       <td>${statutBadge(c.statut)}</td>
@@ -2907,11 +2934,68 @@ function renderCommandes(data){
   document.getElementById('cmd-pag').textContent=`1–${data.length} sur ${commandes.length}`;
 }
 
+function populateLivreurFilter(selectId, dataArr, field){
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  const current = sel.value;
+  const livreurs = [...new Set(dataArr.map(d=>d[field]||'').filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Tous les livreurs</option>';
+  livreurs.forEach(l => { const o=document.createElement('option'); o.value=l; o.textContent=l; sel.appendChild(o); });
+  if(current) sel.value = current;
+}
+
+function applySort(data, sortVal){
+  const [field, dir] = sortVal.split('-');
+  return [...data].sort((a,b)=>{
+    let va = a[field]||'', vb = b[field]||'';
+    if(field==='date'){ va=va.split('/').reverse().join('-'); vb=vb.split('/').reverse().join('-'); }
+    if(field==='num'){ va=String(va); vb=String(vb); }
+    return dir==='asc' ? va.localeCompare(vb) : vb.localeCompare(va);
+  });
+}
+
+let cmdSortField='num', cmdSortDir='desc';
+function setSortCmd(field){
+  if(cmdSortField===field){ cmdSortDir = cmdSortDir==='asc'?'desc':'asc'; }
+  else { cmdSortField=field; cmdSortDir='desc'; }
+  // Mettre à jour les indicateurs visuels
+  ['num','client','livreur','date'].forEach(f=>{
+    const el = document.getElementById('sort-cmd-'+f);
+    if(el) el.textContent = f===cmdSortField ? (cmdSortDir==='asc'?'↑':'↓') : '↕';
+  });
+  // Mettre à jour le select de tri
+  const sel = document.getElementById('cmd-sort');
+  if(sel) sel.value = field+'-'+cmdSortDir;
+  filterCommandes('');
+}
+
+function resetFilterCmd(){
+  document.getElementById('cmd-filter-statut').value='';
+  document.getElementById('cmd-filter-livreur').value='';
+  document.getElementById('cmd-sort').value='num-desc';
+  cmdSortField='num'; cmdSortDir='desc';
+  filterCommandes('');
+}
+
+function getCommandesActives(){
+  const filtreStatut = document.getElementById('cmd-filter-statut')?.value || '';
+  if(filtreStatut === '__tous__') return commandes;
+  if(filtreStatut) return commandes.filter(c => c.statut === filtreStatut);
+  // Par défaut : tout sauf "Payé" et "Livré"
+  return commandes.filter(c => c.statut !== 'Payé' && c.statut !== 'Livré');
+}
+
 function filterCommandes(q){
-  const statut=document.getElementById('cmd-filter-statut').value;
-  let data=commandes;
-  if(q)data=data.filter(c=>c.client.toLowerCase().includes(q.toLowerCase())||String(c.num).includes(q));
-  if(statut)data=data.filter(c=>c.statut===statut);
+  populateLivreurFilter('cmd-filter-livreur', commandes, 'livreur');
+  const statut  = document.getElementById('cmd-filter-statut').value;
+  const livreur = document.getElementById('cmd-filter-livreur')?.value||'';
+  const sortVal = document.getElementById('cmd-sort')?.value||'num-desc';
+  // Par défaut : exclure "Prêt à livrer" (sauf si filtre explicite)
+  let data = (statut === '__tous__') ? commandes : (statut ? commandes : getCommandesActives());
+  if(q) data = data.filter(c=>(c.client||'').toLowerCase().includes(q.toLowerCase())||String(c.num).includes(q));
+  if(statut)  data = data.filter(c=>c.statut===statut);
+  if(livreur) data = data.filter(c=>c.livreur===livreur);
+  data = applySort(data, sortVal);
   renderCommandes(data);
 }
 
@@ -2933,24 +3017,30 @@ function showCmdForm(i){
     document.getElementById('cf-client').value='';
     document.getElementById('cf-tel').value='';
     document.getElementById('cf-adresse').value='';
-    document.getElementById('cf-livreur').value='';
+    populateCfLivreur('');
     document.getElementById('cf-date').value=new Date().toISOString().split('T')[0];
     document.getElementById('cf-remise').value=0;
     statutBarUpdate('Brouillon');
     setCmdReadOnly(false);
   } else {
     const c=commandes[i];
-    currentCmdIdx=i;cmdReadOnly=true;
+    currentCmdIdx=i;
+    currentCmdFirestoreId = c._id || null; // stocker le _id Firestore
+    cmdReadOnly=true;
     document.getElementById('cmd-form-bc').textContent=c.num;
     document.getElementById('cmd-form-actions').innerHTML=`
       <button class="btn-modify" onclick="enableCmdEdit()">Modifier</button>
       <button class="btn-modify" onclick="showCmdForm(-1)">Créer</button>`;
     document.getElementById('cmd-ro').classList.add('show');
     document.getElementById('cf-num').value=c.num;
-    document.getElementById('cf-client').value=c.client;
+    const cfClientInput = document.getElementById('cf-client');
+    const cfClientLbl   = document.getElementById('cf-client-lbl');
+    if(cfClientInput) cfClientInput.value = c.client;
+    if(cfClientInput) cfClientInput.style.display = 'none';
+    if(cfClientLbl){ cfClientLbl.textContent = c.client||''; cfClientLbl.style.display = 'block'; }
     document.getElementById('cf-tel').value=c.tel||'';
     document.getElementById('cf-adresse').value=c.adresse||'';
-    document.getElementById('cf-livreur').value=c.livreur||'';
+    populateCfLivreur(c.livreur||'');
     document.getElementById('cf-date').value=c.date;
     document.getElementById('cf-remise').value=c.remise||0;
     cmdLignes=c.lignes?JSON.parse(JSON.stringify(c.lignes)):[];
@@ -2977,6 +3067,7 @@ function showCmdForm(i){
 }
 
 function hideCmdForm(){
+  currentCmdFirestoreId = null; // Reset à la fermeture
   document.getElementById('cmd-list-view').style.display='';
   document.getElementById('cmd-form-view').style.display='none';
 }
@@ -2994,7 +3085,44 @@ function enableCmdEdit(){
   statutBarUpdate(statut);
 }
 
+function populateCfLivreur(valeurActuelle){
+  const sel = document.getElementById('cf-livreur');
+  if(!sel) return;
+  const livreurs = ['Ourouch Houssam','Koukouss Hafid','Radi Abdellah','Oujane Nadir',
+    'Abdessamad Aboulfath','Taakouft Soufiane','Messaoud Ameziane','Anass Mounaouar','Labiad Yassine'];
+  // Reconstruire les options
+  sel.innerHTML = '<option value="">—</option>';
+  livreurs.forEach(l => {
+    const o = document.createElement('option');
+    o.value = l; o.textContent = l;
+    sel.appendChild(o);
+  });
+  // Ajouter la valeur actuelle si elle n existe pas dans la liste
+  if(valeurActuelle && !livreurs.includes(valeurActuelle)){
+    const o = document.createElement('option');
+    o.value = valeurActuelle; o.textContent = valeurActuelle;
+    sel.appendChild(o);
+  }
+  sel.value = valeurActuelle || '';
+}
+
 function setCmdReadOnly(ro){
+  // Gérer le label cliquable du client
+  const clientInput = document.getElementById('cf-client');
+  const clientLbl   = document.getElementById('cf-client-lbl');
+  if(clientInput && clientLbl){
+    const addBtn = document.getElementById('cf-client-add-btn');
+    if(ro){
+      clientLbl.textContent  = clientInput.value;
+      clientLbl.style.display = 'block';
+      clientInput.style.display = 'none';
+      if(addBtn) addBtn.style.display = 'none';
+    } else {
+      clientLbl.style.display  = 'none';
+      clientInput.style.display = '';
+      if(addBtn) addBtn.style.display = '';  // montrer le bouton en mode édition
+    }
+  }
   ['cf-client','cf-livreur','cf-date','cf-remise'].forEach(id=>{
     const el=document.getElementById(id);
     if(!el)return;
@@ -3009,28 +3137,91 @@ function setCmdReadOnly(ro){
 }
 
 function saveCmdForm(){
-  const client=document.getElementById('cf-client').value.trim();
-  if(!client){alert('Veuillez saisir un client.');return;}
-  const obj={
-    num:document.getElementById('cf-num').value,
+  const client = document.getElementById('cf-client').value.trim();
+  if(!client){ alert('Veuillez saisir un client.'); return; }
+
+  const num    = document.getElementById('cf-num').value;
+  const statut = currentCmdFirestoreId
+    ? (commandes.find(c => c._id === currentCmdFirestoreId)?.statut || 'Brouillon')
+    : 'Brouillon';
+
+  // Données à sauvegarder — champs de base uniquement (pas les lignes)
+  const data = {
+    num,
     client,
-    tel:document.getElementById('cf-tel').value,
-    adresse:document.getElementById('cf-adresse').value,
-    livreur:document.getElementById('cf-livreur').value,
-    date:document.getElementById('cf-date').value,
-    remise:parseFloat(document.getElementById('cf-remise').value)||0,
-    statut:'Brouillon',
-    lignes:JSON.parse(JSON.stringify(cmdLignes)),
-    photos:[...cmdPhotos],
-    montant:parseFloat(document.getElementById('total-net').textContent.replace(',','.'))||0
+    tel:     document.getElementById('cf-tel').value,
+    adresse: document.getElementById('cf-adresse').value,
+    livreur: document.getElementById('cf-livreur').value,
+    date:    document.getElementById('cf-date').value,
+    remise:  parseFloat(document.getElementById('cf-remise').value) || 0,
+    statut,
+    montant: parseFloat(document.getElementById('total-net').textContent.replace(',','.')) || 0,
   };
-  if(currentCmdIdx===-1){commandes.unshift(obj);}
-  else{commandes[currentCmdIdx]=obj;}
-  hideCmdForm();
-  renderCommandes(commandes);
-  showToast(`✓ Commande ${obj.num} enregistrée`,'#1D9E75');
-  // Firebase
-  (async()=>{ const fid = await fbSave('commandes', obj, obj._id||null); if(fid&&!obj._id){obj._id=fid;} })();
+  // Ajouter les lignes SEULEMENT si modifiées (évite d'écraser les lignes Firestore)
+  if(cmdLignes.length > 0){
+    data.lignes = JSON.parse(JSON.stringify(cmdLignes));
+  }
+
+  if(!window._firestore){
+    showToast('Firebase non disponible', '#DC2626');
+    return;
+  }
+
+  (async()=>{
+    try {
+      // Nettoyer data : remplacer undefined par null pour Firestore
+      const dataClean = JSON.parse(JSON.stringify(data, (k,v) => v===undefined ? null : v));
+      console.log('data à sauvegarder:', dataClean.num, dataClean.client, dataClean.statut, '| lignes dans dataClean:', dataClean.lignes?.length);
+  console.log('cmdLignes au moment save:', cmdLignes.length);
+      console.log('currentCmdFirestoreId:', currentCmdFirestoreId);
+
+      if(currentCmdFirestoreId){
+        const docRef = window._firestore.collection('commandes').doc(currentCmdFirestoreId);
+        // Étape 1 : mettre à jour les champs scalaires
+        const {lignes, ...baseFields} = dataClean;
+        await docRef.update({ ...baseFields, updatedAt: new Date().toISOString() });
+        // Étape 2 : mettre à jour les lignes séparément si présentes
+        if(lignes && lignes.length > 0){
+          await docRef.update({ lignes: lignes });
+          console.log('Lignes sauvegardées:', lignes.length);
+        }
+        console.log('✅ Commande mise à jour:', num, currentCmdFirestoreId);
+        // Vérifier que les données sont bien dans Firestore
+        const verify = await window._firestore.collection('commandes').doc(currentCmdFirestoreId).get();
+        const vData = verify.data();
+        console.log('🔍 Vérif Firestore - client:', vData?.client, '| statut:', vData?.statut, '| date:', vData?.date, '| lignes:', vData?.lignes?.length);
+      } else {
+        // CREATE nouvelle commande
+        const ref = await window._firestore.collection('commandes').add({
+          ...dataClean, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString()
+        });
+        currentCmdFirestoreId = ref.id;
+        console.log('✅ Commande créée:', num, ref.id);
+      }
+      // Créer le client si pas dans la base
+      const clientNom = dataClean.client || '';
+      const clientTel  = dataClean.tel    || '';
+      if(clientNom){
+        const existingCl = clients.find(c =>
+          (c.nom||'').toLowerCase() === clientNom.toLowerCase() ||
+          (clientTel && (c.tel||'').replace(/\s/g,'') === clientTel.replace(/\s/g,''))
+        );
+        if(!existingCl){
+          saveClientToFirestore({
+            nom: clientNom, tel: clientTel,
+            adresse: dataClean.adresse || '',
+            ville: 'Tanger', type: 'Particulier',
+            tel2:'', email:'', notes:''
+          });
+        }
+      }
+      hideCmdForm();
+      showToast('Commande ' + num + ' enregistree', '#1D9E75');
+    } catch(e){
+      console.error('❌ saveCmdForm erreur:', e.code, e.message);
+      showToast('Erreur: ' + e.message, '#DC2626');
+    }
+  })();
 }
 
 // CLIENT AUTOCOMPLETE dans commande
@@ -3053,6 +3244,36 @@ function cfSelectClient(nom,tel,adresse){
   document.getElementById('cf-tel').value=tel;
   document.getElementById('cf-adresse').value=adresse;
   document.getElementById('cf-client-drop').style.display='none';
+}
+
+// Recherche client dans la fiche BL
+function bfClientSearch(){
+  const q = document.getElementById('bf-client-input').value.trim().toLowerCase();
+  const drop = document.getElementById('bf-client-drop');
+  if(q.length < 1){ drop.style.display='none'; return; }
+  const matches = clients.filter(c =>
+    (c.nom||'').toLowerCase().includes(q) || (c.tel||'').includes(q)
+  ).slice(0, 6);
+  if(!matches.length){ drop.style.display='none'; return; }
+  drop.innerHTML = matches.map(c => `
+    <div onclick="bfSelectClient('${c.nom.replace(/'/g,"\'")}','${(c.tel||'').replace(/'/g,"\'")}','${((c.quartier||'')+(c.ville?', '+c.ville:'')).replace(/'/g,"\'")}' )"
+      style="padding:9px 12px;cursor:pointer;font-size:13px;border-bottom:1px solid #f5f5f5;"
+      onmouseover="this.style.background='#f0f4ff'" onmouseout="this.style.background=''">
+      <div style="font-weight:600">${c.nom}</div>
+      <div style="font-size:11px;color:#8899aa">${c.tel||''} · ${c.quartier||''} ${c.ville||''}</div>
+    </div>`).join('');
+  drop.style.display = 'block';
+}
+
+function bfSelectClient(nom, tel, adresse){
+  const input = document.getElementById('bf-client-input');
+  const drop  = document.getElementById('bf-client-drop');
+  if(input) input.value = nom;
+  if(drop)  drop.style.display = 'none';
+  // Pré-remplir aussi le BL courant pour aperçu
+  if(currentBLIdx >= 0 && blData[currentBLIdx]){
+    blData[currentBLIdx].client = nom;
+  }
 }
 document.addEventListener('click',e=>{
   const d=document.getElementById('cf-client-drop');
@@ -3233,9 +3454,73 @@ function statutBarUpdate(statut){
 }
 
 function changeCmdStatut(newStatut){
-  if(currentCmdIdx>=0)commandes[currentCmdIdx].statut=newStatut;
+  if(currentCmdIdx < 0) return;
+  const cmd = commandes[currentCmdIdx];
+  cmd.statut = newStatut;
   statutBarUpdate(newStatut);
-  showToast('✓ Statut → '+newStatut,'#1a5fa8');
+  showToast('Statut → ' + newStatut, '#1a5fa8');
+
+  if(!cmd._id || !window._firestore) return;
+
+  // 1. Mettre à jour le statut de la commande dans Firestore
+  window._firestore.collection('commandes').doc(cmd._id).update({
+    statut: newStatut,
+    updatedAt: new Date().toISOString()
+  }).then(() => {
+    buildBlData();
+    if(currentPage === 'bons-livraison') renderBL(blData);
+  }).catch(e => console.warn('Statut commande erreur:', e.message));
+
+  // 2. Si "Prêt à livrer" → créer un BL dans Firestore automatiquement
+  if(newStatut === 'Prêt à livrer'){
+    // Vérifier si un BL existe déjà pour cette commande
+    const existingBL = blData.find(b => b.num === cmd.num);
+    if(!existingBL){
+      const newBL = {
+        num:          cmd.num,
+        client:       cmd.client || '',
+        livreur:      cmd.livreur || '',
+        dateCollecte: cmd.date || new Date().toISOString().split('T')[0],
+        etat:         'Prêt à livrer',
+        dateLivraison: '',
+        datePaiement:  '',
+        remise:        cmd.remise || 0,
+        montant:       cmd.montant || 0,
+        lignes: cmd.lignes ? JSON.parse(JSON.stringify(cmd.lignes)).map((l,i) => ({
+          ...l,
+          num:    l.num    || l.numArt || (i+1),  // compatibilité
+          numArt: l.numArt || l.num    || (i+1),  // compatibilité
+        })) : [],
+        sourceCommande: cmd._id,
+        createdAt:     new Date().toISOString(),
+        updatedAt:     new Date().toISOString()
+      };
+      window._firestore.collection('bons_livraison').add(newBL)
+        .then(ref => {
+          console.log('BL créé Firestore:', cmd.num, ref.id);
+          showToast('BL créé pour commande ' + cmd.num, '#1D9E75');
+        })
+        .catch(e => console.warn('Création BL erreur:', e.message));
+    } else {
+      console.log('BL déjà existant pour:', cmd.num);
+    }
+  }
+
+  // 3. Si statut change depuis "Prêt à livrer" → mettre à jour le BL
+  if(newStatut !== 'Prêt à livrer'){
+    const bl = blData.find(b => b.num === cmd.num);
+    if(bl?._id){
+      window._firestore.collection('bons_livraison').doc(bl._id).update({
+        etat: newStatut === 'Payé' ? 'Payé' : newStatut,
+        updatedAt: new Date().toISOString()
+      }).catch(e => console.warn('Mise à jour BL erreur:', e.message));
+    }
+  }
+
+  // 4. Si statut = "Payé" → points fidélité automatiques
+  if(newStatut === 'Payé'){
+    fidAddPointsFromCommande(cmd.client||'', parseFloat(cmd.montant)||0);
+  }
 }
 
 // IMPRIMER BC — layout exact comme le PDF original
@@ -3387,20 +3672,7 @@ function showToast(msg,color){
 }
 
 // ===== BONS DE LIVRAISON =====
-let blData = [
-  {num:'264475',client:'Greenzer',livreur:'Ourouch Houssam',dateCollecte:'14/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,lignes:[{numArt:1,article:'Tapis synthétique',larg:2.50,long:3.80,surface:9.50,qte:1,uom:'m²',prixU:22,pu:0,totalHT:209,obs:'beige'}]},
-  {num:'264474',client:'Laundry Service Mesnana',livreur:'Ourouch Houssam',dateCollecte:'13/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,lignes:[{numArt:1,article:'Tapis synthétique',larg:3.00,long:4.00,surface:12.00,qte:1,uom:'m²',prixU:15,pu:0,totalHT:180,obs:'gris'}]},
-  {num:'264470',client:'Ouidad aboud',livreur:'Ourouch Houssam',dateCollecte:'13/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,lignes:[{numArt:1,article:'Rideau',larg:1.5,long:2.8,surface:4.2,qte:2,uom:'m²',prixU:70,pu:0,totalHT:294,obs:'blanc'}]},
-  {num:'264469',client:'Homat el warda',livreur:'Koukouss Hafid',dateCollecte:'13/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:20,lignes:[{numArt:1,article:'Canapé',larg:0,long:0,surface:0,qte:1,uom:'Pièce',prixU:100,pu:0,totalHT:100,obs:''}]},
-  {num:'264467',client:'Touria',livreur:'Koukouss Hafid',dateCollecte:'13/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,lignes:[{numArt:1,article:'Tapis shaggy',larg:2.0,long:3.0,surface:6.0,qte:1,uom:'m²',prixU:30,pu:0,totalHT:180,obs:'beige'}]},
-  {num:'264466',client:'Rachida',livreur:'Koukouss Hafid',dateCollecte:'13/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,lignes:[{numArt:1,article:'Tapis laine',larg:2.5,long:3.5,surface:8.75,qte:1,uom:'m²',prixU:40,pu:0,totalHT:350,obs:'rouge'}]},
-  {num:'264462',client:'Zairi Firdaous',livreur:'Koukouss Hafid',dateCollecte:'13/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,lignes:[{numArt:1,article:'Matelas 2P',larg:0,long:0,surface:0,qte:1,uom:'Pièce',prixU:400,pu:0,totalHT:400,obs:''}]},
-  {num:'264458',client:'El Ahmar Khalid',livreur:'Lui-même',dateCollecte:'13/04/2026',etat:'Livré & Payé',dateLivraison:'14/04/2026',datePaiement:'14/04/2026',remise:0,lignes:[{numArt:1,article:'Tapis synthétique',larg:2.80,long:4.60,surface:12.88,qte:1,uom:'m²',prixU:20,pu:257.60,totalHT:257.60,obs:'Beige'}]},
-  {num:'264457',client:'Sekkouri Ferdaouss',livreur:'Koukouss Hafid',dateCollecte:'11/04/2026',etat:'Prêt à livrer',dateLivraison:'',datePaiement:'',remise:0,lignes:[{numArt:1,article:'Couette',larg:0,long:0,surface:0,qte:2,uom:'Pièce',prixU:50,pu:0,totalHT:100,obs:''}]},
-  {num:'264452',client:'Assia El Afia',livreur:'Lui-même',dateCollecte:'11/04/2026',etat:'Livré & Payé',dateLivraison:'12/04/2026',datePaiement:'12/04/2026',remise:50,lignes:[{numArt:1,article:'Canapé',larg:0,long:0,surface:0,qte:1,uom:'Pièce',prixU:100,pu:0,totalHT:100,obs:''},{numArt:2,article:'Tapis synthétique',larg:3.0,long:4.0,surface:12.0,qte:1,uom:'m²',prixU:22,pu:0,totalHT:264,obs:'beige'}]},
-  {num:'264451',client:'Maroune Hanoun',livreur:'Lui-même',dateCollecte:'11/04/2026',etat:'Livré & Payé',dateLivraison:'13/04/2026',datePaiement:'13/04/2026',remise:0,lignes:[{numArt:1,article:'Fauteuil',larg:0,long:0,surface:0,qte:2,uom:'Pièce',prixU:100,pu:0,totalHT:200,obs:''}]},
-  {num:'264443',client:'Saghir Abdellah',livreur:'Lui-même',dateCollecte:'11/04/2026',etat:'Livré & Payé',dateLivraison:'11/04/2026',datePaiement:'11/04/2026',remise:0,lignes:[{numArt:1,article:'Tapis perse',larg:2.0,long:3.0,surface:6.0,qte:1,uom:'m²',prixU:40,pu:0,totalHT:240,obs:''}]},
-];
+let blData = []; // Chargé depuis Firestore via onSnapshot
 
 let currentBLIdx = 0;
 let blEditMode = false;
@@ -3421,10 +3693,10 @@ function renderBL(data){
   document.getElementById('bl-body').innerHTML=data.map((b,i)=>{
     const isBlue=['Prêt à livrer'].includes(b.etat);
     const style=isBlue?'color:#1a5fa8;':'';
-    return `<tr onclick="showBLFiche(${blData.indexOf(b)})" style="cursor:pointer;">
+    return `<tr onclick="showBLFicheById('${b._id||b.num}')" style="cursor:pointer;">
       <td><input type="checkbox" onclick="event.stopPropagation()"/></td>
       <td class="link-cell" style="${style}">${b.num}</td>
-      <td style="${style}font-weight:500">${b.client}</td>
+      <td style="${style}font-weight:500;" class="link-cell-client" onclick="event.stopPropagation();showClientPopup(blData[${data.indexOf(b)}].client)" title="Voir fiche client">${b.client}</td>
       <td style="${style}">${b.livreur}</td>
       <td style="${style}">${b.dateCollecte}</td>
       <td>${blEtatBadge(b.etat)}</td>
@@ -3442,6 +3714,65 @@ function filterBL(q){
 }
 
 // FICHE BL
+// Construire blData depuis commandes (appelée à chaque changement)
+function buildBlData(){
+  const statutsBL = ['Prêt à livrer','Livré','Payé'];
+  blData = commandes
+    .filter(c => statutsBL.includes(c.statut))
+    .map(c => ({
+      _id:           c._id,
+      num:           c.num,
+      client:        c.client        || '',
+      livreur:       c.livreur       || '',
+      dateCollecte:  c.date          || '',
+      etat:          c.statut,
+      dateLivraison: c.dateLivraison || '',
+      datePaiement:  c.datePaiement  || '',
+      remise:        c.remise        || 0,
+      montant:       c.montant       || 0,
+      lignes:        c.lignes        || [],
+      sourceCommande: c._id,
+      notesLivreur:  c.notesLivreur  || [],
+    }));
+  blData.sort((a,b) => (b.num||'').localeCompare(a.num||''));
+  console.log('buildBlData:', blData.length, 'BLs depuis', commandes.length, 'commandes');
+  return blData;
+}
+
+// Sauvegarder un client dans Firestore
+async function saveClientToFirestore(clientData){
+  if(!window._firestore) return null;
+  try {
+    // Vérifier si client existe déjà (par téléphone)
+    const tel = (clientData.tel||'').replace(/\s/g,'');
+    const existing = clients.find(c => (c.tel||'').replace(/\s/g,'') === tel && tel);
+    if(existing && existing._id){
+      // Mettre à jour
+      await window._firestore.collection('clients').doc(existing._id).update({
+        ...clientData, updatedAt: new Date().toISOString()
+      });
+      return existing._id;
+    } else {
+      // Créer nouveau
+      const ref = await window._firestore.collection('clients').add({
+        ...clientData,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+      console.log('Nouveau client créé:', clientData.nom, ref.id);
+      return ref.id;
+    }
+  } catch(e){
+    console.warn('saveClientToFirestore:', e.message);
+    return null;
+  }
+}
+
+function showBLFicheById(idOrNum){
+  const i = blData.findIndex(b => (b._id||b.num) === idOrNum);
+  if(i >= 0) showBLFiche(i);
+}
+
 function showBLFiche(i){
   if(i===-1){
     // Nouveau BL vide
@@ -3465,7 +3796,20 @@ function hideBLFiche(){
 
 function fillBLFiche(b){
   document.getElementById('bl-fiche-bc').textContent=b.num;
-  document.getElementById('bf-client').textContent=b.client||'—';
+  // Client : span en lecture, zone de recherche en édition
+  const bfClientSpan = document.getElementById('bf-client');
+  const bfClientZone = document.getElementById('bf-client-search-zone');
+  const bfClientInput= document.getElementById('bf-client-input');
+  if(blEditMode){
+    if(bfClientSpan) bfClientSpan.style.display = 'none';
+    if(bfClientZone) bfClientZone.style.display = '';
+    if(bfClientInput){ bfClientInput.value = b.client || ''; bfClientInput.focus(); }
+    const drop = document.getElementById('bf-client-drop');
+    if(drop) drop.style.display = 'none';
+  } else {
+    if(bfClientSpan){ bfClientSpan.textContent = b.client || '—'; bfClientSpan.style.display = ''; }
+    if(bfClientZone) bfClientZone.style.display = 'none';
+  }
   // Fix : toujours synchroniser le select avec la valeur actuelle avant d'afficher
   const livTxt=document.getElementById('bf-livreur-txt');
   const livSel=document.getElementById('bf-livreur-sel');
@@ -3492,7 +3836,7 @@ function fillBLFiche(b){
 function renderBLLignes(lignes){
   document.getElementById('bl-lignes-body').innerHTML=lignes.length?lignes.map(l=>`
     <tr>
-      <td style="text-align:center;font-weight:600;color:#1a5fa8">${l.numArt}</td>
+      <td style="text-align:center;font-weight:600;color:#1a5fa8">${l.num||l.numArt||'—'}</td>
       <td style="font-weight:500;color:#1a5fa8">${l.article}</td>
       <td style="text-align:center;color:#1a5fa8">${l.larg>0?l.larg.toFixed(2):'0,00'}</td>
       <td style="text-align:center;color:#1a5fa8">${l.long>0?l.long.toFixed(2):'0,00'}</td>
@@ -3510,13 +3854,28 @@ function renderBLLignes(lignes){
 
 function toggleBLEdit(){
   if(blEditMode){
+    const b = blData[currentBLIdx];
     // Sauvegarder livreur
-    const sel=document.getElementById('bf-livreur-sel');
-    blData[currentBLIdx].livreur=sel.value;
-    blEditMode=false;
-    showToast('✓ Bon de livraison enregistré','#1D9E75');
+    const sel = document.getElementById('bf-livreur-sel');
+    if(sel) b.livreur = sel.value;
+    // Sauvegarder client depuis la zone de recherche
+    const clientInput = document.getElementById('bf-client-input');
+    if(clientInput && clientInput.value.trim()) b.client = clientInput.value.trim();
+    // Fermer le dropdown
+    const clientDrop = document.getElementById('bf-client-drop');
+    if(clientDrop) clientDrop.style.display = 'none';
+    blEditMode = false;
+    // Sauvegarder dans Firestore
+    if(b._id && window._firestore){
+      window._firestore.collection('bons_livraison').doc(b._id).update({
+        client:  b.client,
+        livreur: b.livreur,
+        updatedAt: new Date().toISOString()
+      }).catch(e => console.warn('BL update:', e.message));
+    }
+    showToast('Bon de livraison enregistré','#1D9E75');
   } else {
-    blEditMode=true;
+    blEditMode = true;
   }
   fillBLFiche(blData[currentBLIdx]);
   updateBLStatutBar(blData[currentBLIdx].etat);
@@ -3615,7 +3974,7 @@ function imprimerBL(){
 
   const lignesRows=(b.lignes||[]).map((l,i)=>`
     <tr>
-      <td style="text-align:center">${l.numArt}</td>
+      <td style="text-align:center">${l.num||l.numArt||'—'}</td>
       <td style="font-weight:bold;text-align:center">${l.article}</td>
       <td style="text-align:center">${l.larg>0?l.larg.toFixed(2):'0,00'}</td>
       <td style="text-align:center">${l.long>0?l.long.toFixed(2):'0,00'}</td>
@@ -3709,28 +4068,7 @@ function imprimerBL(){
 
 // ===== LIGNES DE COMMANDE =====
 // Générer les lignes depuis les commandes + lignes statiques
-let lignesData = [
-  {cmdNum:'264504',numArt:1,article:'Tapis synthétique',larg:3.48,long:3.48,surface:12.11,qte:1,qteTraitee:0,uom:'m²',obs:'rouge beige',empl:'',etat:'Brouillon'},
-  {cmdNum:'264503',numArt:1,article:'Divers',larg:0,long:0,surface:0,qte:1,qteTraitee:0,uom:'Pièce',obs:'',empl:'',etat:'Brouillon'},
-  {cmdNum:'264495',numArt:1,article:'Tapis synthétique',larg:2.95,long:3.50,surface:10.32,qte:1,qteTraitee:0,uom:'m²',obs:'beige marron',empl:'',etat:'Brouillon'},
-  {cmdNum:'264491',numArt:2,article:'Rideau',larg:0,long:0,surface:0,qte:2,qteTraitee:0,uom:'Forfait',obs:'',empl:'',etat:'Brouillon'},
-  {cmdNum:'264491',numArt:1,article:'Tapis synthétique',larg:3.60,long:4.00,surface:14.40,qte:1,qteTraitee:0,uom:'m²',obs:'beige',empl:'',etat:'Brouillon'},
-  {cmdNum:'264488',numArt:3,article:'Couette',larg:0,long:0,surface:0,qte:1,qteTraitee:1,uom:'Pièce',obs:'',empl:'B-02',etat:'En traitement'},
-  {cmdNum:'264488',numArt:2,article:'Couverture',larg:0,long:0,surface:0,qte:5,qteTraitee:3,uom:'Pièce',obs:'',empl:'B-01',etat:'En traitement'},
-  {cmdNum:'264488',numArt:1,article:'Tapis synthétique',larg:1.40,long:2.00,surface:2.80,qte:1,qteTraitee:1,uom:'m²',obs:'bleu',empl:'A-04',etat:'Prêt à livrer'},
-  {cmdNum:'264487',numArt:2,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68,qte:1,qteTraitee:0,uom:'m²',obs:'gris',empl:'',etat:'Brouillon'},
-  {cmdNum:'264487',numArt:1,article:'Tapis shaggy',larg:1.65,long:2.30,surface:3.79,qte:1,qteTraitee:0,uom:'m²',obs:'beige',empl:'',etat:'Brouillon'},
-  {cmdNum:'264486',numArt:1,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68,qte:1,qteTraitee:0,uom:'m²',obs:'blanc',empl:'',etat:'Brouillon'},
-  {cmdNum:'264485',numArt:1,article:'Tapis synthétique',larg:1.70,long:2.30,surface:3.91,qte:1,qteTraitee:0,uom:'m²',obs:'rouge beige',empl:'',etat:'Brouillon'},
-  {cmdNum:'264484',numArt:6,article:'Tapis synthétique',larg:2.96,long:3.50,surface:10.36,qte:1,qteTraitee:0,uom:'m²',obs:'jaune',empl:'',etat:'Brouillon'},
-  {cmdNum:'264484',numArt:5,article:'Tapis synthétique',larg:0.75,long:1.95,surface:1.46,qte:1,qteTraitee:0,uom:'m²',obs:'multi-coleur',empl:'',etat:'Brouillon'},
-  {cmdNum:'264484',numArt:4,article:'Tapis synthétique',larg:0.96,long:2.90,surface:2.78,qte:1,qteTraitee:0,uom:'m²',obs:'beige',empl:'',etat:'Brouillon'},
-  {cmdNum:'264484',numArt:3,article:'Tapis synthétique',larg:1.20,long:2.30,surface:2.76,qte:1,qteTraitee:0,uom:'m²',obs:'multi-coleur',empl:'',etat:'Brouillon'},
-  {cmdNum:'264484',numArt:2,article:'Tapis shaggy',larg:1.65,long:3.15,surface:5.20,qte:1,qteTraitee:0,uom:'m²',obs:'marron',empl:'',etat:'Brouillon'},
-  {cmdNum:'264484',numArt:1,article:'Tapis synthétique',larg:2.50,long:4.55,surface:11.38,qte:1,qteTraitee:0,uom:'m²',obs:'doré',empl:'',etat:'Brouillon'},
-  {cmdNum:'264483',numArt:1,article:'Tapis synthétique',larg:2.05,long:3.00,surface:6.15,qte:1,qteTraitee:0,uom:'m²',obs:'rouge',empl:'',etat:'Brouillon'},
-  {cmdNum:'264482',numArt:1,article:'Tapis synthétique',larg:2.00,long:3.10,surface:6.20,qte:1,qteTraitee:0,uom:'m²',obs:'blanc',empl:'',etat:'Brouillon'},
-];
+let lignesData = []; // Chargé depuis commandes Firestore
 
 let currentLigIdx = 0;
 let ligEditMode = false;
@@ -3743,21 +4081,31 @@ function ligEtatBadge(etat){
 
 function renderLignes(data){
   ligFilteredData=data;
-  document.getElementById('lig-body').innerHTML=data.map((l,i)=>`
-    <tr onclick="showLigFiche(${lignesData.indexOf(l)})" style="cursor:pointer">
+  document.getElementById('lig-body').innerHTML=data.map((l,i)=>{
+    const pct = l.qte>0 ? Math.round((l.qteTraitee||0)/l.qte*100) : 0;
+    const rowBg = l.etat==='Prêt à livrer' ? '' : (!l.empl ? 'background:#FFFBEB;' : '');
+    return `<tr onclick="showLigFiche(${lignesData.indexOf(l)})" style="cursor:pointer;${rowBg}">
       <td><input type="checkbox" onclick="event.stopPropagation()"/></td>
-      <td class="link-cell">${l.cmdNum}</td>
-      <td style="color:#5a6a7a;font-weight:600">${l.numArt}</td>
+      <td class="link-cell" style="font-weight:700">${l.cmdNum}</td>
+      <td style="color:#5a6a7a;font-size:12px;max-width:120px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${l.cmdClient||'—'}</td>
+      <td style="text-align:center;font-weight:600;color:#5a6a7a">${l.num||l.numArt||'—'}</td>
       <td style="font-weight:500">${l.article}</td>
-      <td style="color:#5a6a7a">${l.larg>0?l.larg.toFixed(2):'0,00'}</td>
-      <td style="color:#5a6a7a">${l.long>0?l.long.toFixed(2):'0,00'}</td>
-      <td style="color:#5a6a7a">${l.surface>0?l.surface.toFixed(2):'0,00'}</td>
-      <td style="color:#5a6a7a">${l.qte}</td>
-      <td style="color:#5a6a7a">${l.uom}</td>
-      <td style="color:#8899aa;font-style:${l.obs?'normal':'italic'}">${l.obs||'—'}</td>
-      <td>${ligEtatBadge(l.etat)}</td>
-    </tr>`).join('');
-  document.getElementById('lig-pag').textContent=`1–${data.length} sur ${lignesData.length}`;
+      <td style="text-align:center;color:#5a6a7a">${l.uom==='m²'?(l.surface>0?l.surface.toFixed(2)+'m²':'0'):l.qte+' '+l.uom}</td>
+      <td style="text-align:center;font-weight:700;color:${pct>=100?'#059669':'#F59E0B'}">
+        ${l.qteTraitee||0} / ${l.qte||1}
+        <div style="height:3px;background:#f0f2f5;border-radius:2px;margin-top:3px;width:50px">
+          <div style="height:3px;background:${pct>=100?'#059669':'#F59E0B'};width:${Math.min(pct,100)}%;border-radius:2px;"></div>
+        </div>
+      </td>
+      <td style="font-weight:700;color:${l.empl?'#1a5fa8':'#9CA3AF'}">
+        ${l.empl||'<span style="font-weight:400;font-size:11px;color:#F59E0B;">⬜ À définir</span>'}
+      </td>
+      <td style="color:#8899aa;font-size:12px">${l.obs||'—'}</td>
+      <td>${ligEtatBadge(l.etat||'Brouillon')}</td>
+    </tr>`;
+  }).join('');
+  const t=data.length;
+  document.getElementById('lig-pag').textContent=t+' ligne'+(t>1?'s':'');
 }
 
 function filterLignes(q){
@@ -3795,7 +4143,11 @@ function fillLigFiche(l){
   document.getElementById('lf-long').textContent=l.long>0?l.long.toFixed(2):'0,00';
   document.getElementById('lf-surf').textContent=l.surface>0?l.surface.toFixed(2):'0,00';
   document.getElementById('lf-qte').textContent=l.qte;
-  document.getElementById('lf-qte-traitee').textContent=l.qteTraitee||0;
+  const qteTraiteeEl = document.getElementById('lf-qte-traitee');
+  if(qteTraiteeEl){
+    qteTraiteeEl.max   = l.qte || 99;
+    qteTraiteeEl.value = l.qteTraitee || 0;
+  }
   document.getElementById('lf-uom').textContent=l.uom;
   document.getElementById('lf-obs').textContent=l.obs||'—';
   document.getElementById('lf-etat').innerHTML=ligEtatBadge(l.etat);
@@ -3822,22 +4174,104 @@ function toggleLigEdit(){
   }
 }
 
-function saveEmplacement(){
-  const val=document.getElementById('lf-emplacement').value.trim();
-  const old=lignesData[currentLigIdx].empl;
-  lignesData[currentLigIdx].empl=val;
-  // Si emplacement saisi et qte traitée = qte totale → passer en Prêt à livrer
-  const l=lignesData[currentLigIdx];
-  if(val && l.qteTraitee>=l.qte && l.etat!=='Prêt à livrer'){
-    lignesData[currentLigIdx].etat='Prêt à livrer';
-    updateLigStatutBar('Prêt à livrer');
-    document.getElementById('lf-etat').innerHTML=ligEtatBadge('Prêt à livrer');
+// Sauvegarder une ligne dans Firestore (dans la commande parente)
+function saveLigneToFirestore(l){
+  console.log('saveLigneToFirestore appelé:', l?.cmdNum, 'empl:', l?.empl, 'qte:', l?.qteTraitee, 'cmdId:', l?.cmdId);
+
+  if(!l){ console.warn('l est null'); return; }
+  if(!window._firestore){ console.warn('_firestore non disponible'); return; }
+
+  // Chercher la commande par _id OU par num
+  let cmd = l.cmdId ? commandes.find(c => c._id === l.cmdId) : null;
+  if(!cmd && l.cmdNum) cmd = commandes.find(c => c.num === l.cmdNum);
+  if(!cmd){ console.warn('Commande non trouvée:', l.cmdId, l.cmdNum); return; }
+  if(!cmd.lignes){ console.warn('cmd.lignes absent:', cmd.num); return; }
+  if(!cmd._id){
+    console.warn('cmd._id null - commande pas encore dans Firestore:', cmd.num);
+    return;
   }
-  if(val!==old){
-    const input=document.getElementById('lf-emplacement');
-    input.style.animation='none';
-    setTimeout(()=>{input.style.animation='empl-flash .6s ease';},10);
-    showToast('✓ Emplacement enregistré : '+val,'#1D9E75');
+
+  // Mettre à jour cmdId dans lignesData pour les prochains appels
+  l.cmdId = cmd._id;
+
+  console.log('Commande:', cmd.num, 'ID:', cmd._id, '| lignes:', cmd.lignes.length);
+
+  const idx = (l.ligneIdx !== undefined && l.ligneIdx >= 0)
+    ? l.ligneIdx
+    : cmd.lignes.findIndex(cl => (cl.num||cl.numArt||'') === (l.num||l.numArt||''));
+
+  console.log('Index ligne:', idx);
+  if(idx < 0 || idx >= cmd.lignes.length){
+    console.warn('Index invalide:', idx, '/ total:', cmd.lignes.length);
+    return;
+  }
+
+  // Mettre à jour la ligne
+  cmd.lignes[idx].empl       = l.empl || '';
+  cmd.lignes[idx].qteTraitee = l.qteTraitee || 0;
+  cmd.lignes[idx].etat       = l.etat || 'Brouillon';
+  console.log('Ligne mise à jour localement:', cmd.lignes[idx]);
+
+  // Nettoyer avant Firestore
+  const lignesPropres = cmd.lignes.map(cl => {
+    const propres = {};
+    const fieldsAGarder = ['num','numArt','article','larg','long','surface','qte','uom','prixU','pu','totalHT','obs','empl','qteTraitee','etat'];
+    fieldsAGarder.forEach(f => { if(cl[f] !== undefined) propres[f] = cl[f]; });
+    return propres;
+  });
+
+  const toutPret = lignesPropres.every(cl => (cl.qteTraitee||0) >= (cl.qte||1));
+  const newStatut = toutPret ? 'Prêt à livrer' : cmd.statut;
+
+  console.log('Envoi Firestore - cmdId:', l.cmdId, '| lignes:', lignesPropres.length, '| statut:', newStatut);
+
+  window._firestore.collection('commandes').doc(l.cmdId).update({
+    lignes:    lignesPropres,
+    statut:    newStatut,
+    updatedAt: new Date().toISOString()
+  }).then(() => {
+    console.log('✅ Firestore OK - commande:', cmd.num, 'ligne idx:', idx, 'empl:', l.empl);
+    if(toutPret && cmd.statut !== 'Prêt à livrer'){
+      cmd.statut = 'Prêt à livrer';
+      showToast('Commande ' + cmd.num + ' Pret a livrer', '#1D9E75');
+      lignesData = lignesData.filter(ld => ld.cmdId !== l.cmdId);
+      renderLignes(lignesData);
+    }
+  }).catch(e => {
+    console.error('❌ Firestore ERREUR:', e.code, e.message);
+    showToast('Erreur sauvegarde: ' + e.message, '#DC2626');
+  });
+}
+
+function saveEmplacement(){
+  const l = lignesData[currentLigIdx];
+  if(!l) return;
+
+  const val      = document.getElementById('lf-emplacement').value.trim();
+  const qteEl  = document.getElementById('lf-qte-traitee');
+  // lf-qte-traitee est un span (textContent) ou input (value) selon le mode
+  const qteVal = qteEl ? (qteEl.tagName === 'INPUT'
+    ? (parseInt(qteEl.value) || 0)
+    : (parseInt(qteEl.textContent) || 0)
+  ) : (l.qteTraitee || 0);
+
+  const oldEmpl = l.empl;
+  l.empl        = val;
+  l.qteTraitee  = qteVal;
+
+  // Si quantité traitée = quantité totale → article Prêt à livrer
+  if(qteVal >= l.qte && l.etat !== 'Prêt à livrer'){
+    l.etat = 'Prêt à livrer';
+    updateLigStatutBar('Prêt à livrer');
+    const etatEl = document.getElementById('lf-etat');
+    if(etatEl) etatEl.innerHTML = ligEtatBadge('Prêt à livrer');
+  }
+
+  // Sauvegarder dans Firestore via fonction centralisée
+  saveLigneToFirestore(l);
+
+  if(val !== oldEmpl || qteVal !== (oldEmpl ? l.qteTraitee : 0)){
+    showToast('Emplacement enregistré : ' + (val||'—'), '#1D9E75');
   }
 }
 
@@ -3855,6 +4289,9 @@ function goToCommande(){
 // BOUTONS +1 / -1 / Tous
 function ligQteAction(action){
   const l=lignesData[currentLigIdx];
+  // Lire la valeur actuelle depuis l'input
+  const qteEl = document.getElementById('lf-qte-traitee');
+  if(qteEl) l.qteTraitee = parseInt(qteEl.value) || 0;
   if(action==='+1') l.qteTraitee=Math.min(l.qte,(l.qteTraitee||0)+1);
   else if(action==='-1') l.qteTraitee=Math.max(0,(l.qteTraitee||0)-1);
   else if(action==='tous') l.qteTraitee=l.qte;
@@ -3866,7 +4303,8 @@ function ligQteAction(action){
     l.etat=l.empl?'Prêt à livrer':'En traitement';
   }
 
-  document.getElementById('lf-qte-traitee').textContent=l.qteTraitee;
+  const qteTrEl = document.getElementById('lf-qte-traitee');
+  if(qteTrEl) qteTrEl.value = l.qteTraitee;
   document.getElementById('lf-etat').innerHTML=ligEtatBadge(l.etat);
   updateLigStatutBar(l.etat);
 
@@ -3874,6 +4312,9 @@ function ligQteAction(action){
   const el=document.getElementById('lf-qte-traitee');
   el.style.color=action==='-1'?'#DC2626':'#059669';
   setTimeout(()=>el.style.color='#1a2332',600);
+
+  // Sauvegarder dans Firestore immédiatement
+  saveLigneToFirestore(l);
 
   showToast(
     action==='+1'?`+1 traité (${l.qteTraitee}/${l.qte})`:
@@ -4383,38 +4824,74 @@ ${clientsRows||'<p style="text-align:center;color:#aaa">Aucun BL dans ce chargem
 }
 
 // ===== TRÉSORERIE =====
-let tresoMouvements = [
-  {id:'R001',date:'2026-04-14',type:'recette',categorie:'Commande payée',libelle:'Paiement commande Greenzer',ref:'264475',montant:481.80,saisi:'Système',mois:3},
-  {id:'R002',date:'2026-04-13',type:'recette',categorie:'Commande payée',libelle:'Paiement commande El Ahmar Khalid',ref:'264458',montant:257.60,saisi:'Système',mois:3},
-  {id:'R003',date:'2026-04-12',type:'recette',categorie:'Commande payée',libelle:'Paiement commande Assia El Afia',ref:'264452',montant:314.00,saisi:'Système',mois:3},
-  {id:'R004',date:'2026-04-13',type:'recette',categorie:'Commande payée',libelle:'Paiement commande Maroune Hanoun',ref:'264451',montant:200.00,saisi:'Système',mois:3},
-  {id:'R005',date:'2026-04-11',type:'recette',categorie:'Commande payée',libelle:'Paiement commande Saghir Abdellah',ref:'264443',montant:240.00,saisi:'Système',mois:3},
-  {id:'C001',date:'2026-04-01',type:'charge',categorie:'Loyer',libelle:'Loyer atelier Avril 2026',ref:'Contrat bail',montant:3500.00,saisi:'Administrator',mois:3},
-  {id:'C002',date:'2026-04-05',type:'charge',categorie:'Salaires',libelle:'Salaires équipe Avril - Acompte',ref:'Virement 1',montant:9000.00,saisi:'Administrator',mois:3},
-  {id:'C003',date:'2026-04-08',type:'charge',categorie:'Carburant',libelle:'Carburant Koukouss Hafid',ref:'Reçu #82',montant:480.00,saisi:'Administrator',mois:3},
-  {id:'C004',date:'2026-04-10',type:'charge',categorie:'Entretien',libelle:'Entretien Ford Transit',ref:'Facture Garage Al Majd',montant:750.00,saisi:'Administrator',mois:3},
-  {id:'C005',date:'2026-04-12',type:'charge',categorie:'Carburant',libelle:'Carburant Ourouch Houssam',ref:'Reçu #91',montant:380.00,saisi:'Administrator',mois:3},
-  {id:'R006',date:'2026-03-28',type:'recette',categorie:'Commande payée',libelle:'Paiement lot Mars semaine 4',ref:'Multi',montant:8400.00,saisi:'Système',mois:2},
-  {id:'C006',date:'2026-03-01',type:'charge',categorie:'Loyer',libelle:'Loyer atelier Mars 2026',ref:'Contrat bail',montant:3500.00,saisi:'Administrator',mois:2},
-  {id:'C007',date:'2026-03-05',type:'charge',categorie:'Salaires',libelle:'Salaires équipe Mars',ref:'Virement',montant:18000.00,saisi:'Administrator',mois:2},
-  {id:'C008',date:'2026-03-15',type:'charge',categorie:'Carburant',libelle:'Carburant mi-mars',ref:'Reçu #71',montant:850.00,saisi:'Administrator',mois:2},
-  {id:'C009',date:'2026-03-20',type:'charge',categorie:'Divers',libelle:'Produits nettoyage',ref:'Facture fournisseur',montant:1200.00,saisi:'Administrator',mois:2},
-];
-
+// tresoMouvements = CHARGES uniquement (depuis Firestore via onSnapshot)
+// tresoMouvements = CHARGES depuis Firestore (recettes calculées depuis commandes[])
+let tresoMouvements = [];
 let tresoActiveTab='tous';
-let tresoPageMonth=3;
+let tresoPageMonth=new Date().getMonth();
 
 function initTresoreriePage(){
-  tresoPageMonth=parseInt(document.getElementById('treso-page-month').value);
+  const sel=document.getElementById('treso-page-month');
+  if(sel){
+    // Si aucune option sélectionnée ou valeur vide, forcer le mois courant
+    if(!sel.value || sel.value==='') sel.value=String(new Date().getMonth());
+    tresoPageMonth=parseInt(sel.value);
+  } else {
+    tresoPageMonth=new Date().getMonth();
+  }
   renderTresoSummary();
   renderTresoTable();
 }
 
+// Normalise une date vers YYYY-MM-DD pour le tri
+function normaliserDate(d){
+  if(!d) return '';
+  if(d.includes('-') && d.indexOf('-') === 4) return d; // déjà YYYY-MM-DD
+  if(d.includes('/')){
+    const p=d.split('/');
+    if(p.length===3) return p[2]+'-'+p[1].padStart(2,'0')+'-'+p[0].padStart(2,'0');
+  }
+  return d;
+}
+
+// Retourne le mois (0-based) d une date (YYYY-MM-DD ou DD/MM/YYYY)
+function moisDeDate(d){
+  if(!d) return -1;
+  if(d.includes('-') && d.indexOf('-') === 4) return parseInt(d.split('-')[1])-1;
+  if(d.includes('/')){
+    const p=d.split('/');
+    if(p.length===3) return parseInt(p[1])-1;
+  }
+  return -1;
+}
+
+// Recettes = commandes[] statut Payé du mois demandé
+function getRecettesFromCommandes(moisIdx){
+  const cmdPayees=(commandes||[]).filter(c=>{
+    if(c.statut!=='Payé') return false;
+    const d=c.datePaiement||c.date||'';
+    return moisDeDate(d)===moisIdx;
+  }).map(c=>{
+    const d=c.datePaiement||c.date||'';
+    return {
+      _id: 'rec_'+c.num,
+      date: normaliserDate(d),
+      type:'recette',
+      categorie:'Commande payée',
+      libelle:'Paiement commande '+(c.client||c.num),
+      ref:c.num,
+      montant:parseFloat(c.montant)||0,
+      saisi:'Système',
+      mois:moisIdx
+    };
+  });
+  return cmdPayees;
+}
+
 function renderTresoSummary(){
   const m=tresoPageMonth;
-  const mouvs=tresoMouvements.filter(mv=>mv.mois===m);
-  const recettes=mouvs.filter(mv=>mv.type==='recette');
-  const charges=mouvs.filter(mv=>mv.type==='charge');
+  const recettes=getRecettesFromCommandes(m);
+  const charges=tresoMouvements.filter(mv=>mv.mois===m&&mv.type==='charge');
   const totalRec=recettes.reduce((s,mv)=>s+mv.montant,0);
   const totalChg=charges.reduce((s,mv)=>s+mv.montant,0);
   const solde=totalRec-totalChg;
@@ -4441,21 +4918,24 @@ function catClass(cat){
 function renderTresoTable(){
   const m=tresoPageMonth;
   const cat=document.getElementById('treso-filter-cat')?.value||'';
-  let data=tresoMouvements.filter(mv=>mv.mois===m);
-  if(tresoActiveTab==='recettes')data=data.filter(mv=>mv.type==='recette');
-  else if(tresoActiveTab==='charges')data=data.filter(mv=>mv.type==='charge');
+  const charges=tresoMouvements.filter(mv=>mv.mois===m&&mv.type==='charge');
+  const recettes=getRecettesFromCommandes(m);
+  let data;
+  if(tresoActiveTab==='recettes') data=recettes;
+  else if(tresoActiveTab==='charges') data=charges;
+  else data=[...recettes,...charges];
   if(cat)data=data.filter(mv=>mv.categorie===cat);
-  data.sort((a,b)=>b.date.localeCompare(a.date));
+  data.sort((a,b)=>(normaliserDate(b.date)||'').localeCompare(normaliserDate(a.date)||''));
   document.getElementById('treso-table-body').innerHTML=data.length?data.map(mv=>`
     <tr>
-      <td style="color:#8899aa">${mv.date.split('-').reverse().join('/')}</td>
+      <td style="color:#8899aa">${(()=>{const d=mv.date||'';if(d.includes('/')&&d.indexOf('/')<3)return d;const p=d.split('-');return p.length===3?p[2]+'/'+p[1]+'/'+p[0]:d;})()}</td>
       <td class="${mv.type==='recette'?'treso-type-recette':'treso-type-charge'}">${mv.type==='recette'?'💚 Recette':'🔴 Charge'}</td>
       <td><span class="treso-cat-badge ${catClass(mv.categorie)}">${mv.categorie}</span></td>
       <td style="font-weight:500">${mv.libelle}</td>
       <td style="color:#8899aa;font-size:12px">${mv.ref||'—'}</td>
       <td style="text-align:right;font-weight:700;${mv.type==='recette'?'color:#059669':'color:#DC2626'}">${mv.type==='recette'?'+':'−'}${mv.montant.toLocaleString('fr-FR',{minimumFractionDigits:2})} MAD</td>
       <td style="color:#8899aa;font-size:12px">${mv.saisi}</td>
-      <td>${mv.type==='charge'?`<button onclick="deleteCharge('${mv.id}')" style="border:none;background:none;cursor:pointer;color:#ccd3dc;font-size:16px;width:24px;height:24px;border-radius:4px;" onmouseover="this.style.background='#FEE2E2';this.style.color='#DC2626'" onmouseout="this.style.background='none';this.style.color='#ccd3dc'">×</button>`:''}
+      <td>${mv.type==='charge'?`<button onclick="deleteCharge('${mv._id||mv.id}')" style="border:none;background:none;cursor:pointer;color:#ccd3dc;font-size:16px;width:24px;height:24px;border-radius:4px;" onmouseover="this.style.background='#FEE2E2';this.style.color='#DC2626'" onmouseout="this.style.background='none';this.style.color='#ccd3dc'">×</button>`:''}
       </td>
     </tr>`).join('')
     :`<tr><td colspan="8" style="text-align:center;padding:30px;color:#ccd3dc;font-style:italic;">Aucun mouvement</td></tr>`;
@@ -4485,35 +4965,66 @@ function saveNewCharge(){
   const ref=document.getElementById('ac-ref').value.trim();
   if(!date||!libelle||!montant){showToast('⚠️ Remplissez tous les champs obligatoires','#e53e3e');return;}
   const moisISO=parseInt(date.split('-')[1])-1;
-  const id='C'+String(tresoMouvements.length+1).padStart(3,'0');
-  const newCharge={id,date,type:'charge',categorie:cat,libelle,ref,montant,saisi:'Administrator',mois:moisISO};
-  tresoMouvements.push(newCharge);
+  const localId='C'+Date.now();
+  const newCharge={
+    id:localId, _id:null,
+    date, type:'charge', categorie:cat, libelle, ref, montant,
+    saisi:'Administrator', mois:moisISO,
+    createdAt:new Date().toISOString()
+  };
+  // 1. Fermer modal
   document.getElementById('add-charge-modal').style.display='none';
-  renderTresoSummary();renderTresoTable();
-  showToast(`✓ Charge "${libelle}" — ${montant.toFixed(2)} MAD enregistrée`,'#1D9E75');
-  (async()=>{ const fid=await fbSave('tresorerie',newCharge,null); if(fid)newCharge._id=fid; })();
-}
-
-function deleteCharge(id){
-  const idx=tresoMouvements.findIndex(mv=>mv.id===id);
-  if(idx>=0&&tresoMouvements[idx].type==='charge'){
-    const mv=tresoMouvements[idx];
-    if(confirm(`Supprimer "${mv.libelle}" (${mv.montant} MAD) ?`)){
-      const fid=mv._id;
-      tresoMouvements.splice(idx,1);
-      renderTresoSummary();renderTresoTable();
-      showToast('✓ Charge supprimée','#1D9E75');
-      if(fid)(async()=>await fbDelete('tresorerie',fid))();
-    }
+  // 2. Ajouter localement immédiatement → affichage instantané
+  tresoMouvements.unshift(newCharge);
+  initTresoreriePage();
+  showToast('✓ Charge "'+libelle+'" — '+montant.toFixed(2)+' MAD','#1D9E75');
+  // 3. Sauvegarder dans Firestore (en arrière-plan)
+  const db=window._firestore;
+  if(db){
+    db.collection('tresorerie').add({
+      date, type:'charge', categorie:cat, libelle, ref, montant,
+      saisi:'Administrator', mois:moisISO,
+      createdAt:new Date().toISOString()
+    }).then(docRef=>{
+      // Mettre à jour _id local pour deleteCharge
+      newCharge._id=docRef.id;
+    }).catch(e=>{
+      console.error('saveNewCharge Firestore error:',e);
+      showToast('Sauvegardé localement seulement','#D97706');
+    });
   }
 }
 
-// Override updateTreso pour utiliser les vrais mouvements
+function deleteCharge(id){
+  const mv=tresoMouvements.find(m=>m._id===id||m.id===id);
+  if(!mv||mv.type!=='charge'){showToast('Charge introuvable','#e53e3e');return;}
+  if(!confirm('Supprimer "'+mv.libelle+'" ('+mv.montant+' MAD) ?')) return;
+  // Supprimer localement immédiatement
+  const idx=tresoMouvements.indexOf(mv);
+  if(idx>=0) tresoMouvements.splice(idx,1);
+  initTresoreriePage();
+  showToast('✓ Charge supprimée','#1D9E75');
+  // Supprimer dans Firestore
+  const db=window._firestore;
+  if(db&&mv._id){
+    db.collection('tresorerie').doc(mv._id).delete()
+      .then(()=>showToast('✓ Charge supprimée','#1D9E75'))
+      .catch(e=>{ console.error(e); showToast('Erreur suppression','#e53e3e'); });
+    // onSnapshot mettra à jour tresoMouvements automatiquement
+  } else {
+    // Fallback local
+    const idx=tresoMouvements.indexOf(mv);
+    if(idx>=0) tresoMouvements.splice(idx,1);
+    initTresoreriePage();
+    showToast('✓ Charge supprimée','#1D9E75');
+  }
+}
+
+// updateTreso : recettes depuis commandes[], charges depuis tresoMouvements
 function updateTreso(){
   const m=tresoMonth;
-  const mouvs=tresoMouvements.filter(mv=>mv.mois===m);
-  const rec=mouvs.filter(mv=>mv.type==='recette').reduce((s,mv)=>s+mv.montant,0);
-  const chg=mouvs.filter(mv=>mv.type==='charge').reduce((s,mv)=>s+mv.montant,0);
+  const rec=getRecettesFromCommandes(m).reduce((s,mv)=>s+mv.montant,0);
+  const chg=tresoMouvements.filter(mv=>mv.mois===m&&mv.type==='charge').reduce((s,mv)=>s+mv.montant,0);
   const benef=rec-chg;
   const e1=document.getElementById('treso-recette');
   const e2=document.getElementById('treso-charge');
@@ -4533,20 +5044,38 @@ const FID_TIERS = {
   platine: {name:'Platine',icon:'💎', color:'#8B5CF6', bg:'#EDE9FE', min:5001, max:99999,remise:'20%', extra:'Service VIP + priorité absolue'},
 };
 
-let fidClients = [
-  {id:1,nom:'Idrissi Mohamed Amine',tel:'0661234567',pts:5820,ca:8420,cmds:24,depuis:'2020'},
-  {id:2,nom:'Mme Zerouali',         tel:'0662345678',pts:5340,ca:6130,cmds:18,depuis:'2021'},
-  {id:3,nom:'Fellam Hassna',        tel:'0663456789',pts:3680,ca:5480,cmds:15,depuis:'2020'},
-  {id:4,nom:'Iman Makroum',         tel:'0664567890',pts:3120,ca:4210,cmds:12,depuis:'2021'},
-  {id:5,nom:'Jaafari Hanane',       tel:'0665678901',pts:2840,ca:3890,cmds:11,depuis:'2022'},
-  {id:6,nom:'Bangoura Fatou',       tel:'0666789012',pts:1480,ca:2940,cmds:9, depuis:'2022'},
-  {id:7,nom:'Greenzer',             tel:'0667890123',pts:1320,ca:2640,cmds:8, depuis:'2023'},
-  {id:8,nom:'Maazouza Rachid',      tel:'0668901234',pts:980, ca:1960,cmds:7, depuis:'2022'},
-  {id:9,nom:'Nour eddine',          tel:'0669012345',pts:790, ca:1580,cmds:6, depuis:'2023'},
-  {id:10,nom:'Amina',               tel:'0660123456',pts:620, ca:1240,cmds:5, depuis:'2023'},
-  {id:11,nom:'Latifa Pharmacie',    tel:'0667037468',pts:800, ca:1600,cmds:2, depuis:'2024'},
-  {id:12,nom:'Fayz Hassan',         tel:'0661112222',pts:430, ca:860, cmds:4, depuis:'2024'},
-];
+// fidClients = construit depuis Firestore fid_clients + clients[]
+let fidClients = [];
+
+// Reconstruire fidClients depuis clients[] (Firestore) + fid_clients[] (points)
+function buildFidClients(){
+  // Fusionner clients Firestore avec leurs points fidélité
+  fidClients = (clients||[]).map(c => {
+    // Chercher enregistrement fidélité existant par nom ou tel
+    const fid = _fidClientsRaw.find(f =>
+      f.nom === c.nom ||
+      (c.tel && f.tel && f.tel === c.tel)
+    );
+    const pts   = fid ? (fid.pts||0)  : 0;
+    const ca    = fid ? (fid.ca||0)   : (commandes.filter(cmd=>cmd.client===c.nom&&cmd.statut==='Payé').reduce((s,cmd)=>s+(parseFloat(cmd.montant)||0),0));
+    const cmds  = fid ? (fid.cmds||0) : commandes.filter(cmd=>cmd.client===c.nom).length;
+    const depuis= fid ? (fid.depuis||new Date().getFullYear().toString()) : new Date().getFullYear().toString();
+    return {
+      _id   : fid?._id || null,
+      nom   : c.nom || '',
+      tel   : c.tel || c.telp || '',
+      pts, ca, cmds, depuis
+    };
+  });
+  // Ajouter clients fid qui ne sont pas dans clients[] (anciens)
+  _fidClientsRaw.forEach(f => {
+    const existe = fidClients.find(c => c.nom === f.nom);
+    if(!existe) fidClients.push({...f});
+  });
+  fidClients.sort((a,b) => b.pts - a.pts);
+}
+
+let _fidClientsRaw = []; // données brutes Firestore fid_clients
 
 const fidAccumRules = [
   {icon:'🛒',name:'Achat standard',desc:'Par tranche de 10 MAD dépensés',pts:'1 pt',color:'#F59E0B',bg:'#FEF3C7'},
@@ -4798,26 +5327,81 @@ function openFidAddPoints(idx){
   document.getElementById('fid-modal').style.display='flex';
 }
 
-function fidSavePoints(){
-  const idx=parseInt(document.getElementById('fid-m-client').value);
-  const pts=parseInt(document.getElementById('fid-m-pts').value)||0;
-  if(!pts){showToast('⚠️ Saisissez un nombre de points');return;}
-  fidClients[idx].pts+=pts;
+async function fidSavePoints(){
+  const idx = parseInt(document.getElementById('fid-m-client').value);
+  const pts = parseInt(document.getElementById('fid-m-pts').value)||0;
+  const raison = document.getElementById('fid-m-raison')?.value || 'Manuel';
+  if(!pts){ showToast('⚠️ Saisissez un nombre de points','#e53e3e'); return; }
+  const c = fidClients[idx];
+  if(!c){ showToast('⚠️ Client introuvable','#e53e3e'); return; }
   document.getElementById('fid-modal').style.display='none';
-  showToast(`✅ +${pts} points ajoutés à ${fidClients[idx].nom}`);
-  if(fidCurrentTab==='clients')fidRenderClients();
-  if(fidCurrentTab==='carte')fidRenderCarte(fidCurrentCarteIdx);
+  showToast(`⭐ +${pts} points → ${c.nom}`, '#F59E0B');
+  // Écrire dans Firestore
+  const db = window._firestore;
+  if(!db) return;
+  try {
+    const raw = _fidClientsRaw.find(f => f.nom === c.nom);
+    if(raw && raw._id){
+      await db.collection('fid_clients').doc(raw._id).update({
+        pts: (raw.pts||0) + pts,
+        updatedAt: new Date().toISOString()
+      });
+    } else {
+      await db.collection('fid_clients').add({
+        nom: c.nom, tel: c.tel||'', pts,
+        ca: c.ca||0, cmds: c.cmds||0,
+        depuis: c.depuis||new Date().getFullYear().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+  } catch(e){ console.error('fidSavePoints error:', e); }
 }
 
 function closeFidModal(e){if(e.target===e.currentTarget)document.getElementById('fid-modal').style.display='none';}
 
-// Ajouter points auto depuis commande payée
-function fidAddPointsFromCommande(clientNom, montant){
-  const pts=Math.floor(montant/10);
-  const idx=fidClients.findIndex(c=>c.nom.toLowerCase()===clientNom.toLowerCase());
-  if(idx>=0&&pts>0){
-    fidClients[idx].pts+=pts;
-    showToast(`⭐ +${pts} points fidélité pour ${fidClients[idx].nom}`);
+// Ajouter points auto depuis commande payée → écrit dans Firestore fid_clients
+async function fidAddPointsFromCommande(clientNom, montant){
+  const pts = Math.floor((parseFloat(montant)||0) / 10);
+  if(pts <= 0) return;
+  const db = window._firestore;
+  if(!db){ console.warn('fidAddPointsFromCommande: pas de Firestore'); return; }
+
+  // Chercher client existant dans fid_clients
+  const existing = _fidClientsRaw.find(f =>
+    f.nom && f.nom.toLowerCase() === clientNom.toLowerCase()
+  );
+
+  // Calculer CA total depuis commandes Payées
+  const caTotal = (commandes||[])
+    .filter(c => c.client === clientNom && c.statut === 'Payé')
+    .reduce((s,c) => s + (parseFloat(c.montant)||0), 0);
+  const nbCmds = (commandes||[]).filter(c => c.client === clientNom).length;
+
+  try {
+    if(existing && existing._id){
+      // Mettre à jour pts + ca + cmds
+      await db.collection('fid_clients').doc(existing._id).update({
+        pts   : (existing.pts||0) + pts,
+        ca    : caTotal,
+        cmds  : nbCmds,
+        updatedAt: new Date().toISOString()
+      });
+    } else {
+      // Créer nouveau profil fidélité
+      await db.collection('fid_clients').add({
+        nom   : clientNom,
+        pts,
+        ca    : caTotal,
+        cmds  : nbCmds,
+        depuis: new Date().getFullYear().toString(),
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      });
+    }
+    showToast(`⭐ +${pts} points fidélité — ${clientNom}`, '#F59E0B');
+  } catch(e){
+    console.error('fidAddPointsFromCommande error:', e);
   }
 }
 
@@ -5398,6 +5982,210 @@ window.addEventListener('message',(e)=>{
   }
 });
 
+// ===== POPUP CLIENT (depuis commandes et BLs) =====
+// Ouvrir popup création client depuis la fiche commande
+function openNewClientFromCmd(){
+  const nomSaisi    = document.getElementById('cf-client').value.trim();
+  const telSaisi    = document.getElementById('cf-tel').value.trim();
+  const adresseSaisi= document.getElementById('cf-adresse').value.trim();
+
+  // Créer un mini-popup de saisie client
+  const existing = document.getElementById('new-client-from-cmd-popup');
+  if(existing) existing.remove();
+
+  const popup = document.createElement('div');
+  popup.id = 'new-client-from-cmd-popup';
+  popup.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  popup.innerHTML = `
+    <div style="background:white;border-radius:14px;padding:28px 32px;width:460px;max-width:95vw;box-shadow:0 20px 60px rgba(0,0,0,.3);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+        <h3 style="margin:0;font-size:16px;font-weight:700;">👤 Nouveau client</h3>
+        <button onclick="document.getElementById('new-client-from-cmd-popup').remove()" style="border:none;background:#f0f2f5;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;">✕</button>
+      </div>
+      <div style="display:grid;gap:12px;">
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#5a6a7a;display:block;margin-bottom:4px;">NOM *</label>
+          <input id="ncc-nom" value="${nomSaisi}" style="width:100%;padding:9px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;box-sizing:border-box;" placeholder="Nom du client"/>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#5a6a7a;display:block;margin-bottom:4px;">TÉLÉPHONE</label>
+            <input id="ncc-tel" value="${telSaisi}" style="width:100%;padding:9px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;box-sizing:border-box;" placeholder="0612345678"/>
+          </div>
+          <div>
+            <label style="font-size:12px;font-weight:600;color:#5a6a7a;display:block;margin-bottom:4px;">TYPE</label>
+            <select id="ncc-type" style="width:100%;padding:9px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;background:white;">
+              <option>Particulier</option><option>Pressing</option><option>Professionnel</option>
+            </select>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#5a6a7a;display:block;margin-bottom:4px;">ADRESSE / QUARTIER</label>
+          <input id="ncc-adresse" value="${adresseSaisi}" style="width:100%;padding:9px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;box-sizing:border-box;" placeholder="Quartier, Ville"/>
+        </div>
+        <div>
+          <label style="font-size:12px;font-weight:600;color:#5a6a7a;display:block;margin-bottom:4px;">NOTES</label>
+          <input id="ncc-notes" style="width:100%;padding:9px 12px;border:1px solid #dde3ec;border-radius:8px;font-size:13px;box-sizing:border-box;" placeholder="Notes optionnelles"/>
+        </div>
+        <button onclick="confirmNewClientFromCmd()"
+          style="width:100%;padding:12px;background:#1D9E75;color:white;border:none;border-radius:8px;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;">
+          ✓ Enregistrer le client
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(popup);
+  setTimeout(()=>document.getElementById('ncc-nom')?.focus(), 100);
+}
+
+async function confirmNewClientFromCmd(){
+  const nom     = document.getElementById('ncc-nom').value.trim();
+  const tel     = document.getElementById('ncc-tel').value.trim();
+  const type    = document.getElementById('ncc-type').value;
+  const adresse = document.getElementById('ncc-adresse').value.trim();
+  const notes   = document.getElementById('ncc-notes').value.trim();
+
+  if(!nom){ showToast('Veuillez saisir un nom', '#e53e3e'); return; }
+
+  const newCl = { nom, tel, type, quartier: adresse, ville:'Tanger', tel2:'', email:'', notes, maps:'' };
+  const id = await saveClientToFirestore(newCl);
+  if(id){ newCl._id = id; if(!clients.find(c=>c._id===id)) clients.push(newCl); }
+
+  // Remplir le champ client dans la commande
+  document.getElementById('cf-client').value = nom;
+  if(tel) document.getElementById('cf-tel').value = tel;
+  if(adresse) document.getElementById('cf-adresse').value = adresse;
+  document.getElementById('new-client-from-cmd-popup').remove();
+  showToast('Client ' + nom + ' créé', '#1D9E75');
+}
+
+function showClientPopup(clientNom){
+  if(!clientNom) return;
+  // Chercher le client dans clients[]
+  // Correspondance exacte uniquement - pas de recherche partielle
+  const c = clients.find(cl => cl.nom && cl.nom.toLowerCase() === clientNom.trim().toLowerCase());
+
+  const existing = document.getElementById('client-popup-overlay');
+  if(existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id = 'client-popup-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(15,20,35,.45);backdrop-filter:blur(2px);z-index:500;display:flex;align-items:center;justify-content:center;';
+  overlay.addEventListener('click', e => { if(e.target===overlay) overlay.remove(); });
+
+  if(!c){
+    // Client non trouvé dans la base — chercher dans les commandes pour afficher infos disponibles
+    const cmdInfo = commandes.find(cmd => cmd.client && cmd.client.toLowerCase() === clientNom.toLowerCase());
+    overlay.innerHTML = `
+      <div style="background:white;border-radius:14px;padding:28px 32px;width:420px;box-shadow:0 20px 60px rgba(0,0,0,.2);position:relative;">
+        <button onclick="document.getElementById('client-popup-overlay').remove()" style="position:absolute;top:14px;right:16px;border:none;background:#f0f2f5;border-radius:50%;width:28px;height:28px;cursor:pointer;font-size:14px;">✕</button>
+        <div style="font-size:18px;font-weight:800;color:#1a2332;margin-bottom:12px;">👤 ${clientNom}</div>
+        ${cmdInfo?.tel ? `<div style="margin-bottom:8px;font-size:13px;">📞 <a href="tel:${cmdInfo.tel}" style="color:#1a5fa8;">${cmdInfo.tel}</a></div>` : ''}
+        ${cmdInfo?.adresse ? `<div style="margin-bottom:12px;font-size:13px;">📍 ${cmdInfo.adresse}</div>` : ''}
+        <div style="font-size:13px;color:#8899aa;padding:10px;background:#f8f9fb;border-radius:8px;margin-bottom:16px;">
+          Ce client n'est pas encore dans la base clients.
+        </div>
+        <button onclick="goPage('clients');document.getElementById('client-popup-overlay').remove();"
+          style="width:100%;padding:10px;background:#1a5fa8;color:white;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">
+          + Ajouter ce client à la base
+        </button>
+      </div>`;
+    document.body.appendChild(overlay);
+    return;
+  }
+
+  // Statistiques commandes de ce client
+  const cmdClient = commandes.filter(cmd => cmd.client && cmd.client.toLowerCase() === clientNom.toLowerCase());
+  const totalCA   = cmdClient.reduce((s,cmd) => s + (cmd.montant||0), 0);
+  const nbPayees  = cmdClient.filter(cmd => cmd.statut === 'Payé').length;
+
+  const typeBadge = c.type === 'Pressing'      ? 'background:#EDE9FE;color:#5B21B6;'
+                  : c.type === 'Professionnel' ? 'background:#DBEAFE;color:#1D4ED8;'
+                  : 'background:#D1FAE5;color:#065F46;';
+
+  overlay.innerHTML = `
+    <div style="background:white;border-radius:14px;width:480px;max-height:85vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2);position:relative;">
+
+      <!-- Header -->
+      <div style="background:linear-gradient(135deg,#1a5fa8,#1D9E75);border-radius:14px 14px 0 0;padding:22px 24px;color:white;">
+        <button onclick="document.getElementById('client-popup-overlay').remove()"
+          style="position:absolute;top:14px;right:16px;border:none;background:rgba(255,255,255,.15);border-radius:50%;width:28px;height:28px;cursor:pointer;color:white;font-size:14px;">✕</button>
+        <div style="font-size:20px;font-weight:800;margin-bottom:4px;">${c.nom}</div>
+        <span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700;${typeBadge}">${c.type||'Particulier'}</span>
+      </div>
+
+      <!-- Corps -->
+      <div style="padding:20px 24px;">
+
+        <!-- Coordonnées -->
+        <div style="font-size:11px;font-weight:700;color:#8899aa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Coordonnées</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;">
+          ${c.tel ? `<div style="background:#f8f9fb;border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;color:#8899aa;text-transform:uppercase;">Téléphone</div>
+            <div style="font-size:13px;font-weight:600;margin-top:2px;">
+              <a href="tel:${c.tel}" style="color:#1a5fa8;text-decoration:none;">📞 ${c.tel}</a>
+            </div>
+          </div>` : ''}
+          ${c.tel2 ? `<div style="background:#f8f9fb;border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;color:#8899aa;text-transform:uppercase;">Tél. 2</div>
+            <div style="font-size:13px;font-weight:600;margin-top:2px;">
+              <a href="tel:${c.tel2}" style="color:#1a5fa8;text-decoration:none;">📞 ${c.tel2}</a>
+            </div>
+          </div>` : ''}
+          ${c.email ? `<div style="background:#f8f9fb;border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;color:#8899aa;text-transform:uppercase;">Email</div>
+            <div style="font-size:13px;font-weight:600;margin-top:2px;">
+              <a href="mailto:${c.email}" style="color:#1a5fa8;text-decoration:none;">✉️ ${c.email}</a>
+            </div>
+          </div>` : ''}
+          ${c.quartier||c.ville ? `<div style="background:#f8f9fb;border-radius:8px;padding:10px 12px;">
+            <div style="font-size:10px;color:#8899aa;text-transform:uppercase;">Adresse</div>
+            <div style="font-size:13px;font-weight:600;margin-top:2px;">📍 ${[c.quartier,c.ville].filter(Boolean).join(', ')}</div>
+          </div>` : ''}
+        </div>
+
+        <!-- Stats -->
+        <div style="font-size:11px;font-weight:700;color:#8899aa;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px;">Historique</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px;">
+          <div style="background:#f8f9fb;border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#1a5fa8;">${cmdClient.length}</div>
+            <div style="font-size:10px;color:#8899aa;text-transform:uppercase;margin-top:2px;">Commandes</div>
+          </div>
+          <div style="background:#f8f9fb;border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:20px;font-weight:800;color:#059669;">${nbPayees}</div>
+            <div style="font-size:10px;color:#8899aa;text-transform:uppercase;margin-top:2px;">Payées</div>
+          </div>
+          <div style="background:#f8f9fb;border-radius:8px;padding:10px;text-align:center;">
+            <div style="font-size:16px;font-weight:800;color:#1a5fa8;">${totalCA.toFixed(0)}</div>
+            <div style="font-size:10px;color:#8899aa;text-transform:uppercase;margin-top:2px;">CA MAD</div>
+          </div>
+        </div>
+
+        ${c.notes ? `
+        <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:8px;padding:10px 12px;margin-bottom:16px;">
+          <div style="font-size:11px;color:#92400E;font-weight:600;margin-bottom:4px;">📝 Notes</div>
+          <div style="font-size:13px;color:#78350F;">${c.notes}</div>
+        </div>` : ''}
+
+        <!-- Actions -->
+        <div style="display:flex;gap:8px;padding-top:4px;">
+          ${c.tel ? `<a href="https://wa.me/${c.tel.replace(/^0/,'212')}" target="_blank"
+            style="flex:1;padding:9px;background:#25D366;color:white;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;text-align:center;text-decoration:none;display:block;">
+            💬 WhatsApp
+          </a>` : ''}
+          ${c.maps ? `<a href="${c.maps}" target="_blank"
+            style="flex:1;padding:9px;background:#EFF6FF;color:#1a5fa8;border:1px solid #BFDBFE;border-radius:8px;font-size:12px;font-weight:700;text-align:center;text-decoration:none;display:block;">
+            🗺 Maps
+          </a>` : ''}
+          <button onclick="goPage('clients');document.getElementById('client-popup-overlay').remove();"
+            style="flex:1;padding:9px;background:#f0f2f5;color:#5a6a7a;border:none;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">
+            👤 Fiche complète
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+}
+
 // ===== STAT CLIENTS =====
 function renderStatClients(){
   document.getElementById('stat-cl-body').innerHTML=statClients.map(c=>`
@@ -5426,16 +6214,7 @@ function renderStatArticles(){
 }
 
 // ===== CLIENTS =====
-let clients=[
-  {nom:'Anassi Mohammed',tel:'0661234567',tel2:'',email:'',num:'12',etage:'',residence:'Res. Al Fath',avenue:'Av. Hassan II',quartier:'Malabata',codepost:'90000',ville:'Tanger',type:'Particulier',maps:'',contactNom:'',contactTel1:'',contactTel2:'',notes:''},
-  {nom:'Bennani Fatima',tel:'0662345678',tel2:'0662345679',email:'bennani@gmail.com',num:'5',etage:'2',residence:'',avenue:'Rue Ibn Batouta',quartier:'Marshan',codepost:'90000',ville:'Tanger',type:'Particulier',maps:'',contactNom:'',contactTel1:'',contactTel2:'',notes:''},
-  {nom:'Chraibi Hassan',tel:'0663456789',tel2:'',email:'',num:'',etage:'',residence:'',avenue:'Bd Mohammed V',quartier:'Centre-ville',codepost:'90000',ville:'Tanger',type:'Pressing',maps:'https://maps.app.goo.gl/abc123',contactNom:'Chraibi Youssef',contactTel1:'0663456790',contactTel2:'',notes:'Client pressing — tarif pressing appliqué'},
-  {nom:'Daoudi Karima',tel:'0664567890',tel2:'',email:'',num:'8',etage:'1',residence:'Res. Najmat',avenue:'Av. Moulay Ismail',quartier:'Beni Makada',codepost:'90000',ville:'Tanger',type:'Particulier',maps:'',contactNom:'',contactTel1:'',contactTel2:'',notes:''},
-  {nom:'El Alami Youssef',tel:'0665678901',tel2:'0665678902',email:'elalami@pro.ma',num:'22',etage:'',residence:'',avenue:'Rue de Fès',quartier:'Val Fleuri',codepost:'90000',ville:'Tanger',type:'Professionnel',maps:'https://maps.app.goo.gl/xyz456',contactNom:'El Alami Sarah',contactTel1:'0665678903',contactTel2:'',notes:'Société — facturation mensuelle'},
-  {nom:'Fassi Leila',tel:'0666789012',tel2:'',email:'',num:'',etage:'',residence:'',avenue:'Bd Zerktouni',quartier:'Bourgogne',codepost:'20000',ville:'Casablanca',type:'Professionnel',maps:'',contactNom:'',contactTel1:'',contactTel2:'',notes:''},
-  {nom:'Ghazali Omar',tel:'0667890123',tel2:'',email:'',num:'3',etage:'',residence:'',avenue:'Av. Prince Héritier',quartier:'Mesnana',codepost:'90000',ville:'Tanger',type:'Particulier',maps:'',contactNom:'',contactTel1:'',contactTel2:'',notes:''},
-  {nom:'Haddad Nadia',tel:'0668901234',tel2:'',email:'',num:'15',etage:'3',residence:'Res. Marina',avenue:'Av. Mohamed VI',quartier:'Iberia',codepost:'90000',ville:'Tanger',type:'Particulier',maps:'https://maps.app.goo.gl/nadia123',contactNom:'',contactTel1:'',contactTel2:'',notes:''},
-];
+let clients = []; // Chargé depuis Firestore via onSnapshot
 
 let currentClIdx=0;
 let clReadOnly=false;
@@ -5489,15 +6268,20 @@ function filterClients(q){
 // FICHE CLIENT
 function showClientForm(i){
   if(i===-1){
-    clients.unshift({nom:'',tel:'',tel2:'',email:'',num:'',etage:'',residence:'',avenue:'',quartier:'',codepost:'',ville:'Tanger',type:'Particulier',maps:'',contactNom:'',contactTel1:'',contactTel2:'',notes:''});
-    i=0;clReadOnly=false;
+    // Nouveau client : objet temporaire SANS l'ajouter à clients[]
+    window._tempNewClient = {nom:'',tel:'',tel2:'',email:'',num:'',etage:'',residence:'',avenue:'',quartier:'',codepost:'',ville:'Tanger',type:'Particulier',maps:'',contactNom:'',contactTel1:'',contactTel2:'',notes:''};
+    currentClIdx = -1;
+    clReadOnly = false;
+    clIsNew = true;
   } else {
-    clReadOnly=true;
+    clReadOnly = true;
+    clIsNew = false;
+    window._tempNewClient = null;
+    currentClIdx = i;
   }
-  currentClIdx=i;
   document.getElementById('cl-kanban-view').style.display='none';
   document.getElementById('cl-fiche-view').style.display='block';
-  fillClientForm(clients[i]);
+  fillClientForm(i === -1 ? (window._tempNewClient || {}) : clients[i]);
   updateClNav();
 }
 
@@ -5571,8 +6355,23 @@ function setClReadOnly(ro){
 
 function saveClient(){
   const nom=document.getElementById('clf-nom').value.trim();
-  if(!nom){showToast('⚠️ Veuillez saisir un nom','#e53e3e');return;}
-  const c=clients[currentClIdx];
+  if(!nom){showToast('Veuillez saisir un nom','#e53e3e');return;}
+  const tel=document.getElementById('clf-tel1').value.trim();
+  
+  // Vérifier doublon : si c'est un nouveau client (pas de _id)
+  // Objet client à sauvegarder
+  const c = clIsNew ? (window._tempNewClient || {}) : clients[currentClIdx];
+  if(!c){ showToast('Erreur client introuvable', '#e53e3e'); return; }
+
+  if(clIsNew){
+    // Vérifier doublon par nom ou tel
+    const dupNom = clients.find(cl => cl._id && cl.nom && cl.nom.toLowerCase()===nom.toLowerCase());
+    const dupTel = tel && clients.find(cl => cl._id && cl.tel && cl.tel.replace(/\s/g,'')===tel.replace(/\s/g,''));
+    if(dupNom || dupTel){
+      showToast('Client déjà existant : ' + (dupNom||dupTel).nom, '#e53e3e');
+      return;
+    }
+  }
   c.nom=nom;
   c.type=document.getElementById('clf-type').value;
   c.num=document.getElementById('clf-num').value;
@@ -5590,10 +6389,27 @@ function saveClient(){
   c.contactTel1=document.getElementById('clf-contact-tel1').value;
   c.contactTel2=document.getElementById('clf-contact-tel2').value;
   c.notes=document.getElementById('clf-notes').value;
-  clReadOnly=true;
-  fillClientForm(c);
-  showToast(`✓ Client "${nom}" enregistré`,'#1D9E75');
-  (async()=>{ const fid=await fbSave('clients',c,c._id||null); if(fid&&!c._id)c._id=fid; })();
+  if(!clIsNew){
+    clReadOnly=true;
+    fillClientForm(c);
+    showToast('Client ' + nom + ' enregistré','#1D9E75');
+  }
+  (async()=>{
+    const fid = await saveClientToFirestore(c);
+    if(fid){
+      clIsNew = false;
+      window._tempNewClient = null;
+      if(currentClIdx === -1){
+        // Nouveau client sauvegardé - onSnapshot va l'ajouter automatiquement
+        hideClientForm();
+        showToast('Client ' + nom + ' créé', '#1D9E75');
+      } else {
+        c._id = c._id || fid;
+        clReadOnly = true;
+        fillClientForm(c);
+      }
+    }
+  })();
 }
 
 function openMaps(){
@@ -5676,7 +6492,7 @@ function showArtForm(i){
   document.getElementById('art-form-view').style.display='block';
   if(i===-1){
     document.getElementById('art-form-bc').textContent='Nouveau';
-    document.getElementById('art-form-actions').innerHTML=`<button class="btn-save" onclick="hideArtForm()">Enregistrer</button> <span style="color:#8899aa">ou</span> <button class="btn-cancel" onclick="hideArtForm()">Annuler</button>`;
+    document.getElementById('art-form-actions').innerHTML=`<button class="btn-save" onclick="saveArtForm()">Enregistrer</button> <span style="color:#8899aa">ou</span> <button class="btn-cancel" onclick="hideArtForm()">Annuler</button>`;
     document.getElementById('art-ro').classList.remove('show');
     fillArtForm({name:'',tp:0,tpr:0,tpro:0,ta:0,uom:'',actif:true,desc:''});
     setArtReadOnly(false);
@@ -5695,33 +6511,36 @@ function hideArtForm(){
 }
 
 function saveArtForm(){
-  const a = articles[currentArtIdx] || {};
-  a.name = document.getElementById('af-nom').value.trim();
-  a.tp   = parseFloat(document.getElementById('af-tp').value) || 0;
-  a.tpr  = parseFloat(document.getElementById('af-tpr').value) || 0;
-  a.tpro = parseFloat(document.getElementById('af-tpro').value) || 0;
-  a.ta   = parseFloat(document.getElementById('af-ta').value) || 0;
-  a.uom  = currentUomVal || '';
-  a.actif = document.getElementById('af-actif').checked;
-  a.desc  = document.getElementById('af-desc').value;
+  const existing = currentArtIdx >= 0 ? articles[currentArtIdx] : null;
+  const artId = existing ? (existing._id || null) : null;
 
-  if(!a.name){ showToast('⚠️ Saisissez le nom de l\'article','#e53e3e'); return; }
+  const artData = {
+    name : document.getElementById('af-nom').value.trim(),
+    tp   : parseFloat(document.getElementById('af-tp').value) || 0,
+    tpr  : parseFloat(document.getElementById('af-tpr').value) || 0,
+    tpro : parseFloat(document.getElementById('af-tpro').value) || 0,
+    ta   : parseFloat(document.getElementById('af-ta').value) || 0,
+    uom  : currentUomVal || '',
+    actif: document.getElementById('af-actif').checked,
+    desc : document.getElementById('af-desc').value,
+  };
 
-  if(currentArtIdx === -1){
-    articles.unshift(a);
-    currentArtIdx = 0;
-  } else {
-    articles[currentArtIdx] = a;
-  }
+  if(!artData.name){ showToast('⚠️ Saisissez le nom de l\'article','#e53e3e'); return; }
 
   hideArtForm();
   setArtView(artViewMode);
-  showToast('✓ Article "'+a.name+'" enregistré','#1D9E75');
+  showToast('✓ Article "'+artData.name+'" enregistré','#1D9E75');
 
-  // Firebase
   (async()=>{
-    const fid = await fbSave('articles', a, a._id||null);
-    if(fid && !a._id) a._id = fid;
+    const db = window._firestore;
+    if(!db){ console.warn('saveArtForm: _firestore non disponible'); return; }
+    try {
+      if(artId){
+        await db.collection('articles').doc(artId).update({ ...artData, updatedAt: new Date().toISOString() });
+      } else {
+        await db.collection('articles').add({ ...artData, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() });
+      }
+    } catch(e){ console.error('saveArtForm Firestore error:', e.message); showToast('Erreur sauvegarde article', '#e53e3e'); }
   })();
 }
 
@@ -5862,67 +6681,118 @@ function fillPersForm(p){
   document.getElementById('pf-lieu').value=p.lieu||'';
   document.getElementById('pf-telper').value=p.telper||'';
   document.getElementById('pf-ville').value=p.ville||'';
-  document.getElementById('pf-active').checked=p.active;
+  document.getElementById('pf-active').checked=!!p.active;
+  // PIN
+  const pinEl=document.getElementById('pf-pin');
+  if(pinEl) pinEl.value=p.pin||'';
+  // Afficher section app
+  onFonctionChange(p.fonction||'');
 }
 function setPersReadOnly(ro){
-  ['pf-nom','pf-telp','pf-cin','pf-lieu','pf-telper'].forEach(id=>{const el=document.getElementById(id);if(el)el.readOnly=ro;});
-  document.getElementById('pf-fonction').disabled=ro;
-  document.getElementById('pf-ville').disabled=ro;
-  document.getElementById('pf-active').disabled=ro;
+  ['pf-nom','pf-telp','pf-cin','pf-lieu','pf-telper','pf-pin'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.readOnly=ro;
+  });
+  ['pf-fonction','pf-ville','pf-active'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.disabled=ro;
+  });
+  // Bouton ouvrir app : toujours visible mais désactivé en lecture
+  const btn=document.getElementById('pf-app-btn');
+  if(btn)btn.style.opacity=ro?'0.6':'1';
 }
 
 // Carte fonction → app
-const FONCTION_APP_MAP = {"Gérant": "ERP", "Administrateur": "ERP", "Assistante": "ERP", "Livreur": "App Livreur", "Chauffeur": "App Livreur", "Finition": "App Finition", "Chef Finition": "App Finition", "Lavage": "App Lavage", "Chef Lavage": "App Lavage", "Technicien": "Atelier", "Manutentionnaire": "Atelier"};
-const FONCTION_BADGE = {"ERP": "#DBEAFE;color:#1D4ED8", "App Livreur": "#D1FAE5;color:#065F46", "App Finition": "#EDE9FE;color:#5B21B6", "App Lavage": "#E0F2FE;color:#0369A1", "Atelier": "#FEF3C7;color:#92400E"};
-
+const FONCTION_APP_MAP = {
+  "Gérant":"ERP","Administrateur":"ERP","Assistante":"ERP",
+  "Livreur":"App Livreur","Chauffeur":"App Livreur",
+  "Finition":"App Finition","Chef Finition":"App Finition",
+  "Lavage":"App Lavage","Chef Lavage":"App Lavage",
+  "Technicien":"Atelier","Manutentionnaire":"Atelier"
+};
+const FONCTION_APP_URL = {
+  "ERP": "", // ERP = page actuelle
+  "App Livreur":"allo_tapis_livreur.html",
+  "App Finition":"allo_tapis_finition.html",
+  "App Lavage":"allo_tapis_lavage.html",
+  "Atelier":""
+};
+const FONCTION_BADGE_STYLE = {
+  "ERP":{bg:"#DBEAFE",color:"#1D4ED8",icon:"🖥️"},
+  "App Livreur":{bg:"#D1FAE5",color:"#065F46",icon:"🚚"},
+  "App Finition":{bg:"#EDE9FE",color:"#5B21B6",icon:"✂️"},
+  "App Lavage":{bg:"#E0F2FE",color:"#0369A1",icon:"🫧"},
+  "Atelier":{bg:"#FEF3C7",color:"#92400E",icon:"⚙️"}
+};
+function FONCTION_APP_STYLE(app){
+  return FONCTION_BADGE_STYLE[app]||{bg:"#f0f2f5",color:"#5a6a7a",icon:"📱"};
+}
 function onFonctionChange(val){
-  const badge = document.getElementById('pf-app-badge');
-  if(!badge) return;
-  const app = FONCTION_APP_MAP[val];
-  if(app && val){
-    const colors = FONCTION_BADGE[app] || '#f0f2f5;color:#5a6a7a';
-    const url = app==='ERP'?'(ERP Admin)':
-                app==='App Livreur'?'→ allotapis.netlify.app/allo_tapis_livreur.html':
-                app==='App Finition'?'→ allotapis.netlify.app/allo_tapis_finition.html':
-                app==='App Lavage'?'→ allotapis.netlify.app/allo_tapis_lavage.html':'';
-    badge.style.display='block';
-    badge.innerHTML=`<div style="background:${colors};padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;">
-      📱 ${app} ${url}
-    </div>`;
+  const section=document.getElementById('pf-app-section');
+  const badgeMain=document.getElementById('pf-app-badge-main');
+  const appBtn=document.getElementById('pf-app-btn');
+  if(!section)return;
+  const app=FONCTION_APP_MAP[val];
+  if(app&&val){
+    const s=FONCTION_APP_STYLE(app);
+    section.style.display='block';
+    badgeMain.innerHTML=`<span style="background:${s.bg};color:${s.color};padding:6px 14px;border-radius:20px;font-size:13px;font-weight:700;">${s.icon} ${app}</span>`;
+    appBtn.style.display=FONCTION_APP_URL[app]?'inline-block':'none';
   } else {
-    badge.style.display='none';
+    section.style.display='none';
+  }
+}
+function ouvrirAppPersonnel(){
+  const app=FONCTION_APP_MAP[document.getElementById('pf-fonction').value];
+  const filename=FONCTION_APP_URL[app];
+  if(!filename&&app!=="ERP")return;
+  if(app==="ERP"){
+    window.open(window.location.href,'_blank');
+  } else {
+    const base=window.location.href.replace(/[^/]*$/,'');
+    window.open(base+filename,'_blank');
   }
 }
 
 function savePersForme(){
-  const p = personnel[currentPersIdx] || {};
-  p.nom     = document.getElementById('pf-nom').value.trim();
-  p.fonction= document.getElementById('pf-fonction').value;
-  p.telp    = document.getElementById('pf-telp').value.trim();
-  p.cin     = document.getElementById('pf-cin').value.trim();
-  p.lieu    = document.getElementById('pf-lieu').value.trim();
-  p.telper  = document.getElementById('pf-telper').value.trim();
-  p.ville   = document.getElementById('pf-ville').value.trim();
-  p.active  = document.getElementById('pf-active').checked;
-  p.app     = FONCTION_APP_MAP[p.fonction] || '';
+  const existing = currentPersIdx >= 0 ? personnel[currentPersIdx] : null;
+  const persId = existing ? (existing._id || null) : null;
 
-  if(!p.nom){ showToast('⚠️ Saisissez le nom','#e53e3e'); return; }
-  if(!p.fonction){ showToast('⚠️ Choisissez une fonction','#e53e3e'); return; }
+  const persData = {
+    nom     : document.getElementById('pf-nom').value.trim(),
+    fonction: document.getElementById('pf-fonction').value,
+    telp    : document.getElementById('pf-telp').value.trim(),
+    cin     : document.getElementById('pf-cin').value.trim(),
+    lieu    : document.getElementById('pf-lieu').value.trim(),
+    telper  : document.getElementById('pf-telper').value.trim(),
+    ville   : document.getElementById('pf-ville').value.trim(),
+    active  : document.getElementById('pf-active').checked,
+    pin     : (document.getElementById('pf-pin').value.trim()).substring(0,4),
+    app     : FONCTION_APP_MAP[document.getElementById('pf-fonction').value] || ''
+  };
 
-  if(currentPersIdx === -1){ personnel.unshift(p); currentPersIdx=0; }
-  else { personnel[currentPersIdx] = p; }
+  if(!persData.nom){ showToast('⚠️ Saisissez le nom','#e53e3e'); return; }
+  if(!persData.fonction){ showToast('⚠️ Choisissez une fonction','#e53e3e'); return; }
 
   persReadOnly = true;
-  fillPersForm(p);
-  setPersReadOnly(true);
   document.getElementById('pers-form-actions').innerHTML=`
     <button class="btn-modify" onclick="enablePersEdit()">Modifier</button>
     <button class="btn-modify" onclick="showPersForm(-1)">Créer</button>`;
-  document.getElementById('pers-ro-banner').classList.add('show');
-  showToast('✓ '+p.nom+' enregistré — '+p.app,'#1D9E75');
+  document.getElementById('pers-ro').classList.add('show');
+  setPersReadOnly(true);
+  fillPersForm(persData);
+  showToast('✓ '+persData.nom+' enregistré — '+persData.app,'#1D9E75');
 
-  // Firebase
-  (async()=>{ const fid=await fbSave('personnel',p,p._id||null); if(fid&&!p._id)p._id=fid; })();
+  // Firestore direct (onSnapshot met à jour personnel[] automatiquement)
+  (async()=>{
+    const db=window._firestore;
+    if(!db){console.warn('savePersForme: _firestore non disponible');return;}
+    try{
+      if(persId){
+        await db.collection('personnel').doc(persId).update({...persData,updatedAt:new Date().toISOString()});
+      } else {
+        await db.collection('personnel').add({...persData,createdAt:new Date().toISOString(),updatedAt:new Date().toISOString()});
+      }
+    }catch(e){console.error('savePersForme error:',e.message);showToast('Erreur sauvegarde','#e53e3e');}
+  })();
 }
 
 // ===== DASHBOARD =====
@@ -5933,7 +6803,7 @@ const caData = [
   {mois:'Oct',val:0},{mois:'Nov',val:0},{mois:'Déc',val:0}
 ];
 
-let tresoMonth = 3; // Avril (0-indexed)
+let tresoMonth = new Date().getMonth();
 
 const moisLabels=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
@@ -6161,14 +7031,43 @@ function renderRamassage(data){
   document.getElementById('ram-pag').textContent=`${total} ramassage${total>1?'s':''}`;
 }
 
+let ramSortField='date', ramSortDir='desc';
+function setSortRam(field){
+  if(ramSortField===field){ ramSortDir = ramSortDir==='asc'?'desc':'asc'; }
+  else { ramSortField=field; ramSortDir='desc'; }
+  ['id','nom','creneau','livreur','date'].forEach(f=>{
+    const el = document.getElementById('sort-ram-'+f);
+    if(el) el.textContent = f===ramSortField ? (ramSortDir==='asc'?'↑':'↓') : '↕';
+  });
+  const sel = document.getElementById('ram-sort');
+  if(sel) sel.value = field+'-'+ramSortDir;
+  filterRamassage('');
+}
+
+function resetFilterRam(){
+  document.getElementById('ram-filter-statut').value='';
+  document.getElementById('ram-filter-livreur').value='';
+  document.getElementById('ram-sort').value='date-desc';
+  ramSortField='date'; ramSortDir='desc';
+  filterRamassage('');
+}
+
 function filterRamassage(q){
-  const statut=document.getElementById('ram-filter-statut').value;
-  const urgentOnly=document.getElementById('ram-filter-urgent').checked;
-  // Partir des actifs par défaut (sans filtre statut)
-  let data = statut ? ramassages : getRamassagesActifs();
-  if(q) data=data.filter(r=>(r.nom||'').toLowerCase().includes(q.toLowerCase())||(r.tel||'').includes(q));
-  if(statut) data=data.filter(r=>r.statut===statut);
-  if(urgentOnly) data=data.filter(r=>r.urgent);
+  populateLivreurFilter('ram-filter-livreur', ramassages, 'livreur');
+  const statut   = document.getElementById('ram-filter-statut').value;
+  const livreur  = document.getElementById('ram-filter-livreur')?.value||'';
+  const sortVal  = document.getElementById('ram-sort')?.value||'date-desc';
+  const urgentOnly = document.getElementById('ram-filter-urgent')?.checked||false;
+  // Filtre statut : par défaut = actifs seulement
+  let data;
+  if(statut === '__tous__')    data = ramassages;
+  else if(statut)              data = ramassages.filter(r=>r.statut===statut);
+  else                         data = getRamassagesActifs();
+  if(q)        data = data.filter(r=>(r.nom||'').toLowerCase().includes(q.toLowerCase())||(r.tel||'').includes(q));
+  if(livreur)  data = data.filter(r=>r.livreur===livreur);
+  if(urgentOnly) data = data.filter(r=>r.urgent);
+  // Tri
+  data = applySort(data, sortVal);
   renderRamassage(data);
 }
 
@@ -6567,9 +7466,19 @@ function submitRamassage(){
   if(!livreur){alert('Veuillez assigner un livreur.');document.getElementById('ram-livreur').focus();return;}
 
   // Enregistrer nouveau client si pas dans la base
-  const exists=clients.find(c=>c.tel.replace(/\s/g,'')===tel.replace(/\s/g,''));
+  const exists = clients.find(c => (c.tel||'').replace(/\s/g,'') === tel.replace(/\s/g,''));
   if(!exists){
-    clients.push({nom,tel,quartier:adresse.split(',')[0]||'',ville:'Tanger',type:'Particulier',maps:document.getElementById('ram-maps').value});
+    const newClient = {
+      nom, tel,
+      quartier: adresse.split(',')[0] || '',
+      ville: 'Tanger',
+      type: 'Particulier',
+      maps: document.getElementById('ram-maps').value,
+      tel2:'', email:'', notes:''
+    };
+    clients.push(newClient);
+    // Sauvegarder dans Firestore
+    saveClientToFirestore(newClient).then(id => { if(id) newClient._id = id; });
   }
 
   // Créer le ramassage
@@ -6617,6 +7526,12 @@ document.addEventListener('click',e=>{
 });
 
 // ===== INIT =====
+// Sélectionner le mois courant dans le select trésorerie
+(function(){
+  const moisCourant = new Date().getMonth(); // 0=Jan, 4=Mai...
+  const sel = document.getElementById('treso-page-month');
+  if(sel) sel.value = String(moisCourant);
+})();
 goPage('dashboard');
 
 
@@ -6737,12 +7652,53 @@ async function initFirebase() {
       commandes = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
       commandes.sort((a, b) => (b.num || '').localeCompare(a.num || ''));
       setOnline(true);
-      if (currentPage === 'commandes') renderCommandes(commandes);
-      if (currentPage === 'dashboard') initDashboard();
+
+      // Mettre à jour cmdCounter avec le vrai dernier numéro Firestore
+      const maxNum = commandes.reduce((max, c) => {
+        const n = parseInt(String(c.num || '0').slice(-4)) || 0;
+        return n > max ? n : max;
+      }, cmdCounter);
+      if(maxNum > cmdCounter) {
+        cmdCounter = maxNum;
+        console.log('cmdCounter mis à jour:', cmdCounter);
+      }
+
+      // Reconstruire blData depuis commandes
+      buildBlData();
+      if (currentPage === 'bons-livraison') renderBL(blData);
+
+      // Reconstruire lignesData depuis les commandes actives
+      const statutsActifs = ['Brouillon','En traitement','Prêt à livrer'];
+      lignesData = [];
+      commandes.filter(c => statutsActifs.includes(c.statut)).forEach(c => {
+        if(!c.lignes || !c.lignes.length) return;
+        c.lignes.forEach((l, idx) => {
+          lignesData.push({
+            ...l,
+            cmdNum:    c.num,
+            cmdId:     c._id,
+            cmdStatut: c.statut,
+            cmdClient: c.client,
+            num:       l.num || l.numArt || (idx+1),
+            numArt:    l.numArt || l.num || (idx+1),
+            ligneIdx:  idx,  // INDEX exact dans cmd.lignes[] pour sauvegarde Firestore
+            empl:      l.empl || '',
+            qteTraitee: l.qteTraitee || 0,
+            etat:      l.etat || 'Brouillon',
+          });
+        });
+      });
+
+      if (currentPage === 'commandes')   renderCommandes(getCommandesActives());
+      if (currentPage === 'lignes')      renderLignes(lignesData);
+      if (currentPage === 'dashboard')   initDashboard();
+      if (currentPage === 'tresorerie')  initTresoreriePage(); // recettes = commandes Payées
+      buildFidClients(); // mettre à jour ca/cmds dans fidélité
+      if (currentPage === 'fidelite')    initFidelite();
     }, err => { console.warn('Commandes offline:', err.message); });
 
     onSnapshot(collection(db, 'bons_livraison'), snap => {
-      if (snap.empty) return;
+      // Les BLs viennent UNIQUEMENT de Firestore - pas de données statiques
       blData = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
       blData.sort((a, b) => (b.num || '').localeCompare(a.num || ''));
       if (currentPage === 'bons-livraison') renderBL(blData);
@@ -6767,23 +7723,20 @@ async function initFirebase() {
       if (currentPage === 'dashboard') initDashboard();
     }, err => console.warn('Ramassages offline:', err.message));
 
-    onSnapshot(collection(db, 'lignes'), snap => {
-      if (snap.empty) return;
-      lignesData = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
-      if (currentPage === 'lignes') renderLignesPage(lignesData);
-      if (currentPage === 'app-finition') initAppFinition();
-    }, err => console.warn('Lignes offline:', err.message));
 
     onSnapshot(collection(db, 'clients'), snap => {
-      if (snap.empty) return;
       clients = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
       clients.sort((a, b) => (a.nom || '').localeCompare(b.nom || ''));
       if (currentPage === 'clients') renderClients(clients);
+      buildFidClients(); // reconstruire fidélité avec les vrais clients
+      if (currentPage === 'fidelite') initFidelite();
     }, err => console.warn('Clients offline:', err.message));
 
     onSnapshot(collection(db, 'tresorerie'), snap => {
-      if (snap.empty) return;
-      tresoMouvements = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+      // tresoMouvements = UNIQUEMENT les charges (recettes viennent de commandes[])
+      tresoMouvements = snap.docs
+        .map(d => ({ _id: d.id, ...d.data() }))
+        .filter(mv => mv.type === 'charge');
       tresoMouvements.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       if (currentPage === 'tresorerie') initTresoreriePage();
       if (currentPage === 'dashboard') updateTreso();
@@ -6797,10 +7750,48 @@ async function initFirebase() {
     }, err => console.warn('Chargements offline:', err.message));
 
     onSnapshot(collection(db, 'fid_clients'), snap => {
-      if (snap.empty) return;
-      fidClients = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
-      fidClients.sort((a, b) => b.pts - a.pts);
+      _fidClientsRaw = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+      buildFidClients();
+      if(currentPage === 'fidelite') initFidelite();
     }, err => console.warn('Fidélité offline:', err.message));
+
+    onSnapshot(collection(db, 'articles'), snap => {
+      articles = snap.docs.map(d => ({ _id: d.id, ...d.data() }));
+      articles.sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+      if (currentPage === 'articles') { renderKanban(articles); renderArtList(articles); }
+    }, err => console.warn('Articles offline:', err.message));
+
+    // Override saveArtForm pour Firestore (remplace la version locale)
+    window.saveArtForm = async function() {
+      const nom = document.getElementById('af-nom')?.value?.trim();
+      if (!nom) { showToast('Veuillez saisir le nom de l\'article', '#e53e3e'); return; }
+      const artData = {
+        name: nom,
+        tp:   parseFloat(document.getElementById('af-tp')?.value) || 0,
+        tpr:  parseFloat(document.getElementById('af-tpr')?.value) || 0,
+        tpro: parseFloat(document.getElementById('af-tpro')?.value) || 0,
+        ta:   parseFloat(document.getElementById('af-ta')?.value) || 0,
+        uom:  currentUomVal || '',
+        actif: document.getElementById('af-actif')?.checked !== false,
+        desc:  document.getElementById('af-desc')?.value || '',
+        updatedAt: new Date().toISOString()
+      };
+      try {
+        const existingArt = currentArtIdx >= 0 ? articles[currentArtIdx] : null;
+        if (existingArt?._id) {
+          await updateDoc(doc(db, 'articles', existingArt._id), artData);
+        } else {
+          artData.createdAt = new Date().toISOString();
+          await addDoc(collection(db, 'articles'), artData);
+        }
+        hideArtForm();
+        setArtView(artViewMode);
+        showToast('Article "' + nom + '" enregistré', '#1D9E75');
+      } catch(e) {
+        console.warn('Save article error:', e);
+        showToast('Erreur lors de l\'enregistrement', '#e53e3e');
+      }
+    };
 
     // ── ÉCRITURE FIRESTORE ──
     // Override des fonctions de sauvegarde pour persister dans Firestore
@@ -6827,27 +7818,7 @@ async function initFirebase() {
       catch(e) { console.warn('Save ram error:', e); }
     };
 
-    // Sauvegarder charge trésorerie
-    const _origSaveCharge = window.saveNewCharge;
-    window.saveNewCharge = async function() {
-      _origSaveCharge && _origSaveCharge();
-      // La charge vient d'être ajoutée à tresoMouvements en local
-      const mv = tresoMouvements[0];
-      if (!mv || mv._id) return; // déjà synced
-      try { const r = await addDoc(collection(db, 'tresorerie'), { ...mv, createdAt: new Date().toISOString() }); mv._id = r.id; }
-      catch(e) { console.warn('Save charge error:', e); }
-    };
-
-    // Supprimer charge
-    const _origDelCharge = window.deleteCharge;
-    window.deleteCharge = async function(id) {
-      const mv = tresoMouvements.find(m => m.id === id);
-      _origDelCharge && _origDelCharge(id);
-      if (mv?._id) {
-        try { await deleteDoc(doc(db, 'tresorerie', mv._id)); }
-        catch(e) { console.warn('Del charge error:', e); }
-      }
-    };
+    // saveNewCharge et deleteCharge gèrent Firestore directement — pas d'override
 
     // Sauvegarder client
     const _origSaveClient = window.saveClient;
