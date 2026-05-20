@@ -328,31 +328,9 @@ body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:cent
 // Ces données correspondent aux BLs "Prêt à livrer" et ramassages "En attente"
 // Dans une intégration Firebase, elles viendraient en temps réel
 
-const ERP_LIVRAISONS = [
-  {num:'264475',client:'Greenzer',          quartier:'N/A',         montant:481.80,articles:6,collecte:'14/04/2026',livreur:'Ourouch Houssam',lat:35.763,lng:-5.780,statut:'pret'},
-  {num:'264474',client:'Laundry Service Mesnana',quartier:'Mesnana',montant:91.20, articles:3,collecte:'13/04/2026',livreur:'Ourouch Houssam',lat:35.770,lng:-5.795,statut:'pret'},
-  {num:'264099',client:'Amrani Mustapha',   quartier:'Qasr Baladi', montant:560.87,articles:3,collecte:'23/02/2026',livreur:'Ourouch Houssam',lat:35.775,lng:-5.802,statut:'pret'},
-  {num:'264298',client:'zeyneb',            quartier:'N/A',         montant:557.00,articles:3,collecte:'30/03/2026',livreur:'Ourouch Houssam',lat:35.768,lng:-5.790,statut:'pret'},
-  {num:'264423',client:'Mohamed Yahya',     quartier:'El Mssala',   montant:222.60,articles:1,collecte:'08/04/2026',livreur:'Ourouch Houssam',lat:35.755,lng:-5.808,statut:'pret'},
-  {num:'264032',client:'Maazouza Rachid',   quartier:'Castilla',    montant:161.18,articles:1,collecte:'17/02/2026',livreur:'Radi Abdellah',  lat:35.778,lng:-5.803,statut:'pret'},
-  {num:'264111',client:'Nour eddine',       quartier:'Wilaya',      montant:120.80,articles:1,collecte:'23/02/2026',livreur:'Radi Abdellah',  lat:35.765,lng:-5.797,statut:'pret'},
-  {num:'264331',client:'Iman Makroum',      quartier:'Tanja balia', montant:799.34,articles:3,collecte:'31/03/2026',livreur:'Radi Abdellah',  lat:35.756,lng:-5.818,statut:'pret'},
-  {num:'264333',client:'Fellam Hassna',     quartier:'Dar dariba',  montant:730.00,articles:2,collecte:'31/03/2026',livreur:'Radi Abdellah',  lat:35.763,lng:-5.808,statut:'pret'},
-  {num:'264391',client:'Bangoura Fatou',    quartier:'Marjane',     montant:291.80,articles:1,collecte:'06/04/2026',livreur:'Radi Abdellah',  lat:35.771,lng:-5.788,statut:'pret'},
-  {num:'264394',client:'Jaafari Hanane',    quartier:'Moujahidine', montant:339.68,articles:4,collecte:'06/04/2026',livreur:'Radi Abdellah',  lat:35.760,lng:-5.772,statut:'pret'},
-  {num:'264445',client:'Idrissi M. Amine', quartier:'Hay Hassani', montant:1150.44,articles:6,collecte:'11/04/2026',livreur:'Radi Abdellah', lat:35.757,lng:-5.810,statut:'pret'},
-  {num:'264442',client:'Pressing Roudaina',quartier:'Dradeb',      montant:227.60,articles:4,collecte:'10/04/2026',livreur:'Ourouch Houssam',lat:35.761,lng:-5.798,statut:'pret'},
-  {num:'264453',client:'Bendafi Chaimaa',   quartier:'Boubana',     montant:217.71,articles:1,collecte:'11/04/2026',livreur:'Ourouch Houssam',lat:35.767,lng:-5.785,statut:'pret'},
-];
+const ERP_LIVRAISONS = []; // chargé depuis Firestore
 
-const ERP_RAMASSAGES = [
-  {num:'264506',client:'Khalidi Youssef',   quartier:'Boukhalef',   tel:'0661234567',rdv:'09:00',articles:2,livreur:'Ourouch Houssam',lat:35.774,lng:-5.795,statut:'attente'},
-  {num:'264507',client:'Benali Fatima',     quartier:'Malabata',    tel:'0662345678',rdv:'10:30',articles:3,livreur:'Ourouch Houssam',lat:35.782,lng:-5.781,statut:'attente'},
-  {num:'264508',client:'Tazi Mohammed',     quartier:'Iberia',      tel:'0663456789',rdv:'11:00',articles:1,livreur:'Radi Abdellah',  lat:35.769,lng:-5.800,statut:'attente'},
-  {num:'264509',client:'Chaoui Khadija',    quartier:'Hay Hassani', tel:'0664567890',rdv:'14:00',articles:4,livreur:'Radi Abdellah',  lat:35.759,lng:-5.812,statut:'attente'},
-  {num:'264510',client:'Alaoui Hassan',     quartier:'Branes',      tel:'0665678901',rdv:'15:30',articles:2,livreur:'Koukouss Hafid', lat:35.752,lng:-5.790,statut:'attente'},
-  {num:'264511',client:'Bensouda Meriem',   quartier:'Val Fleuri',  tel:'0666789012',rdv:'16:00',articles:3,livreur:'Koukouss Hafid', lat:35.748,lng:-5.798,statut:'attente'},
-];
+const ERP_RAMASSAGES = []; // chargé depuis Firestore
 
 // ── STATE ──
 let currentLivreur = '';
@@ -377,11 +355,34 @@ function updateTime(){
 
 // ── LOGIN ──
 // ── PINS LIVREURS (configurés par l'admin) ──
-const LIVREUR_PINS = {
-  'Ourouch Houssam':'1234','Koukouss Hafid':'2345','Radi Abdellah':'3456',
-  'Oujane Nadir':'4567','Abdessamad Aboulfath':'5678','Taakouft Soufiane':'6789',
-  'Anass Mounaouar':'7890','Labiad Yassine':'8901'
-};
+let LIVREUR_PINS = {}; // chargé depuis Firestore personnel
+
+// Charger les livreurs et PINs depuis Firestore dès le chargement
+(async function loadPersonnel(){
+  try {
+    const { initializeApp } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js");
+    const { getFirestore, collection, onSnapshot }
+      = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+    const cfg = {apiKey:"AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",authDomain:"allo-tapis.firebaseapp.com",projectId:"allo-tapis",storageBucket:"allo-tapis.firebasestorage.app",messagingSenderId:"566002084826",appId:"1:566002084826:web:463f92dd116be3ccdfeee3"};
+    const app = initializeApp(cfg, 'livreur-pre');
+    const db  = getFirestore(app);
+    onSnapshot(collection(db, 'personnel'), snap => {
+      const sel = document.getElementById('login-livreur');
+      const livreurs = snap.docs.map(d => d.data())
+        .filter(p => p.active !== false && /livreur|chauffeur/i.test(p.fonction || ''));
+      // Mettre à jour les PINs
+      LIVREUR_PINS = {};
+      livreurs.forEach(p => { if(p.pin) LIVREUR_PINS[p.nom] = p.pin; });
+      // Mettre à jour le select login
+      if(sel && livreurs.length > 0){
+        const current = sel.value;
+        sel.innerHTML = '<option value="">— Sélectionner —</option>' +
+          livreurs.map(p => `<option value="${p.nom}|${p.vehicule||''}">${p.nom}</option>`).join('');
+        if(current) sel.value = current;
+      }
+    });
+  } catch(e){ console.warn('loadPersonnel:', e.message); }
+})();
 
 // PIN: input unique avec délai pour laisser le navigateur enregistrer la valeur
 function onPinInput(el){
@@ -436,7 +437,7 @@ function doLogin(){
 
 // ── SCREENS ──
 function switchScreen(s){
-  document.querySelectorAll('.screen').forEach(sc=>sc.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(sc=>{sc.classList.remove('active');sc.style.display='none';});
   ['tour','carte','depot'].forEach(id=>{
     const t=document.getElementById('ntab-'+(id==='tour'?'tour':id));
     if(t)t.classList.remove('active');
@@ -600,8 +601,9 @@ function renderDepot(){
   const btn=document.getElementById('btn-depot');
   btn.disabled=payed.length===0||deposited;
 
+  btn.textContent=deposited?'⏳ En attente confirmation...':'📥 Déposer en trésorerie';
   if(deposited){
-    document.getElementById('dp-list').innerHTML=`<div style="text-align:center;padding:16px;font-size:12px;color:rgba(255,255,255,.3)">✅ Dépôt effectué — enregistré en trésorerie</div>`;
+    document.getElementById('dp-list').innerHTML=`<div style="text-align:center;padding:20px;"><div style="font-size:26px;margin-bottom:8px;">⏳</div><div style="font-size:13px;font-weight:700;color:#E8A838;margin-bottom:4px;">En attente de confirmation</div><div style="font-size:11px;color:rgba(255,255,255,.3);">L'admin ERP doit confirmer le dépôt</div></div>`;
     return;
   }
 
@@ -815,7 +817,7 @@ function showToast(msg,type='success'){
 </script>
 
 <script>
-let fbUnsubRam=null,fbUnsubBL=null;
+let fbUnsubRam=null,fbUnsubBL=null,fbUnsubCharg=null,fbUnsubDepots=null;
 async function startFirebaseListeners(livreurNom){
   try{
     const cfg={apiKey:"AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",authDomain:"allo-tapis.firebaseapp.com",projectId:"allo-tapis",storageBucket:"allo-tapis.firebasestorage.app",messagingSenderId:"566002084826",appId:"1:566002084826:web:463f92dd116be3ccdfeee3"};
@@ -837,23 +839,102 @@ async function startFirebaseListeners(livreurNom){
         document.title=n>0?'('+n+') Allo Tapis':'Allo Tapis Livreur';
         if(n>0) showToast(n+' ramassage(s) en attente','info');
       },err=>console.warn('RAM:',err.message));
+    // ── CHARGEMENTS du jour pour ce livreur ──
+    if(fbUnsubCharg) fbUnsubCharg();
+    fbUnsubCharg = db.collection('chargements')
+      .where('livreur','==',livreurNom)
+      .onSnapshot(snap=>{
+        // Garder les livraisons déjà actionnées (livré, payé)
+        const acted = myLivraisons.filter(l => l.statut !== 'pret');
+        const actedNums = new Set(acted.map(l => l.num));
+        // Construire myLivraisons depuis les bls[] de chaque chargement
+        const fromCharg = [];
+        snap.docs.forEach(d => {
+          const charg = d.data();
+          const bls = charg.bls || [];
+          bls.forEach(bl => {
+            if(!actedNums.has(bl.num)){
+              fromCharg.push({
+                _chargId : d.id,
+                _blNum   : bl.num,
+                num      : bl.num,
+                client   : bl.client || '—',
+                quartier : bl.quartier || '',
+                adresse  : bl.quartier || '',
+                montant  : parseFloat(bl.montant) || 0,
+                articles : bl.articles?.length || 0,
+                collecte : bl.dateCollecte || charg.date || '',
+                dateCollecte: bl.dateCollecte || charg.date || '',
+                livreur  : charg.livreur,
+                vehicule : charg.vehicule || '',
+                chargDate: charg.date || '',
+                statut   : 'pret',
+                lat      : bl.lat || 35.760,
+                lng      : bl.lng || -5.800,
+                // BL Firestore _id si disponible
+                _id      : bl._id || null
+              });
+            }
+          });
+        });
+        myLivraisons = [...acted, ...fromCharg];
+        renderTour();
+        updateEncaisse();
+        const n = fromCharg.length;
+        if(n > 0) showToast(n + ' livraison(s) dans le chargement', 'info');
+      }, err => console.warn('Chargements:', err.message));
+
+    // ── BL directs Prêt à livrer (sans chargement) ──
     fbUnsubBL = db.collection('bons_livraison')
       .where('livreur','==',livreurNom)
       .where('etat','==','Prêt à livrer')
       .onSnapshot(snap=>{
-        const fs=snap.docs.map(d=>({_id:d.id,num:d.data().num||d.id,client:d.data().client||'',quartier:d.data().quartier||'',montant:d.data().montant||0,articles:d.data().articles||(d.data().lignes?.length||0),collecte:d.data().dateCollecte||'',dateCollecte:d.data().dateCollecte||'',livreur:d.data().livreur,statut:'pret',lat:d.data().lat||35.760,lng:d.data().lng||-5.800}));
-        const acted=myLivraisons.filter(l=>l.statut!=='pret');
-        const actedNums=new Set(acted.map(l=>l.num));
-        myLivraisons=[...acted,...fs.filter(l=>!actedNums.has(l.num))];
-        renderTour();updateEncaisse();
-      },err=>console.warn('BL:',err.message));
+        const fromBL = snap.docs.map(d=>({
+          _id:d.id, num:d.data().num||d.id,
+          client:d.data().client||'', quartier:d.data().quartier||'',
+          montant:d.data().montant||0,
+          articles:d.data().articles||(d.data().lignes?.length||0),
+          collecte:d.data().dateCollecte||'', dateCollecte:d.data().dateCollecte||'',
+          livreur:d.data().livreur, statut:'pret',
+          lat:d.data().lat||35.760, lng:d.data().lng||-5.800
+        }));
+        // Ajouter seulement les BLs pas déjà dans myLivraisons (via chargement)
+        const existingNums = new Set(myLivraisons.map(l=>l.num));
+        const newBLs = fromBL.filter(l => !existingNums.has(l.num));
+        if(newBLs.length > 0){
+          myLivraisons = [...myLivraisons, ...newBLs];
+          renderTour(); updateEncaisse();
+        }
+      }, err=>console.warn('BL:',err.message));
+    // Sync statut commandes ERP → app en temps réel
+    db.collection('commandes').where('livreur','==',livreurNom)
+      .onSnapshot(snap=>{
+        snap.docs.forEach(d=>{
+          const cmd=d.data();
+          const idx=myLivraisons.findIndex(l=>l.num===cmd.num);
+          if(idx>=0){
+            const ns=cmd.statut==='Livré & Payé'||cmd.statut==='Payé'?'paye':cmd.statut==='Livré'?'livre':myLivraisons[idx].statut;
+            if(myLivraisons[idx].statut!==ns){myLivraisons[idx].statut=ns;renderTour();updateEncaisse();}
+          }
+        });
+      },err=>console.warn('SyncCmd:',err.message));
+    // Dépôts : écouter confirmation admin
+    if(fbUnsubDepots)fbUnsubDepots();
+    fbUnsubDepots=db.collection('depots').where('livreur','==',livreurNom)
+      .onSnapshot(snap=>{
+        const confirmes=snap.docs.filter(d=>d.data().statut==='confirme');
+        if(confirmes.length>0){
+          myLivraisons=myLivraisons.filter(l=>l.statut!=='paye');
+          deposited=false;
+          renderTour();renderDepot();
+          showToast('✅ Dépôt confirmé par l\'admin !','success');
+          confirmes.forEach(d=>db.collection('depots').doc(d.id).update({statut:'traite'}).catch(()=>{}));
+        }
+      },err=>console.warn('Depots:',err.message));
     console.log('Firebase Livreur OK:',livreurNom);
   }catch(e){
     console.warn('Firebase non dispo:',e.message);
-    myRamassages=ERP_RAMASSAGES.filter(r=>r.livreur===currentLivreur).map(r=>({...r}));
-    myLivraisons=ERP_LIVRAISONS.filter(l=>l.livreur===currentLivreur).map(l=>({...l}));
-    if(!myRamassages.length) myRamassages=ERP_RAMASSAGES.slice(0,3).map(r=>({...r}));
-    if(!myLivraisons.length) myLivraisons=ERP_LIVRAISONS.slice(0,5).map(l=>({...l}));
+    showToast('⚠️ Connexion Firebase échouée','info');
     renderTour();
   }
 }
@@ -866,9 +947,76 @@ async function fsAdd(col,data){
   try{ const ref=await window._db.collection(col).add({...data,createdAt:new Date().toISOString()}); return ref.id; }catch(e){console.warn("fsAdd err:",e.message);return null;}
 }
 window.marquerCollecte=async function(i){const r=myRamassages[i];myRamassages[i].statut='collecte';renderTour();showToast('✓ Collecté','success');if(r._id)await fsWrite('ramassages',r._id,{statut:'Collecté'});};
-window.marquerLivre=async function(){const l=myLivraisons[selectedLivrIdx];if(!l)return;myLivraisons[selectedLivrIdx].statut='livre';closeModal();renderTour();showToast('✓ Livré','success');if(l._id)await fsWrite('bons_livraison',l._id,{etat:'Livré',dateLivraison:new Date().toISOString().split('T')[0]});};
-window.marquerPayeModal=async function(){const l=myLivraisons[selectedLivrIdx];if(!l)return;myLivraisons[selectedLivrIdx].statut='paye';closeModal();renderTour();showToast('💰 Payé','amber');if(l._id){await fsWrite('bons_livraison',l._id,{etat:'Livré & Payé',datePaiement:new Date().toISOString().split('T')[0]});await fsAdd('tresorerie',{date:new Date().toISOString().split('T')[0],type:'recette',categorie:'Commande payée',libelle:`Paiement BL ${l.num} — ${currentLivreur}`,ref:l.num,montant:l.montant||0,saisi:'App Livreur',mois:new Date().getMonth()});}};
-window.marquerPaye=async function(i){const l=myLivraisons[i];myLivraisons[i].statut='paye';renderTour();showToast('💰 Encaissé','amber');if(l._id){await fsWrite('bons_livraison',l._id,{etat:'Livré & Payé',datePaiement:new Date().toISOString().split('T')[0]});await fsAdd('tresorerie',{date:new Date().toISOString().split('T')[0],type:'recette',categorie:'Commande payée',libelle:`Paiement BL ${l.num} — ${currentLivreur}`,ref:l.num,montant:l.montant||0,saisi:'App Livreur',mois:new Date().getMonth()});}};
-window.deposerTreso=async function(){const p=myLivraisons.filter(l=>l.statut==='paye');const t=p.reduce((s,l)=>s+l.montant,0);if(!p.length)return;await fsAdd('tresorerie',{date:new Date().toISOString().split('T')[0],type:'recette',categorie:'Dépôt livreur',libelle:`Dépôt ${currentLivreur} — ${p.length} cmd`,ref:'Espèces',montant:t,saisi:currentLivreur,mois:new Date().getMonth()});deposited=true;renderDepot();showToast(`✅ ${t.toFixed(2)} MAD déposé`,'success');};
+// ── Mise à jour commande ERP par numéro ──
+async function updateCmdByNum(num, data){
+  if(!window._db) return;
+  try {
+    const snap = await window._db.collection('commandes').where('num','==',num).get();
+    for(const d of snap.docs){
+      await window._db.collection('commandes').doc(d.id).update({
+        ...data, updatedAt: new Date().toISOString()
+      });
+    }
+  } catch(e){ console.warn('updateCmdByNum:', e.message); }
+}
+
+window.marquerLivre=async function(){
+  const l=myLivraisons[selectedLivrIdx];
+  if(!l) return;
+  myLivraisons[selectedLivrIdx].statut='livre';
+  closeModal(); renderTour(); showToast('✓ Livré','success');
+  const today=new Date().toISOString().split('T')[0];
+  // Mettre à jour commande ERP
+  await updateCmdByNum(l.num,{statut:'Livré',dateLivraison:today});
+  // Mettre à jour BL si dispo
+  if(l._id) await fsWrite('bons_livraison',l._id,{etat:'Livré',dateLivraison:today});
+};
+
+window.marquerPayeModal=async function(){
+  const l=myLivraisons[selectedLivrIdx];
+  if(!l) return;
+  myLivraisons[selectedLivrIdx].statut='paye';
+  closeModal(); renderTour(); showToast('💰 Payé','amber');
+  const today=new Date().toISOString().split('T')[0];
+  // Mettre à jour commande ERP → statut Payé
+  await updateCmdByNum(l.num,{statut:'Payé',datePaiement:today});
+  if(l._id) await fsWrite('bons_livraison',l._id,{etat:'Livré & Payé',datePaiement:today});
+  // Ajouter recette trésorerie
+  await fsAdd('tresorerie',{
+    date:today, type:'recette', categorie:'Commande payée',
+    libelle:`Paiement commande ${l.num} — ${l.client||''}`,
+    ref:l.num, montant:parseFloat(l.montant)||0,
+    saisi:'App Livreur · '+currentLivreur, mois:new Date().getMonth()
+  });
+};
+
+window.marquerPaye=async function(i){
+  const l=myLivraisons[i];
+  myLivraisons[i].statut='paye';
+  renderTour(); showToast('💰 Encaissé','amber');
+  const today=new Date().toISOString().split('T')[0];
+  await updateCmdByNum(l.num,{statut:'Payé',datePaiement:today});
+  if(l._id) await fsWrite('bons_livraison',l._id,{etat:'Livré & Payé',datePaiement:today});
+  await fsAdd('tresorerie',{
+    date:today, type:'recette', categorie:'Commande payée',
+    libelle:`Paiement commande ${l.num} — ${l.client||''}`,
+    ref:l.num, montant:parseFloat(l.montant)||0,
+    saisi:'App Livreur · '+currentLivreur, mois:new Date().getMonth()
+  });
+};
+
+window.deposerTreso=async function(){
+  const p=myLivraisons.filter(l=>l.statut==='paye');
+  const t=p.reduce((s,l)=>s+(parseFloat(l.montant)||0),0);
+  if(!p.length) return;
+  const today=new Date().toISOString().split('T')[0];
+  await fsAdd('depots',{
+    livreur:currentLivreur, date:today, montant:t, statut:'en_attente',
+    commandes:p.map(l=>({num:l.num,client:l.client,montant:parseFloat(l.montant)||0})),
+    nbCmds:p.length, mois:new Date().getMonth()
+  });
+  deposited=true; renderDepot();
+  showToast(`⏳ ${fmt(t)} MAD — en attente confirmation admin`,'amber');
+};
 </script>
 </html>

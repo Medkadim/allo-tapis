@@ -238,43 +238,10 @@ body{font-family:'Syne',sans-serif;background:#111;display:flex;align-items:cent
 
 <script>
 // ══ DONNÉES (miroir des lignesData + commandes de l'ERP) ══
-const ERP_COMMANDES = {
-  '264504':{client:'Ahmed bou9tib',   date:'15/04/2026',statut:'Brouillon'},
-  '264503':{client:'Laundry Service', date:'15/04/2026',statut:'Brouillon'},
-  '264495':{client:'Pressing Roudaina',date:'14/04/2026',statut:'En traitement'},
-  '264491':{client:'Rachida',          date:'13/04/2026',statut:'En traitement'},
-  '264488':{client:'Abdeljalil Salma', date:'15/04/2026',statut:'En traitement'},
-  '264487':{client:'Hanane',           date:'15/04/2026',statut:'Brouillon'},
-  '264486':{client:'Ibrahim elkhalil', date:'15/04/2026',statut:'Brouillon'},
-  '264485':{client:'Laundry Service Irfane',date:'15/04/2026',statut:'Brouillon'},
-  '264484':{client:'Homat el warda',   date:'13/04/2026',statut:'En traitement'},
-  '264483':{client:'Touria',           date:'13/04/2026',statut:'En traitement'},
-  '264482':{client:'Rachida Bennani',  date:'13/04/2026',statut:'Brouillon'},
-};
+let ERP_COMMANDES = {}; // chargé depuis Firestore
 
-// Lignes de commande — miroir lignesData ERP
-let LIGNES = [
-  {id:0, cmdNum:'264504',numArt:1,article:'Tapis synthétique',larg:3.48,long:3.48,surface:12.11,qte:1,qteTraitee:0,uom:'m²',obs:'rouge beige',empl:'',etat:'Brouillon'},
-  {id:1, cmdNum:'264503',numArt:1,article:'Divers',           larg:0,   long:0,   surface:0,    qte:1,qteTraitee:0,uom:'Pièce',obs:'',        empl:'',etat:'Brouillon'},
-  {id:2, cmdNum:'264495',numArt:1,article:'Tapis synthétique',larg:2.95,long:3.50,surface:10.32,qte:1,qteTraitee:1,uom:'m²',obs:'beige marron',empl:'A-05',etat:'En traitement'},
-  {id:3, cmdNum:'264491',numArt:1,article:'Tapis synthétique',larg:3.60,long:4.00,surface:14.40,qte:1,qteTraitee:1,uom:'m²',obs:'beige',      empl:'A-02',etat:'En traitement'},
-  {id:4, cmdNum:'264491',numArt:2,article:'Rideau',           larg:0,   long:0,   surface:0,    qte:2,qteTraitee:0,uom:'Forfait',obs:'',      empl:'',etat:'Brouillon'},
-  {id:5, cmdNum:'264488',numArt:1,article:'Tapis synthétique',larg:1.40,long:2.00,surface:2.80, qte:1,qteTraitee:1,uom:'m²',obs:'bleu',      empl:'A-04',etat:'Prêt à livrer'},
-  {id:6, cmdNum:'264488',numArt:2,article:'Couverture',       larg:0,   long:0,   surface:0,    qte:5,qteTraitee:3,uom:'Pièce',obs:'',       empl:'B-01',etat:'En traitement'},
-  {id:7, cmdNum:'264488',numArt:3,article:'Couette',          larg:0,   long:0,   surface:0,    qte:1,qteTraitee:1,uom:'Pièce',obs:'',       empl:'B-02',etat:'En traitement'},
-  {id:8, cmdNum:'264487',numArt:1,article:'Tapis shaggy',     larg:1.65,long:2.30,surface:3.79, qte:1,qteTraitee:0,uom:'m²',obs:'beige',     empl:'',etat:'Brouillon'},
-  {id:9, cmdNum:'264487',numArt:2,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68, qte:1,qteTraitee:0,uom:'m²',obs:'gris',      empl:'',etat:'Brouillon'},
-  {id:10,cmdNum:'264486',numArt:1,article:'Tapis synthétique',larg:1.60,long:2.30,surface:3.68, qte:1,qteTraitee:0,uom:'m²',obs:'blanc',     empl:'',etat:'Brouillon'},
-  {id:11,cmdNum:'264485',numArt:1,article:'Tapis synthétique',larg:1.70,long:2.30,surface:3.91, qte:1,qteTraitee:0,uom:'m²',obs:'rouge beige',empl:'',etat:'Brouillon'},
-  {id:12,cmdNum:'264484',numArt:1,article:'Tapis synthétique',larg:2.50,long:4.55,surface:11.38,qte:1,qteTraitee:0,uom:'m²',obs:'doré',      empl:'',etat:'En traitement'},
-  {id:13,cmdNum:'264484',numArt:2,article:'Tapis shaggy',     larg:1.65,long:3.15,surface:5.20, qte:1,qteTraitee:0,uom:'m²',obs:'marron',    empl:'',etat:'En traitement'},
-  {id:14,cmdNum:'264484',numArt:3,article:'Tapis synthétique',larg:1.20,long:2.30,surface:2.76, qte:3,qteTraitee:1,uom:'m²',obs:'multi-coleur',empl:'A-08',etat:'En traitement'},
-  {id:15,cmdNum:'264484',numArt:4,article:'Tapis synthétique',larg:0.96,long:2.90,surface:2.78, qte:1,qteTraitee:0,uom:'m²',obs:'beige',     empl:'',etat:'En traitement'},
-  {id:16,cmdNum:'264484',numArt:5,article:'Lhouf',            larg:0,   long:0,   surface:0,    qte:6,qteTraitee:0,uom:'Pièce',obs:'',       empl:'',etat:'Brouillon'},
-  {id:17,cmdNum:'264484',numArt:6,article:'Tapis synthétique',larg:2.96,long:3.50,surface:10.36,qte:1,qteTraitee:0,uom:'m²',obs:'jaune',     empl:'',etat:'Brouillon'},
-  {id:18,cmdNum:'264483',numArt:1,article:'Tapis synthétique',larg:2.05,long:3.00,surface:6.15, qte:1,qteTraitee:0,uom:'m²',obs:'rouge',     empl:'',etat:'En traitement'},
-  {id:19,cmdNum:'264482',numArt:1,article:'Tapis synthétique',larg:2.00,long:3.10,surface:6.20, qte:2,qteTraitee:0,uom:'m²',obs:'blanc',     empl:'',etat:'Brouillon'},
-];
+// Lignes chargées depuis Firestore (commandes[].lignes[])
+let LIGNES = [];
 
 // ══ STATE ══
 let currentUser = '';
@@ -787,61 +754,7 @@ function showToast(msg, type='green'){
 }
 </script>
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getFirestore, collection, onSnapshot, updateDoc, doc, query, where }
-  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyD1iwObYKpiaqBXpmX1iXaYVZm9FjMpVp8",
-  authDomain: "allo-tapis.firebaseapp.com",
-  projectId: "allo-tapis",
-  storageBucket: "allo-tapis.firebasestorage.app",
-  messagingSenderId: "566002084826",
-  appId: "1:566002084826:web:463f92dd116be3ccdfeee3"
-};
-const fbApp = initializeApp(firebaseConfig);
-const db = getFirestore(fbApp);
-
-// Charger toutes les lignes en temps réel (toutes commandes en Brouillon/En traitement)
-onSnapshot(collection(db,'lignes'), snap => {
-  const newLignes = snap.docs.map(d => ({...d.data(), _id:d.id}));
-  // Fusionner avec LIGNES local (garder les edits en cours)
-  newLignes.forEach(nl => {
-    const idx = LIGNES.findIndex(l=>l._id===nl._id || (l.cmdNum===nl.cmdNum && l.numArt===nl.numArt));
-    if(idx>=0){ LIGNES[idx] = {...LIGNES[idx], ...nl}; }
-    else { LIGNES.push(nl); }
-  });
-  if(document.getElementById('screen-search')?.classList.contains('active')) renderResults();
-  if(document.getElementById('screen-stats')?.classList.contains('active')) renderStats();
-});
-
-// Override saveEmpl pour écrire dans Firestore
-const _origSaveEmpl = window.saveEmpl;
-window.saveEmpl = async function(id){
-  // Exécuter la logique locale d'abord
-  _origSaveEmpl(id);
-  // Puis synchroniser avec Firestore
-  const l = LIGNES.find(x=>x.id===id || x._id===id);
-  if(l?._id){
-    await updateDoc(doc(db,'lignes',l._id), {
-      empl: l.empl, etat: l.etat,
-      qteTraitee: l.qteTraitee||0,
-      syncedBy: currentUser,
-      syncedAt: new Date().toISOString()
-    });
-    // Vérifier si commande entière prête → mettre à jour commande
-    const cmdLignes = LIGNES.filter(x=>x.cmdNum===l.cmdNum);
-    if(cmdLignes.every(x=>x.etat==='Prêt à livrer')){
-      // Notifier l'ERP via postMessage
-      window.opener?.postMessage({
-        type:'FINITION_SYNC',
-        updates:[{cmdNum:l.cmdNum, numArt:l.numArt, empl:l.empl, etat:l.etat, qteTraitee:l.qteTraitee||0, syncedBy:currentUser}]
-      },'*');
-    }
-  }
-};
-</script>
+<!-- Firebase géré dans le bloc async ci-dessous -->
 
 <script>
 (async function() {
@@ -861,59 +774,122 @@ window.saveEmpl = async function(id){
 
     const fbApp = initializeApp(firebaseConfig);
     const db = getFirestore(fbApp);
+    window._db_finition = db;
 
-    // Charger les lignes en temps réel
-    onSnapshot(collection(db, 'lignes'), snap => {
-      if (snap.empty) return;
-      // Fusionner avec LIGNES local
-      snap.docs.forEach(d => {
-        const data = d.data();
-        const idx = LIGNES.findIndex(l =>
-          l.cmdNum === data.cmdNum && l.numArt === data.numArt
-        );
-        if (idx >= 0) {
-          LIGNES[idx] = { ...LIGNES[idx], ...data, _id: d.id };
-        } else {
-          LIGNES.push({ ...data, _id: d.id, id: LIGNES.length });
-        }
+    // ── COMMANDES (contient les lignes en sous-tableau) ──
+    onSnapshot(collection(db, 'commandes'), snap => {
+      // Vider
+      Object.keys(ERP_COMMANDES).forEach(k => delete ERP_COMMANDES[k]);
+      // Garder les edits en cours (emplacement saisi mais pas encore sauvegardé)
+      const editsEnCours = {};
+      editingIds.forEach(id => {
+        const l = LIGNES.find(x => x.id === id);
+        if(l) editsEnCours[l.cmdNum + '_' + l.numArt] = {
+          empl: document.getElementById('empl-input-'+id)?.value || l.empl
+        };
       });
-      // Re-render si page active
-      const screen = document.getElementById('screen-search');
-      if (screen && screen.classList.contains('active')) renderResults();
-    }, err => console.warn('Lignes offline:', err.message));
 
-    // Override saveEmpl → écrire dans Firestore
+      LIGNES.length = 0;
+      let idx = 0;
+
+      snap.docs.forEach(d => {
+        const cmd = d.data();
+        if(!cmd.num) return;
+
+        // Métadonnées commande
+        ERP_COMMANDES[cmd.num] = {
+          client : cmd.client || '—',
+          date   : cmd.date   || '',
+          statut : cmd.statut || 'Brouillon',
+          _id    : d.id
+        };
+
+        // Extraire lignes
+        (cmd.lignes || []).forEach(l => {
+          const key = cmd.num + '_' + l.numArt;
+          const edit = editsEnCours[key];
+          LIGNES.push({
+            ...l,
+            id    : idx++,
+            cmdNum: cmd.num,
+            cmdId : d.id,
+            empl  : edit ? edit.empl : (l.empl || ''),
+            qteTraitee: l.qteTraitee || 0,
+            etat  : l.etat || 'Brouillon'
+          });
+        });
+      });
+
+      // Re-render
+      const active = document.querySelector('.screen.active');
+      if(active?.id === 'screen-search') renderResults();
+      if(active?.id === 'screen-stats')  renderStats();
+    }, err => console.warn('Finition commandes offline:', err.message));
+
+    // ── PERSONNEL (login select) ──
+    onSnapshot(collection(db, 'personnel'), snap => {
+      const sel = document.getElementById('login-user');
+      if(!sel) return;
+      const list = snap.docs.map(d => d.data())
+        .filter(p => p.active !== false && /finition/i.test(p.fonction || ''));
+      if(list.length > 0){
+        sel.innerHTML = '<option value="">— Sélectionner —</option>' +
+          list.map(p => `<option value="${p.nom}">${p.nom}${p.fonction ? ' — '+p.fonction : ''}</option>`).join('');
+      }
+    }, err => console.warn('Finition personnel offline:', err.message));
+
+    // ── Helper : construire lignesPropres et sauver dans Firestore ──
+    async function syncCmdToFirestore(cmdNum, cmdId){
+      const cmdLignes = LIGNES.filter(x => x.cmdNum === cmdNum);
+      const fields = ['num','numArt','article','larg','long','surface','qte','uom','prixU','pu','totalHT','obs','empl','qteTraitee','etat'];
+      const lignesPropres = cmdLignes.map(x => {
+        const keep = {};
+        fields.forEach(f => { if(x[f] !== undefined) keep[f] = x[f]; });
+        return keep;
+      });
+      // Commande Prêt à livrer si TOUS les articles ont emplacement + etat=Prêt à livrer
+      const toutPret = lignesPropres.every(x => x.empl && x.etat === 'Prêt à livrer');
+      const newStatut = toutPret ? 'Prêt à livrer' : 'En traitement';
+      await updateDoc(doc(db, 'commandes', cmdId), {
+        lignes   : lignesPropres,
+        statut   : newStatut,
+        updatedAt: new Date().toISOString()
+      });
+      return { toutPret, newStatut };
+    }
+
+    // ── saveEmpl → exécuter local PUIS sync Firestore ──
     const _origSaveEmpl = window.saveEmpl;
     window.saveEmpl = async function(id) {
-      _origSaveEmpl(id); // logique locale d'abord
+      // Capturer cmdNum + cmdId AVANT que _origSaveEmpl modifie quoi que ce soit
       const l = LIGNES.find(x => x.id === id);
-      if (l && l._id) {
-        try {
-          await updateDoc(doc(db, 'lignes', l._id), {
-            empl: l.empl,
-            etat: l.etat,
-            qteTraitee: l.qteTraitee || 0,
-            syncedBy: currentUser,
-            updatedAt: new Date().toISOString()
-          });
-        } catch(e) { console.warn('Save empl Firebase error:', e); }
-      }
+      if(!l){ _origSaveEmpl(id); return; }
+      const cmdNum = l.cmdNum;
+      const cmdId  = l.cmdId;
+      // Logique locale (met à jour l.empl, l.etat, l.qteTraitee dans LIGNES[])
+      _origSaveEmpl(id);
+      if(!cmdId) return;
+      try {
+        const { toutPret } = await syncCmdToFirestore(cmdNum, cmdId);
+        if(toutPret){
+          // Mettre à jour ERP_COMMANDES local aussi
+          if(ERP_COMMANDES[cmdNum]) ERP_COMMANDES[cmdNum].statut = 'Prêt à livrer';
+        }
+      } catch(e) { console.warn('saveEmpl Firestore error:', e); }
     };
 
-    // Override changeQte → sync Firestore
+    // ── changeQte → sync Firestore ──
     const _origChangeQte = window.changeQte;
     window.changeQte = async function(id, delta) {
-      _origChangeQte(id, delta);
       const l = LIGNES.find(x => x.id === id);
-      if (l && l._id) {
-        try {
-          await updateDoc(doc(db, 'lignes', l._id), {
-            qteTraitee: l.qteTraitee || 0,
-            etat: l.etat,
-            updatedAt: new Date().toISOString()
-          });
-        } catch(e) { console.warn('QteTraitee sync error:', e); }
-      }
+      if(!l){ _origChangeQte(id, delta); return; }
+      const cmdNum = l.cmdNum;
+      const cmdId  = l.cmdId;
+      _origChangeQte(id, delta);
+      if(!cmdId) return;
+      try {
+        await syncCmdToFirestore(cmdNum, cmdId);
+      } catch(e) { console.warn('changeQte Firestore error:', e); }
     };
 
     console.log('✅ Firebase Finition connecté');

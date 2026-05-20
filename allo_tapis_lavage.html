@@ -530,49 +530,42 @@ async function setEtat(artId, newEtat) {
     const db = getFirestore(fbApp);
     window._db = db;
 
-    let _lignesLoaded = false;
-    let _commandesLoaded = false;
+    // ── COMMANDES (contient les lignes en sous-tableau) ──
+    onSnapshot(collection(db, 'commandes'), snap => {
+      // Vider
+      Object.keys(COMMANDES).forEach(k => delete COMMANDES[k]);
+      ARTICLES.length = 0;
 
-    function tryRender(){
-      // Rendre seulement quand les deux collections sont chargées
-      if(!_lignesLoaded || !_commandesLoaded) return;
+      let idx = 0;
+      snap.docs.forEach(d => {
+        const cmd = d.data();
+        if(!cmd.num) return;
+
+        // Stocker métadonnées commande
+        COMMANDES[cmd.num] = {
+          client      : cmd.client || '—',
+          typeClient  : cmd.typeClient || 'Particulier',
+          dateCollecte: cmd.date || new Date().toISOString().split('T')[0],
+          urgent      : cmd.urgent || false
+        };
+
+        // Extraire les lignes de cette commande
+        const lignes = cmd.lignes || [];
+        lignes.forEach(l => {
+          // Afficher seulement les articles pas encore Prêt à livrer
+          if(l.etat === 'Prêt à livrer') return;
+          ARTICLES.push({
+            ...l,
+            id     : idx++,
+            cmdNum : cmd.num
+          });
+        });
+      });
+
       if(document.getElementById('art-list')?.style.display !== 'none'){
         renderKPIs();
         renderList();
       }
-    }
-
-    // ── LIGNES (articles) ──
-    onSnapshot(collection(db, 'lignes'), snap => {
-      ARTICLES.length = 0;
-      snap.docs.forEach((d, i) => {
-        const data = d.data();
-        // Afficher tous les articles sauf ceux déjà Prêt à livrer
-        if(data.etat !== 'Prêt à livrer'){
-          ARTICLES.push({ ...data, _id: d.id, id: i });
-        }
-      });
-      _lignesLoaded = true;
-      tryRender();
-    }, err => console.warn('Lavage lignes offline:', err.message));
-
-    // ── COMMANDES ──
-    onSnapshot(collection(db, 'commandes'), snap => {
-      // Vider et reconstruire depuis Firestore
-      Object.keys(COMMANDES).forEach(k => delete COMMANDES[k]);
-      snap.docs.forEach(d => {
-        const cmd = d.data();
-        if(cmd.num){
-          COMMANDES[cmd.num] = {
-            client      : cmd.client || '—',
-            typeClient  : cmd.typeClient || 'Particulier',
-            dateCollecte: cmd.date || new Date().toISOString().split('T')[0],
-            urgent      : cmd.urgent || false
-          };
-        }
-      });
-      _commandesLoaded = true;
-      tryRender();
     }, err => console.warn('Lavage commandes offline:', err.message));
 
     // ── PERSONNEL (login select) ──
